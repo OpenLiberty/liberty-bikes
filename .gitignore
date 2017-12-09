@@ -1,0 +1,6 @@
+build
+/.apt_generated/
+/.gradle/
+/bin/
+**/.DS_Store
+.vscode

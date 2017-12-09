@@ -1,0 +1,6 @@
+---
+applications:
+- name: projecttron
+  memory: 512M
+  host: projecttron
+  domain: mybluemix.net
