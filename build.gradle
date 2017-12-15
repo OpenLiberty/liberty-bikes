@@ -1,21 +1,54 @@
-// Apply the java plugin to add support for Java
-apply plugin: 'java'
-
-// Apply the war plugin to build a web archive
+apply plugin: 'liberty'
 apply plugin: 'war'
 
 sourceCompatibility = 1.8
 
-// In this section you declare where to find the dependencies of your project
-repositories {
-    // Use 'jcenter' for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.0.1'
+    }
 }
 
-// In this section you declare the dependencies for your production and test code
+repositories {
+    mavenCentral()
+}
+
 dependencies {
-    // Java EE
     compile 'javax:javaee-api:7.0'
+    libertyRuntime 'io.openliberty:openliberty-runtime:17.0.0.3'
+}
+
+ext {
+	httpPort = 8080
+	httpsPort = 8443
+}
+
+liberty {
+	server {
+		name = 'tronServer'
+		dropins = [war]
+		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
+	}
+}
+
+libertyStart.dependsOn 'libertyStop'
+libertyRun.dependsOn 'libertyStop'
+
+task openBrowser {
+    description = 'Opens a web browser to http://localhost:${httpPort}/'
+    doLast {
+        java.awt.Desktop.desktop.browse "http://localhost:${httpPort}/".toURI()
+    }
+}
+
+gradle.taskGraph.whenReady { graph ->
+    if (graph.hasTask(":libertyStart")) {
+        libertyStart.doLast {
+            println ("Application is running on http://localhost:${httpPort}/")
+        }
+    }
 }
 
