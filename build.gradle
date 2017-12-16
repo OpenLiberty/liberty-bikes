@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    compile 'javax:javaee-api:7.0'
+    compileOnly 'javax:javaee-api:7.0'
     libertyRuntime 'io.openliberty:openliberty-runtime:17.0.0.3'
 }
 
