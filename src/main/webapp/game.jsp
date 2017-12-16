@@ -3,7 +3,7 @@
 <html>
 <head>
 	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	  <title>Web Based Tron</title>
+	  <title>Liberty Bikes</title>
 	  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 	  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
 </head>
@@ -11,7 +11,7 @@
 	<br><br><br>
 	<div class="col-md-offset-2 col-md-7">
 		<div class="panel panel-primary">
-			<div class="panel-heading"><h1>Web Based Tron</h1></div>
+			<div class="panel-heading"><h1>Liberty Bikes</h1></div>
 			<div class="panel-body">
 				<div class="col-md-8" style="display:inline-block">
 					<canvas id="myCanvas" width="600" height="600" style="border:1px solid #000000; background:url('images/tron_floor.jpg')"></canvas><br><br>

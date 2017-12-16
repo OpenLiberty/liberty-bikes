@@ -1,7 +1,7 @@
 /**
  *
  */
-package coms319.group10.project4.whiteboard;
+package org.libertybikes.game.core;
 
 import java.io.IOException;
 
