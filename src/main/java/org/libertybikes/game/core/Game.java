@@ -1,7 +1,7 @@
 /**
  *
  */
-package coms319.group10.project4.whiteboard;
+package org.libertybikes.game.core;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,7 +13,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
-import coms319.group10.project4.whiteboard.Player.STATUS;
+import org.libertybikes.game.core.Player.STATUS;
 
 /**
  * @author Andrew

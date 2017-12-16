@@ -1,11 +1,11 @@
 /**
  *
  */
-package coms319.group10.project4.whiteboard;
+package org.libertybikes.game.core;
 
 import javax.websocket.Session;
 
-import coms319.group10.project4.whiteboard.Player.DIRECTION;
+import org.libertybikes.game.core.Player.DIRECTION;
 
 /**
  * @author Andrew

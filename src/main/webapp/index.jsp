@@ -4,12 +4,12 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-		<title>Tron</title>
+		<title>Liberty Bikes</title>
 		<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
 	</head>
 	<body>
-		<h1>Tron Login</h1>
+		<h1>Liberty Bikes</h1>
 		 <div class="col-md-offset-1">
 			 Enter Username:
 		 	<input type="text" id="username" name="username"></input>

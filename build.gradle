@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    compile 'javax:javaee-api:7.0'
+    compileOnly 'javax:javaee-api:7.0'
     libertyRuntime 'io.openliberty:openliberty-runtime:17.0.0.3'
 }
 
@@ -28,7 +28,7 @@ ext {
 
 liberty {
 	server {
-		name = 'tronServer'
+		name = 'libertybikes.game'
 		dropins = [war]
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
 	}
@@ -36,19 +36,16 @@ liberty {
 
 libertyStart.dependsOn 'libertyStop'
 libertyRun.dependsOn 'libertyStop'
+libertyStart.doLast {
+	println "Application available at: http://localhost:${httpPort}/"
+}
 
-task openBrowser {
-    description = 'Opens a web browser to http://localhost:${httpPort}/'
+// Some convenience tasks
+task run   { dependsOn 'libertyRun' }
+task start { dependsOn 'libertyStart' }
+task stop  { dependsOn 'libertyStop' }
+task open {
     doLast {
         java.awt.Desktop.desktop.browse "http://localhost:${httpPort}/".toURI()
     }
 }
-
-gradle.taskGraph.whenReady { graph ->
-    if (graph.hasTask(":libertyStart")) {
-        libertyStart.doLast {
-            println ("Application is running on http://localhost:${httpPort}/")
-        }
-    }
-}
-
