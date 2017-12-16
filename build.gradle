@@ -3,6 +3,11 @@ apply plugin: 'war'
 
 sourceCompatibility = 1.8
 
+eclipse {
+    project.natures 'org.eclipse.buildship.core.gradleprojectnature',
+                    'org.eclipse.wst.jsdt.core.jsNature'
+}
+
 buildscript {
     repositories {
         mavenCentral()
@@ -45,6 +50,7 @@ task run   { dependsOn 'libertyRun' }
 task start { dependsOn 'libertyStart' }
 task stop  { dependsOn 'libertyStop' }
 task open {
+    group = 'liberty'
     doLast {
         java.awt.Desktop.desktop.browse "http://localhost:${httpPort}/".toURI()
     }
