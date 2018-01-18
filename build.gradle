@@ -1,51 +1,39 @@
-apply plugin: 'liberty'
-apply plugin: 'war'
-
-sourceCompatibility = 1.8
-
 buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.0.1'
-    }
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compileOnly 'javax:javaee-api:7.0'
-    libertyRuntime 'io.openliberty:openliberty-runtime:17.0.0.3'
-}
-
-ext {
-	httpPort = 8080
-	httpsPort = 8443
-}
-
-liberty {
-	server {
-		name = 'libertybikes.game'
-		dropins = [war]
-		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.0.1'
 	}
 }
 
-libertyStart.dependsOn 'libertyStop'
-libertyRun.dependsOn 'libertyStop'
-libertyStart.doLast {
-	println "Application available at: http://localhost:${httpPort}/"
-}
+subprojects {
+	apply plugin: 'liberty'
+	apply plugin: 'war'
 
-// Some convenience tasks
-task run   { dependsOn 'libertyRun' }
-task start { dependsOn 'libertyStart' }
-task stop  { dependsOn 'libertyStop' }
-task open {
-    doLast {
-        java.awt.Desktop.desktop.browse "http://localhost:${httpPort}/".toURI()
-    }
+	sourceCompatibility = 1.8
+
+	buildscript {
+		repositories {
+			mavenCentral()
+		}
+		dependencies {
+			classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.0.1'
+		}
+	}
+
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		compileOnly 'javax:javaee-api:7.0'
+		libertyRuntime 'io.openliberty:openliberty-runtime:17.0.0.4'
+	}
+	
+	libertyStart.dependsOn 'libertyStop'
+	libertyRun.dependsOn 'libertyStop'
+	
+	task start { dependsOn 'libertyStart' }
+	task stop  { dependsOn 'libertyStop' }
 }

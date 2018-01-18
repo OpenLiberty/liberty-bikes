@@ -15,4 +15,5 @@ include 'api'
 include 'services:webservice'
 */
 
-rootProject.name = 'project-tron'
+rootProject.name = 'liberty-bikes'
+include 'game-service'
