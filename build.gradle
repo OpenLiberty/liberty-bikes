@@ -28,7 +28,13 @@ subprojects {
 
 	dependencies {
 		compileOnly 'javax:javaee-api:7.0'
-		libertyRuntime 'io.openliberty:openliberty-runtime:17.0.0.4'
+	}
+	
+	liberty {
+	    install {
+	    	baseDir = rootProject.buildDir
+	        runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2017.12.0.0.zip"
+	    }
 	}
 	
 	libertyStart.dependsOn 'libertyStop'
