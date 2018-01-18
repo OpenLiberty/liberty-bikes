@@ -1,0 +1,22 @@
+ext {
+	httpPort = 8081
+	httpsPort = 8444
+}
+
+liberty {
+	server {
+		name = 'player-service'
+		dropins = [war]
+		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
+	}
+}
+
+libertyStart.doLast {
+	println "Application available at: http://localhost:${httpPort}/${project.name}"
+}
+
+task open {
+    doLast {
+        java.awt.Desktop.desktop.browse "http://localhost:${httpPort}/${project.name}".toURI()
+    }
+}
