@@ -13,13 +13,22 @@
 		 <div class="col-md-offset-1">
 			 Enter Username:
 		 	<input type="text" id="username" name="username"></input>
-		 	<input type="submit" class="btn btn-success" value="Login" onclick="storeName()">
+		 	Enter Round ID:
+		 	<input type="text" id="roundId" name="roundId"></input>
+		 	<input type="submit" class="btn btn-success" value="Login" onclick="joinRound()">
+		 	<input type="submit" class="btn btn-success" value="Create Round" onclick="createRound()">
 		 </div>
 	</body>
 <script type="text/javascript">
-function storeName(){
+function createRound(){
+	$.post("round/create", function(data) {
+		alert("Response is: " + data);
+	})
+}
+function joinRound(){
 	localStorage.setItem("username", $("#username").val());
-	location.href = "game.jsp";
+	localStorage.setItem("roundId", $("#roundId").val());
+	location.href = "game.jsp";		
 }
 </script>
 </html>

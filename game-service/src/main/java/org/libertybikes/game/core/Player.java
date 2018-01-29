@@ -28,8 +28,8 @@ public class Player {
     }
 
     public static final int PLAYER_SIZE = 5;
-    public final Game game;
-    public Session client;
+    private final GameRound game;
+    private Session client;
     public final String color;
     public DIRECTION direction = DIRECTION.RIGHT;
     public int x;
@@ -38,45 +38,18 @@ public class Player {
     public boolean isAlive = true;
     private STATUS playerStatus = STATUS.Connected;
 
-    public Player(Game g, Session client, String color) {
+    public Player(GameRound g, Session client, String color) {
         this.game = g;
         this.color = color;
         this.client = client;
     }
 
-    public Player(Game g, Session client, String color, int xstart, int ystart) {
+    public Player(GameRound g, Session client, String color, int xstart, int ystart) {
         this.game = g;
         this.color = color;
         this.client = client;
         x = xstart;
         y = ystart;
-    }
-
-    public boolean movePlayer() {
-        game.board[x / PLAYER_SIZE][y / PLAYER_SIZE] = false;
-        switch (direction) {
-            case UP:
-                if (y - PLAYER_SIZE >= 0)
-                    y -= PLAYER_SIZE;
-                break;
-            case DOWN:
-                if (y + PLAYER_SIZE < Game.GAME_SIZE)
-                    y += PLAYER_SIZE;
-                break;
-            case RIGHT:
-                if (x + PLAYER_SIZE < Game.GAME_SIZE)
-                    x += PLAYER_SIZE;
-                break;
-            case LEFT:
-                if (x - PLAYER_SIZE >= 0)
-                    x -= PLAYER_SIZE;
-                break;
-        }
-        boolean checkResult = checkPosition(x, y);
-        if (!checkResult) {
-            setStatus(STATUS.Dead);
-        }
-        return checkResult;
     }
 
     public String toJson() {
@@ -103,6 +76,33 @@ public class Player {
         int realXPosition = x / PLAYER_SIZE;
         int realYPosition = y / PLAYER_SIZE;
         return game.board[realXPosition][realYPosition];
+    }
+
+    public boolean movePlayer() {
+        game.board[x / PLAYER_SIZE][y / PLAYER_SIZE] = false;
+        switch (direction) {
+            case UP:
+                if (y - PLAYER_SIZE >= 0)
+                    y -= PLAYER_SIZE;
+                break;
+            case DOWN:
+                if (y + PLAYER_SIZE < GameRound.GAME_SIZE)
+                    y += PLAYER_SIZE;
+                break;
+            case RIGHT:
+                if (x + PLAYER_SIZE < GameRound.GAME_SIZE)
+                    x += PLAYER_SIZE;
+                break;
+            case LEFT:
+                if (x - PLAYER_SIZE >= 0)
+                    x -= PLAYER_SIZE;
+                break;
+        }
+        boolean checkResult = checkPosition(x, y);
+        if (!checkResult) {
+            setStatus(STATUS.Dead);
+        }
+        return checkResult;
     }
 
     public void sendTextToClient(String message) {

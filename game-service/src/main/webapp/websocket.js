@@ -1,4 +1,6 @@
-var wsUri = "ws://" + document.location.hostname + ":" + document.location.port + "/websocket";
+//var wsUri = "ws://" + document.location.hostname + ":" + document.location.port + "/websocket";
+var roundId = localStorage.getItem("roundId");
+var wsUri = "ws://" + document.location.hostname + ":" + document.location.port + "/round/ws/" + roundId;
 var websocket = new WebSocket(wsUri);
 websocket.binaryType = "arraybuffer";
 var output = document.getElementById("output");
