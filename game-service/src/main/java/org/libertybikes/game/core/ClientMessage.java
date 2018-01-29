@@ -3,6 +3,8 @@
  */
 package org.libertybikes.game.core;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 /**
  * @author Andrew
  *
@@ -17,8 +19,15 @@ public class ClientMessage {
 
     public Player.DIRECTION direction;
 
-    public String playerjoined;
+    @JsonbProperty("playerjoined")
+    public String playerJoinedId;
 
+    @JsonbProperty("message")
     public GameEvent event;
+
+    @Override
+    public String toString() {
+        return "{ direction=" + direction + ", playerjoined=" + playerJoinedId + ", event=" + event + " }";
+    }
 
 }

@@ -64,8 +64,8 @@ public class Player {
         return sb.toString();
     }
 
-    public void setDirection(String dir) {
-        direction = DIRECTION.valueOf(dir);
+    public void setDirection(DIRECTION dir) {
+        direction = dir;
     }
 
     public DIRECTION getDrirection() {
