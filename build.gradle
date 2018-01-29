@@ -38,10 +38,12 @@ subprojects {
 	        runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2017.12.0.0.zip"
 	    }
 	}
-	
+
+	libertyDebug.dependsOn 'libertyStop'	
 	libertyStart.dependsOn 'libertyStop'
-	libertyRun.dependsOn 'libertyStop'
+	libertyRun.dependsOn   'libertyStop'
 	
+	task debug { dependsOn 'libertyDebug' }
 	task start { dependsOn 'libertyStart' }
-	task stop  { dependsOn 'libertyStop' }
+	task stop  { dependsOn 'libertyStop'  }
 }

@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.json.Json;
-import javax.json.JsonObject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.websocket.OnClose;
@@ -38,24 +37,22 @@ public class GameRoundWebsocket {
 
     @OnOpen
     public void onOpen(@PathParam("roundId") String roundId, Session session) {
-        System.out.println("@AGG opened a session for game: " + roundId + " using ws=" + this.toString());
+        System.out.println("Opened a session for game round: " + roundId);
     }
 
     @OnClose
     public void onClose(@PathParam("roundId") String roundId, Session peer) {
-        System.out.println("@AGG closed a session for game: " + roundId);
+        System.out.println("Closed a session for game round: " + roundId);
         GameRound game = gameSvc.getRound(roundId);
         game.removePlayer(clients.get(peer));
         clients.remove(peer);
     }
 
     @OnMessage
-    public void processMsg(@PathParam("roundId") final String roundId, String message, Session session) {
-        System.out.println("roundId=" + roundId + "  msg=" + message);
-
+    public void onMessage(@PathParam("roundId") final String roundId, String message, Session session) {
         final ClientMessage msg = jsonb.fromJson(message, ClientMessage.class);
         final GameRound round = gameSvc.getRound(roundId);
-        System.out.println("@AGG parsed msg: " + msg);
+        System.out.println("[onMessage] roundId=" + roundId + "  msg=" + msg);
 
         if (msg.event != null) {
             if (GameEvent.GAME_START == msg.event)
@@ -63,12 +60,13 @@ public class GameRoundWebsocket {
             else if (GameEvent.GAME_PAUSE == msg.event)
                 round.pause();
             else if (GameEvent.GAME_REQUEUE == msg.event) {
+                GameRound nextGame = gameSvc.requeue(round);
+                String requeueMsg = Json.createObjectBuilder()
+                                .add("requeue", nextGame.id)
+                                .build()
+                                .toString();
                 Player p = clients.get(session);
-                // TODO Game.getUnstartedGame();
-                JsonObject obj = Json.createObjectBuilder().add("requeue", "requeue").build();
-                p.sendTextToClient(obj.toString());
-                System.out.println("@AGG TODO: requeue not implemented");
-                throw new RuntimeException("Not yet implemented");
+                p.sendTextToClient(requeueMsg);
             }
         }
 

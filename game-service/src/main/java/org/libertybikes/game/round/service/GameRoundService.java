@@ -50,6 +50,12 @@ public class GameRoundService {
         return r;
     }
 
+    public GameRound requeue(GameRound oldRound) {
+        GameRound nextRound = new GameRound(oldRound.nextRoundId);
+        GameRound existingRound = allRounds.putIfAbsent(oldRound.nextRoundId, nextRound);
+        return existingRound == null ? nextRound : existingRound;
+    }
+
 //    @GET
 //    @Path("/{roundId}/join")
 //    @Produces(MediaType.APPLICATION_JSON)

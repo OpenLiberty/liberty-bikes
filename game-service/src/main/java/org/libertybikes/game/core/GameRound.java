@@ -25,6 +25,7 @@ public class GameRound implements Runnable {
     }
 
     public final String id;
+    public final String nextRoundId;
 
     public Set<Player> players = new HashSet<Player>();
 
@@ -37,11 +38,12 @@ public class GameRound implements Runnable {
     AtomicBoolean paused = new AtomicBoolean(false);
 
     public GameRound() {
-        id = UUID.randomUUID().toString();
+        this(UUID.randomUUID().toString());
     }
 
     public GameRound(String id) {
         this.id = id;
+        nextRoundId = UUID.randomUUID().toString();
     }
 
     public void addPlayer(Player p) {
