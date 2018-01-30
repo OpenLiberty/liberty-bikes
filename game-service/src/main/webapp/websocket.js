@@ -1,4 +1,6 @@
-var wsUri = "ws://" + document.location.hostname + ":" + document.location.port + "/websocket";
+var roundId = localStorage.getItem("roundId");
+var baseUri = "ws://" + document.location.hostname + ":" + document.location.port + "/round/ws/";
+var wsUri = baseUri + roundId;
 var websocket = new WebSocket(wsUri);
 websocket.binaryType = "arraybuffer";
 var output = document.getElementById("output");
@@ -23,6 +25,8 @@ function onMessage(evt) {
     	if(json.playerlist){
     		updatePlayerList(json);
     	}else if(json.requeue) {
+    		roundId = json.requeue;
+    		localStorage.setItem("roundId", roundId)
     		location.reload();
     	}else {
     		drawImageText(evt.data);
@@ -39,6 +43,7 @@ function onError(evt) {
 function onConnect(evt){
 	var name = localStorage.getItem("username");
 	sendText(JSON.stringify({"playerjoined":name}));
+	console.log("Joined round: " + roundId);
 }
 
 function writeToScreen(message) {

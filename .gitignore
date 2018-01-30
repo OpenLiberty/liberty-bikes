@@ -6,7 +6,6 @@ build
 .vscode
 /*/bin/
 /*/build/
-/*/.classpath
 /*/.project
 /*/.settings/org.eclipse.jdt.core.prefs
 /*/.settings/org.eclipse.wst.common.component

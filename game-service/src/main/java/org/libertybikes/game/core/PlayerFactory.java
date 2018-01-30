@@ -9,7 +9,7 @@ import org.libertybikes.game.core.Player.DIRECTION;
 
 /**
  * @author Andrew
- * 
+ *
  */
 public class PlayerFactory {
 
@@ -17,9 +17,9 @@ public class PlayerFactory {
 
     private static enum PlayerData {
         START_1("#DF740C", 50, 50, DIRECTION.RIGHT),
-        START_2("#FF0000", 50, Game.GAME_SIZE - 50, DIRECTION.UP),
-        START_3("#6FC3DF", Game.GAME_SIZE - 50, 50, DIRECTION.DOWN),
-        START_4("#FFE64D", Game.GAME_SIZE - 50, Game.GAME_SIZE - 50, DIRECTION.LEFT);
+        START_2("#FF0000", 50, GameRound.GAME_SIZE - 50, DIRECTION.UP),
+        START_3("#6FC3DF", GameRound.GAME_SIZE - 50, 50, DIRECTION.DOWN),
+        START_4("#FFE64D", GameRound.GAME_SIZE - 50, GameRound.GAME_SIZE - 50, DIRECTION.LEFT);
 
         public final String color;
         public final int x;
@@ -36,7 +36,7 @@ public class PlayerFactory {
 
     private static final PlayerData[] startingData = new PlayerData[] { PlayerData.START_1, PlayerData.START_2, PlayerData.START_3, PlayerData.START_4 };
 
-    public static Player initNextPlayer(Game g, Session client, String name) {
+    public static Player initNextPlayer(GameRound g, Session client, String name) {
         PlayerData data = startingData[g.players.size()];
         Player p = new Player(g, client, data.color, data.x, data.y);
         p.direction = data.dir;
