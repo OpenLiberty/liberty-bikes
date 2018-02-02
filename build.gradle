@@ -1,49 +1,50 @@
 buildscript {
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.0.1'
-	}
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.0.1'
+    }
 }
 
 subprojects {
-	apply plugin: 'liberty'
-	apply plugin: 'war'
+    apply plugin: 'liberty'
+    apply plugin: 'war'
 
-	sourceCompatibility = 1.8
+    sourceCompatibility = 1.8
 
-	buildscript {
-		repositories {
-			mavenCentral()
-		}
-		dependencies {
-			classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.0.1'
-		}
-	}
+    buildscript {
+        repositories {
+            mavenCentral()
+        }
+        dependencies {
+            classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.0.1'
+        }
+    }
 
-	repositories {
-		mavenCentral()
-	}
+    repositories {
+        mavenCentral()
+    }
 
-	dependencies {
-		compileOnly group: 'org.eclipse.microprofile', name: 'microprofile', version: '1.2'
-		compileOnly group: 'javax', name: 'javaee-api', version: '8.0'
-	}
-	
-	liberty {
-	    install {
-	    	// use 1 liberty install for the whole repo
-	    	baseDir = rootProject.buildDir
-	        runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2017.12.0.0.zip"
-	    }
-	}
+    dependencies {
+        compileOnly group: 'org.eclipse.microprofile', name: 'microprofile', version: '1.2'
+        compileOnly group: 'javax', name: 'javaee-api', version: '8.0'
+    }
+    
+    liberty {
+        install {
+            // use 1 liberty install for the whole repo
+            // TODO: re-enable this one liberty-gradle-plugin bug is fixed
+            // baseDir = rootProject.buildDir
+            runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2017.12.0.0.zip"
+        }
+    }
 
-	libertyDebug.dependsOn 'libertyStop'	
-	libertyStart.dependsOn 'libertyStop'
-	libertyRun.dependsOn   'libertyStop'
-	
-	task debug { dependsOn 'libertyDebug' }
-	task start { dependsOn 'libertyStart' }
-	task stop  { dependsOn 'libertyStop'  }
+    libertyDebug.dependsOn 'libertyStop'    
+    libertyStart.dependsOn 'libertyStop'
+    libertyRun.dependsOn   'libertyStop'
+    
+    task debug { dependsOn 'libertyDebug' }
+    task start { dependsOn 'libertyStart' }
+    task stop  { dependsOn 'libertyStop'  }
 }
