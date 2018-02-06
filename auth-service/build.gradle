@@ -1,0 +1,23 @@
+ext {
+	httpPort = 8082
+	httpsPort = 8482
+	appUrl = "http://localhost:${httpPort}/${war.baseName}" 
+}
+
+liberty {
+	server {
+		name = 'auth-service'
+		dropins = [war]
+		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
+	}
+}
+
+libertyStart.doLast {
+	println "Application available at: ${appUrl}"
+}
+
+task open {
+    doLast {
+        java.awt.Desktop.desktop.browse "${appUrl}/token".toURI()
+    }
+}
