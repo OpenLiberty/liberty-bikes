@@ -1,0 +1,7 @@
+#gameroot {
+  background-image: url('/assets/images/tron_grid.jpg');
+}
+
+#gameroot div {
+  background-color: white;
+}

@@ -1,0 +1,12 @@
+<server>
+    <featureManager>
+        <feature>webProfile-7.0</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint" httpPort="${httpPort}" httpsPort="${httpsPort}" />
+                  
+    <applicationManager autoExpand="true"/>
+
+    <webApplication location="${application.name}" contextRoot="/" >
+    </webApplication>
+</server>

@@ -11,3 +11,5 @@ build
 /*/.settings/org.eclipse.wst.common.component
 /*/.settings/org.eclipse.wst.common.project.facet.core.xml
 /*/.settings/org.eclipse.buildship.core.prefs
+/frontend/src/main/webapp/*
+!/frontend/src/main/webapp/WEB-INF

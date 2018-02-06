@@ -1,0 +1,26 @@
+<div id="gameroot" class="container-fluid">
+<div class="offset-md-2 col-md-7">
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h1>Liberty Bikes Game</h1>
+    </div>
+    <div class="panel-body">
+      <div class="col-md-6" style="display:inline-block">
+        <canvas id="myCanvas" width="600" height="600" style="border:1px solid #000000; background:url('assets/images/tron_floor.jpg')"></canvas>
+        <br>
+        <br>
+      </div>
+      <ul id="playerList" class='list-group col-md-4 ' style="display:inline-block">
+      </ul>
+    </div>
+    <div class="panel-footer">
+      <button type="button" class="btn btn-success" (click)="startGame()">Start Game</button>
+      <button type="button" class="btn btn-danger" (click)="pauseGame()">Pause Game</button>
+      <button type="button" class="btn btn-warning" (click)="requeue()">Requeue</button>
+    </div>
+  </div>
+</div>
+<div id="output"></div>
+</div>
+<script type="text/javascript" src="websocket.js"></script>
+<script type="text/javascript" src="whiteboard.js"></script>
