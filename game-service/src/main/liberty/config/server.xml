@@ -16,4 +16,12 @@
     
     <keyStore id="defaultKeyStore" password="Liberty"/>
     <quickStartSecurity userName="admin" userPassword="admin"/>
+
+    <!-- This configuration allows cross-origin HTTP requests, such
+         as those from the front-end component (different port). -->
+    <cors domain="/round"
+          allowedOrigins="*"
+          allowedMethods="GET, DELETE, POST, PUT"
+          allowedHeaders="Accept, Content-Type, Authorization"
+          maxAge="3600" />
 </server>

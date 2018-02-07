@@ -1,0 +1,83 @@
+apply plugin: 'com.moowork.node'
+
+buildscript {
+	ext {
+		gradleNodeVersion = '1.2.0'
+	}
+
+	repositories {
+		mavenCentral()
+		maven { url 'https://plugins.gradle.org/m2' }
+	}
+
+	dependencies {
+		classpath "com.moowork.gradle:gradle-node-plugin:$gradleNodeVersion"
+	}
+}
+
+ext {
+	httpPort = 12000
+	httpsPort = 12005
+	applicationName = "${war.archiveName}"
+}
+
+war {
+	archiveName = "${baseName}.${extension}"
+	dependsOn 'copyFrontend'
+}
+
+node {
+	version = '9.5.0'
+	npmVersion = '5.6.0'
+	download = true
+	workDir = file("${rootDir}/frontend/prebuild/node")
+	nodeModulesDir = file("${rootDir}/frontend/prebuild")
+}
+
+task cleanClient(type: Delete) {
+    group 'build client'
+    delete fileTree(dir: "${rootDir}/frontend/src/main/webapp/", exclude: [ '**/WEB-INF/**'])
+}
+
+task cleanNpm(type: Delete) {
+    group 'build client'
+    dependsOn 'clean'
+    delete "${rootDir}/frontend/prebuild/node", "${rootDir}/frontend/prebuild/node_modules"
+}
+
+task npmUpdate {
+    group 'build client'
+    dependsOn 'npm_update'
+}
+
+task buildStandaloneClient(type: NpmTask, dependsOn: npmInstall) {
+    group 'build client'
+    description = 'Compile client side folder for development'
+    args = ['run', 'build']
+}
+
+task copyFrontend(type: Copy) {
+	group 'build client'
+	dependsOn 'cleanClient', 'buildStandaloneClient'
+
+	from fileTree("${rootDir}/frontend/prebuild/dist")
+	into "${rootDir}/frontend/src/main/webapp"
+}
+
+liberty {
+	server {
+		name = 'frontendServer'
+		apps = [file('build/libs/frontend.war')]
+		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort, 'application.name': applicationName]
+	}
+}
+
+libertyStart.doLast {
+	println "Application available at: http://localhost:${httpPort}/"
+}
+
+task open {
+    doLast {
+        java.awt.Desktop.desktop.browse "http://localhost:${httpPort}/".toURI()
+    }
+}
