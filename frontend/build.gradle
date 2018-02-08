@@ -67,7 +67,7 @@ task copyFrontend(type: Copy) {
 liberty {
 	server {
 		name = 'frontendServer'
-		apps = [file('build/libs/frontend.war')]
+		apps = [war]
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort, 'application.name': applicationName]
 	}
 }
