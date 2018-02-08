@@ -56,14 +56,4 @@ public class GameRoundService {
         return existingRound == null ? nextRound : existingRound;
     }
 
-//    @GET
-//    @Path("/{roundId}/join")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public GameRound joinRound(@PathParam("roundId") String roundId, @QueryParam("playerId") String playerId) {
-//        GameRound r = allRounds.get(roundId);
-//        if (r == null)
-//            return null;
-//        r.players.add(playerId);
-//        return r;
-//    }
 }

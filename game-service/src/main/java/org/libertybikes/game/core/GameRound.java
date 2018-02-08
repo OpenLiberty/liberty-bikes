@@ -2,8 +2,8 @@ package org.libertybikes.game.core;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -18,11 +18,11 @@ import org.libertybikes.game.core.Player.STATUS;
 public class GameRound implements Runnable {
 
     public static enum State {
-        OPEN,
-        FULL,
-        RUNNING,
-        FINISHED
+        OPEN, FULL, RUNNING, FINISHED
     }
+
+    public static final int GAME_SIZE = 600;
+    public static final int GAME_SPEED = 50;
 
     public final String id;
     public final String nextRoundId;
@@ -31,19 +31,27 @@ public class GameRound implements Runnable {
 
     public State state = State.OPEN;
 
-    public static final int GAME_SIZE = 600;
-    public static final int GAME_SPEED = 50;
     boolean[][] board = new boolean[121][121];
     AtomicBoolean gameRunning = new AtomicBoolean(false);
     AtomicBoolean paused = new AtomicBoolean(false);
 
+    private static final Random r = new Random();
+
+    // Get a string of 6 random uppercase letters (A-Z)
+    private static String getRandomId() {
+        char[] chars = new char[6];
+        for (int i = 0; i < 6; i++)
+            chars[i] = (char) (r.nextInt(26) + 65);
+        return new String(chars);
+    }
+
     public GameRound() {
-        this(UUID.randomUUID().toString());
+        this(getRandomId());
     }
 
     public GameRound(String id) {
         this.id = id;
-        nextRoundId = UUID.randomUUID().toString();
+        nextRoundId = getRandomId();
     }
 
     public void addPlayer(Player p) {
