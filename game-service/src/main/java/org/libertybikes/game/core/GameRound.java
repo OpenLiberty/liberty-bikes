@@ -21,21 +21,20 @@ public class GameRound implements Runnable {
         OPEN, FULL, RUNNING, FINISHED
     }
 
+    public static final int GAME_TICK_SPEED = 50;
     public static final int GAME_SIZE = 600;
-    public static final int GAME_SPEED = 50;
+
+    private static final Random r = new Random();
 
     public final String id;
     public final String nextRoundId;
 
     public Set<Player> players = new HashSet<Player>();
-
     public State state = State.OPEN;
 
-    boolean[][] board = new boolean[121][121];
-    AtomicBoolean gameRunning = new AtomicBoolean(false);
-    AtomicBoolean paused = new AtomicBoolean(false);
-
-    private static final Random r = new Random();
+    private boolean[][] board = new boolean[121][121];
+    private AtomicBoolean gameRunning = new AtomicBoolean(false);
+    private AtomicBoolean paused = new AtomicBoolean(false);
 
     // Get a string of 6 random uppercase letters (A-Z)
     private static String getRandomId() {
@@ -57,43 +56,53 @@ public class GameRound implements Runnable {
     public void addPlayer(Player p) {
         players.add(p);
         System.out.println("Player " + players.size() + " has joined.");
-        for (Player cur : players)
-            broadcastLocation(cur);
-        broadcastPlayerList(players);
+        broadcastPlayerLocations();
+        broadcastPlayerList();
     }
 
     public void removePlayer(Player p) {
         p.disconnect();
         System.out.println(p.playerName + " disconnected.");
-        broadcastPlayerList(players);
+        broadcastPlayerList();
     }
 
     @Override
     public void run() {
-        for (int i = 0; i < GAME_SIZE / Player.PLAYER_SIZE + 1; i++) {
+        for (int i = 0; i < GAME_SIZE / Player.PLAYER_SIZE + 1; i++)
             Arrays.fill(board[i], true);
-        }
         gameRunning.set(true);
         System.out.println("Starting round: " + id);
 
         while (gameRunning.get()) {
             while (!paused.get()) {
-                delay(GAME_SPEED);
-                for (Player p : players) {
-                    if (p.isAlive) {
-                        if (p.movePlayer()) {
-                            broadcastLocation(p);
-                        } else {
-                            // Since someone died, check for winning player
-                            checkForWinner(p);
-                            broadcastPlayerList(players);
-                        }
-                    }
-                }
+                delay(GAME_TICK_SPEED);
+                gameTick();
             }
-            delay(500); // don't thrash for pausing
+            delay(500); // don't thrash when game is paused
         }
         System.out.println("Finished round: " + id);
+    }
+
+    private void gameTick() {
+        // Move all living players forward 1
+        boolean playerStatusChange = false;
+        boolean playersMoved = false;
+        for (Player p : players) {
+            if (p.isAlive) {
+                if (p.movePlayer(board)) {
+                    playersMoved = true;
+                } else {
+                    // Since someone died, check for winning player
+                    checkForWinner(p);
+                    playerStatusChange = true;
+                }
+            }
+        }
+
+        if (playersMoved)
+            broadcastPlayerLocations();
+        if (playerStatusChange)
+            broadcastPlayerList();
     }
 
     private void delay(long ms) {
@@ -103,13 +112,16 @@ public class GameRound implements Runnable {
         }
     }
 
-    private void broadcastLocation(Player p) {
-        String json = p.toJson();
-        for (Player player : players)
-            player.sendTextToClient(json);
+    private void broadcastPlayerLocations() {
+        JsonArrayBuilder arr = Json.createArrayBuilder();
+        for (Player p : players)
+            arr.add(p.toJson());
+        String playerLocations = Json.createObjectBuilder().add("playerlocs", arr).build().toString();
+        for (Player client : players)
+            client.sendTextToClient(playerLocations);
     }
 
-    private void broadcastPlayerList(Set<Player> players) {
+    private void broadcastPlayerList() {
         JsonArrayBuilder array = Json.createArrayBuilder();
         for (Player p : players) {
             array.add(Json.createObjectBuilder()
@@ -144,7 +156,7 @@ public class GameRound implements Runnable {
         for (Player p : players)
             if (STATUS.Connected == p.getStatus())
                 p.setStatus(STATUS.Alive);
-        broadcastPlayerList(players);
+        broadcastPlayerList();
         if (!gameRunning.get()) {
             try {
                 ExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedExecutorService");

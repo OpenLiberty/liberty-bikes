@@ -38,7 +38,7 @@ public class PlayerFactory {
 
     public static Player initNextPlayer(GameRound g, Session client, String name) {
         PlayerData data = startingData[g.players.size()];
-        Player p = new Player(g, client, data.color, data.x, data.y);
+        Player p = new Player(client, data.color, data.x, data.y);
         p.direction = data.dir;
         p.playerName = name;
         return p;

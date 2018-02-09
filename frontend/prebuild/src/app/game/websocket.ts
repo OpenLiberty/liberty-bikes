@@ -52,9 +52,7 @@ export class GameWebsocket {
         location.reload();
       }
       if (json.playerlocs) {
-        console.log(`Drawing player locations...`);
         for (let playerLoc of json.playerlocs) {
-          console.log(`Got playerloc ${playerLoc}`);
           this.whiteboard.drawSquare(playerLoc);
         }
       }
