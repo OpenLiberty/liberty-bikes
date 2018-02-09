@@ -34,11 +34,6 @@ export class GameWebsocket {
     this.websocket.send(json);
   }
 
-  sendBinary(bytes: any) {
-    console.log(`sending binary: ${bytes.toString()}`);
-    this.websocket.send(bytes);
-  }
-
   onMessage(evt: MessageEvent) {
     console.log(`received: ${evt.data}`);
     if (typeof evt.data === 'string') {

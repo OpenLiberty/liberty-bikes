@@ -21,8 +21,8 @@ public class GameRound implements Runnable {
         OPEN, FULL, RUNNING, FINISHED
     }
 
-    public static final int GAME_TICK_SPEED = 50;
-    public static final int GAME_SIZE = 600;
+    public static final int GAME_TICK_SPEED = 50; // ms
+    public static final int BOARD_SIZE = 121;
 
     private static final Random r = new Random();
 
@@ -32,7 +32,7 @@ public class GameRound implements Runnable {
     public Set<Player> players = new HashSet<Player>();
     public State state = State.OPEN;
 
-    private boolean[][] board = new boolean[121][121];
+    private boolean[][] board = new boolean[BOARD_SIZE][BOARD_SIZE];
     private AtomicBoolean gameRunning = new AtomicBoolean(false);
     private AtomicBoolean paused = new AtomicBoolean(false);
 
@@ -68,7 +68,7 @@ public class GameRound implements Runnable {
 
     @Override
     public void run() {
-        for (int i = 0; i < GAME_SIZE / Player.PLAYER_SIZE + 1; i++)
+        for (int i = 0; i < BOARD_SIZE; i++)
             Arrays.fill(board[i], true);
         gameRunning.set(true);
         System.out.println("Starting round: " + id);

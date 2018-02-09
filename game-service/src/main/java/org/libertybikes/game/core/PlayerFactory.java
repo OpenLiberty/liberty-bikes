@@ -16,10 +16,10 @@ public class PlayerFactory {
     public static int MAX_PLAYERS = PlayerData.values().length;
 
     private static enum PlayerData {
-        START_1("#DF740C", 50, 50, DIRECTION.RIGHT),
-        START_2("#FF0000", 50, GameRound.GAME_SIZE - 50, DIRECTION.UP),
-        START_3("#6FC3DF", GameRound.GAME_SIZE - 50, 50, DIRECTION.DOWN),
-        START_4("#FFE64D", GameRound.GAME_SIZE - 50, GameRound.GAME_SIZE - 50, DIRECTION.LEFT);
+        START_1("#DF740C", 10, 10, DIRECTION.RIGHT),
+        START_2("#FF0000", 10, GameRound.BOARD_SIZE - 10, DIRECTION.UP),
+        START_3("#6FC3DF", GameRound.BOARD_SIZE - 10, 10, DIRECTION.DOWN),
+        START_4("#FFE64D", GameRound.BOARD_SIZE - 10, GameRound.BOARD_SIZE - 10, DIRECTION.LEFT);
 
         public final String color;
         public final int x;

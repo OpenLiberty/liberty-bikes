@@ -27,8 +27,6 @@ public class Player {
         Disconnected
     }
 
-    public static final int PLAYER_SIZE = 5;
-
     private Session client;
     public final String color;
     public DIRECTION direction = DIRECTION.RIGHT;
@@ -90,29 +88,29 @@ public class Player {
      */
     public boolean movePlayer(boolean[][] board) {
         // Consume the space the player was in before the move
-        board[x / PLAYER_SIZE][y / PLAYER_SIZE] = false;
+        board[x][y] = false;
 
         switch (direction) {
             case UP:
-                if (y - PLAYER_SIZE >= 0)
-                    y -= PLAYER_SIZE;
+                if (y - 1 >= 0)
+                    y--;
                 break;
             case DOWN:
-                if (y + PLAYER_SIZE < GameRound.GAME_SIZE)
-                    y += PLAYER_SIZE;
+                if (y + 1 < GameRound.BOARD_SIZE)
+                    y++;
                 break;
             case RIGHT:
-                if (x + PLAYER_SIZE < GameRound.GAME_SIZE)
-                    x += PLAYER_SIZE;
+                if (x + 1 < GameRound.BOARD_SIZE)
+                    x++;
                 break;
             case LEFT:
-                if (x - PLAYER_SIZE >= 0)
-                    x -= PLAYER_SIZE;
+                if (x - 1 >= 0)
+                    x--;
                 break;
         }
 
         // Check if the player is now dead after moving
-        boolean spaceAvailable = board[x / PLAYER_SIZE][y / PLAYER_SIZE];
+        boolean spaceAvailable = board[x][y];
         if (!spaceAvailable) {
             setStatus(STATUS.Dead);
         }

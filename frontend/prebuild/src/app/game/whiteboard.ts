@@ -2,6 +2,7 @@ import * as $ from 'jquery';
 import { GameWebsocket } from './websocket';
 
 export class Whiteboard {
+  static readonly PLAYER_SIZE = 5;
   canvas: any;
   context: any;
   gamesocket: GameWebsocket;
@@ -37,7 +38,8 @@ export class Whiteboard {
   drawSquare(data) {
     const json = JSON.parse(data);
     this.context.fillStyle = json.color;
-    this.context.fillRect(json.coords.x, json.coords.y, 5, 5);
+    this.context.fillRect(Whiteboard.PLAYER_SIZE * json.coords.x, Whiteboard.PLAYER_SIZE * json.coords.y,
+                          Whiteboard.PLAYER_SIZE, Whiteboard.PLAYER_SIZE);
   }
 
   updatePlayerList(json) {
