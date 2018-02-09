@@ -2,12 +2,13 @@ import * as $ from 'jquery';
 import { GameWebsocket } from './websocket';
 
 export class Whiteboard {
+  static readonly PLAYER_SIZE = 5;
   canvas: any;
   context: any;
   gamesocket: GameWebsocket;
 
   constructor() {
-    this.canvas = document.getElementById('myCanvas');
+    this.canvas = document.getElementById('gameCanvas');
     this.context = this.canvas.getContext('2d');
     this.gamesocket = new GameWebsocket(this);
 
@@ -34,41 +35,11 @@ export class Whiteboard {
     };
   }
 
-  drawImageText(image) {
-    const json = JSON.parse(image);
+  drawSquare(data) {
+    const json = JSON.parse(data);
     this.context.fillStyle = json.color;
-    switch (json.shape) {
-      case 'circle':
-        this.context.beginPath();
-        this.context.arc(
-          json.coords.x,
-          json.coords.y,
-          5,
-          0,
-          2 * Math.PI,
-          false
-        );
-        this.context.fill();
-        break;
-      case 'square':
-      default:
-        this.context.fillRect(json.coords.x, json.coords.y, 5, 5);
-        break;
-    }
-  }
-
-  drawImageBinary(blob) {
-    const bytes = new Uint8Array(blob);
-
-    const imageData = this.context.createImageData(
-      this.canvas.width,
-      this.canvas.height
-    );
-
-    for (let i = 8; i < imageData.data.length; i++) {
-      imageData.data[i] = bytes[i];
-    }
-    this.context.putImageData(imageData, 0, 0);
+    this.context.fillRect(Whiteboard.PLAYER_SIZE * json.coords.x, Whiteboard.PLAYER_SIZE * json.coords.y,
+                          Whiteboard.PLAYER_SIZE, Whiteboard.PLAYER_SIZE);
   }
 
   updatePlayerList(json) {
@@ -87,16 +58,16 @@ export class Whiteboard {
 
   getStatus(status) {
     if (status === 'Connected') {
-      return '<span class=\'label label-primary\'>Connected</span>';
+      return '<span class=\'badge badge-pill badge-primary\'>Connected</span>';
     }
     if (status === 'Alive' || status === 'Winner') {
-      return `<span class='label label-success'>${status}</span>`;
+      return `<span class='badge badge-pill badge-success'>${status}</span>`;
     }
     if (status === 'Dead') {
-      return '<span class=\'label label-danger\'>Dead</span>';
+      return '<span class=\'badge badge-pill badge-danger\'>Dead</span>';
     }
     if (status === 'Disconnected') {
-      return '<span class=\'label label-default\'>Disconnected</span>';
+      return '<span class=\'badge badge-pill badge-secondary\'>Disconnected</span>';
     }
   }
 

@@ -34,26 +34,23 @@ export class GameWebsocket {
     this.websocket.send(json);
   }
 
-  sendBinary(bytes: any) {
-    console.log(`sending binary: ${bytes.toString()}`);
-    this.websocket.send(bytes);
-  }
-
   onMessage(evt: MessageEvent) {
     console.log(`received: ${evt.data}`);
     if (typeof evt.data === 'string') {
       const json = JSON.parse(evt.data);
       if (json.playerlist) {
         this.whiteboard.updatePlayerList(json);
-      } else if (json.requeue) {
+      }
+      if (json.requeue) {
         this.roundId = json.requeue;
         localStorage.setItem('roundId', this.roundId);
         location.reload();
-      } else {
-        this.whiteboard.drawImageText(evt.data);
       }
-    } else {
-      this.whiteboard.drawImageBinary(evt.data);
+      if (json.playerlocs) {
+        for (let playerLoc of json.playerlocs) {
+          this.whiteboard.drawSquare(playerLoc);
+        }
+      }
     }
   }
 

@@ -27,25 +27,22 @@ public class Player {
         Disconnected
     }
 
-    public static final int PLAYER_SIZE = 5;
-    private final GameRound game;
     private Session client;
     public final String color;
     public DIRECTION direction = DIRECTION.RIGHT;
+    private DIRECTION lastDirection = null;
     public int x;
     public int y;
     public String playerName;
     public boolean isAlive = true;
     private STATUS playerStatus = STATUS.Connected;
 
-    public Player(GameRound g, Session client, String color) {
-        this.game = g;
+    public Player(Session client, String color) {
         this.color = color;
         this.client = client;
     }
 
-    public Player(GameRound g, Session client, String color, int xstart, int ystart) {
-        this.game = g;
+    public Player(Session client, String color, int xstart, int ystart) {
         this.color = color;
         this.client = client;
         x = xstart;
@@ -53,8 +50,8 @@ public class Player {
     }
 
     public String toJson() {
-        // {"shape":"square","color":"#FF0000","coords":{"x":251,"y":89}}
-        StringBuffer sb = new StringBuffer("{\"shape\":\"square\",\"color\":\"");
+        // {"color":"#FF0000","coords":{"x":251,"y":89}}
+        StringBuffer sb = new StringBuffer("{\"color\":\"");
         sb.append(this.color);
         sb.append("\",\"coords\":{\"x\":");
         sb.append(this.x);
@@ -64,45 +61,61 @@ public class Player {
         return sb.toString();
     }
 
-    public void setDirection(DIRECTION dir) {
-        direction = dir;
+    public void setDirection(DIRECTION newDirection) {
+        // Make sure the player doesn't move backwards on themselves
+        if (lastDirection != null) {
+            if (newDirection == DIRECTION.UP && lastDirection == DIRECTION.DOWN)
+                return;
+            else if (newDirection == DIRECTION.DOWN && lastDirection == DIRECTION.UP)
+                return;
+            else if (newDirection == DIRECTION.LEFT && lastDirection == DIRECTION.RIGHT)
+                return;
+            else if (newDirection == DIRECTION.RIGHT && lastDirection == DIRECTION.LEFT)
+                return;
+        }
+
+        direction = newDirection;
     }
 
     public DIRECTION getDrirection() {
         return direction;
     }
 
-    private boolean checkPosition(int x, int y) {
-        int realXPosition = x / PLAYER_SIZE;
-        int realYPosition = y / PLAYER_SIZE;
-        return game.board[realXPosition][realYPosition];
-    }
+    /**
+     * Move a player forward one space in whatever direction they are facing currently.
+     *
+     * @return True if the player is still alive after moving forward one space. False otherwise.
+     */
+    public boolean movePlayer(boolean[][] board) {
+        // Consume the space the player was in before the move
+        board[x][y] = false;
 
-    public boolean movePlayer() {
-        game.board[x / PLAYER_SIZE][y / PLAYER_SIZE] = false;
         switch (direction) {
             case UP:
-                if (y - PLAYER_SIZE >= 0)
-                    y -= PLAYER_SIZE;
+                if (y - 1 >= 0)
+                    y--;
                 break;
             case DOWN:
-                if (y + PLAYER_SIZE < GameRound.GAME_SIZE)
-                    y += PLAYER_SIZE;
+                if (y + 1 < GameRound.BOARD_SIZE)
+                    y++;
                 break;
             case RIGHT:
-                if (x + PLAYER_SIZE < GameRound.GAME_SIZE)
-                    x += PLAYER_SIZE;
+                if (x + 1 < GameRound.BOARD_SIZE)
+                    x++;
                 break;
             case LEFT:
-                if (x - PLAYER_SIZE >= 0)
-                    x -= PLAYER_SIZE;
+                if (x - 1 >= 0)
+                    x--;
                 break;
         }
-        boolean checkResult = checkPosition(x, y);
-        if (!checkResult) {
+
+        // Check if the player is now dead after moving
+        boolean spaceAvailable = board[x][y];
+        if (!spaceAvailable) {
             setStatus(STATUS.Dead);
         }
-        return checkResult;
+        lastDirection = direction;
+        return isAlive;
     }
 
     public void sendTextToClient(String message) {

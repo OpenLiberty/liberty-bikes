@@ -3,6 +3,8 @@
  */
 package org.libertybikes.game.core;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import javax.json.bind.annotation.JsonbProperty;
 
 /**
@@ -10,6 +12,8 @@ import javax.json.bind.annotation.JsonbProperty;
  *
  */
 public class ClientMessage {
+
+    private static final Jsonb jsonb = JsonbBuilder.create();
 
     public static enum GameEvent {
         GAME_START,
@@ -27,7 +31,7 @@ public class ClientMessage {
 
     @Override
     public String toString() {
-        return "{ direction=" + direction + ", playerjoined=" + playerJoinedId + ", event=" + event + " }";
+        return jsonb.toJson(this);
     }
 
 }
