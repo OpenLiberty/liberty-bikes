@@ -31,6 +31,7 @@ public class Player {
     public final String color;
     public DIRECTION direction = DIRECTION.RIGHT;
     private DIRECTION lastDirection = null;
+    private DIRECTION desiredNextDirection = null;
     public int x;
     public int y;
     public String playerName;
@@ -64,14 +65,13 @@ public class Player {
     public void setDirection(DIRECTION newDirection) {
         // Make sure the player doesn't move backwards on themselves
         if (lastDirection != null) {
-            if (newDirection == DIRECTION.UP && lastDirection == DIRECTION.DOWN)
+            if ((newDirection == DIRECTION.UP && lastDirection == DIRECTION.DOWN) ||
+                (newDirection == DIRECTION.DOWN && lastDirection == DIRECTION.UP) ||
+                (newDirection == DIRECTION.LEFT && lastDirection == DIRECTION.RIGHT) ||
+                (newDirection == DIRECTION.RIGHT && lastDirection == DIRECTION.LEFT)) {
+                desiredNextDirection = newDirection;
                 return;
-            else if (newDirection == DIRECTION.DOWN && lastDirection == DIRECTION.UP)
-                return;
-            else if (newDirection == DIRECTION.LEFT && lastDirection == DIRECTION.RIGHT)
-                return;
-            else if (newDirection == DIRECTION.RIGHT && lastDirection == DIRECTION.LEFT)
-                return;
+            }
         }
 
         direction = newDirection;
@@ -89,6 +89,13 @@ public class Player {
     public boolean movePlayer(boolean[][] board) {
         // Consume the space the player was in before the move
         board[x][y] = false;
+
+        // If a player issues two moves in the same game tick and the second direction is illegal,
+        // spread out the moves across two ticks rather than ignoring the second move entirely
+        if (desiredNextDirection != null && lastDirection == direction) {
+            setDirection(desiredNextDirection);
+            desiredNextDirection = null;
+        }
 
         switch (direction) {
             case UP:
