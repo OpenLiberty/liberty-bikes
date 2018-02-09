@@ -45,15 +45,19 @@ export class GameWebsocket {
       const json = JSON.parse(evt.data);
       if (json.playerlist) {
         this.whiteboard.updatePlayerList(json);
-      } else if (json.requeue) {
+      }
+      if (json.requeue) {
         this.roundId = json.requeue;
         localStorage.setItem('roundId', this.roundId);
         location.reload();
-      } else {
-        this.whiteboard.drawImageText(evt.data);
       }
-    } else {
-      this.whiteboard.drawImageBinary(evt.data);
+      if (json.playerlocs) {
+        console.log(`Drawing player locations...`);
+        for (let playerLoc of json.playerlocs) {
+          console.log(`Got playerloc ${playerLoc}`);
+          this.whiteboard.drawSquare(playerLoc);
+        }
+      }
     }
   }
 
