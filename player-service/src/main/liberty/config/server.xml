@@ -3,7 +3,7 @@
         <feature>microProfile-1.2</feature>
     </featureManager>
 
-    <httpEndpoint id="defaultHttpEndpoint" httpPort="${httpPort}" httpsPort="${httpsPort}" />
+    <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
                   
     <applicationManager autoExpand="true"/>
 </server>
