@@ -1,18 +1,24 @@
 package org.libertybikes.game.core;
 
+import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToClient;
+import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToClients;
+
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.websocket.Session;
 
+import org.libertybikes.game.core.ClientMessage.GameEvent;
 import org.libertybikes.game.core.Player.STATUS;
 
 public class GameRound implements Runnable {
@@ -29,7 +35,7 @@ public class GameRound implements Runnable {
     public final String id;
     public final String nextRoundId;
 
-    public Set<Player> players = new HashSet<Player>();
+    public final Map<Session, Client> clients = new HashMap<>();
     public State state = State.OPEN;
 
     private boolean[][] board = new boolean[BOARD_SIZE][BOARD_SIZE];
@@ -53,17 +59,62 @@ public class GameRound implements Runnable {
         nextRoundId = getRandomId();
     }
 
-    public void addPlayer(Player p) {
-        players.add(p);
-        System.out.println("Player " + players.size() + " has joined.");
-        broadcastPlayerLocations();
-        broadcastPlayerList();
+    public void handleMessage(ClientMessage msg, Session client) {
+        if (msg.event != null) {
+            if (GameEvent.GAME_START == msg.event)
+                startGame();
+            else if (GameEvent.GAME_PAUSE == msg.event)
+                pause();
+        }
+
+        if (msg.direction != null) {
+            Player p = clients.get(client).player;
+            p.setDirection(msg.direction);
+        }
+
+        if (msg.playerJoinedId != null) {
+            addPlayer(client, msg.playerJoinedId);
+        }
+
+        if (Boolean.TRUE == msg.isSpectator) {
+            addSpectator(client);
+        }
     }
 
-    public void removePlayer(Player p) {
+    public void addPlayer(Session s, String playerId) {
+        Player p = PlayerFactory.initNextPlayer(this, playerId);
+        clients.put(s, new Client(s, p));
+        System.out.println("Player " + getPlayers().size() + " has joined.");
+        broadcastPlayerList();
+        broadcastPlayerLocations();
+    }
+
+    public void addSpectator(Session s) {
+        System.out.println("A spectator has joined.");
+        clients.put(s, new Client(s));
+        sendTextToClient(s, getPlayerList());
+        sendTextToClient(s, getPlayerLocations());
+    }
+
+    private void removePlayer(Player p) {
         p.disconnect();
         System.out.println(p.playerName + " disconnected.");
         broadcastPlayerList();
+    }
+
+    public int removeClient(Session client) {
+        Client c = clients.remove(client);
+        if (c != null && c.player != null)
+            removePlayer(c.player);
+        return clients.size();
+    }
+
+    public Set<Player> getPlayers() {
+        return clients.values()
+                        .stream()
+                        .filter(c -> c.isPlayer())
+                        .map(c -> c.player)
+                        .collect(Collectors.toSet());
     }
 
     @Override
@@ -87,7 +138,7 @@ public class GameRound implements Runnable {
         // Move all living players forward 1
         boolean playerStatusChange = false;
         boolean playersMoved = false;
-        for (Player p : players) {
+        for (Player p : getPlayers()) {
             if (p.isAlive) {
                 if (p.movePlayer(board)) {
                     playersMoved = true;
@@ -112,36 +163,38 @@ public class GameRound implements Runnable {
         }
     }
 
-    private void broadcastPlayerLocations() {
+    private String getPlayerLocations() {
         JsonArrayBuilder arr = Json.createArrayBuilder();
-        for (Player p : players)
+        for (Player p : getPlayers())
             arr.add(p.toJson());
-        String playerLocations = Json.createObjectBuilder().add("playerlocs", arr).build().toString();
-        for (Player client : players)
-            client.sendTextToClient(playerLocations);
+        return Json.createObjectBuilder().add("playerlocs", arr).build().toString();
     }
 
-    private void broadcastPlayerList() {
+    private String getPlayerList() {
         JsonArrayBuilder array = Json.createArrayBuilder();
-        for (Player p : players) {
+        for (Player p : getPlayers()) {
             array.add(Json.createObjectBuilder()
                             .add("name", p.playerName)
                             .add("status", p.getStatus().toString())
                             .add("color", p.color));
         }
-        JsonObject obj = Json.createObjectBuilder().add("playerlist", array).build();
-        System.out.println("Playerlist: " + obj.toString());
+        return Json.createObjectBuilder().add("playerlist", array).build().toString();
+    }
 
-        for (Player player : players)
-            player.sendTextToClient(obj.toString());
+    private void broadcastPlayerLocations() {
+        sendTextToClients(clients.keySet(), getPlayerLocations());
+    }
+
+    private void broadcastPlayerList() {
+        sendTextToClients(clients.keySet(), getPlayerList());
     }
 
     private void checkForWinner(Player dead) {
-        if (players.size() < 2) // 1 player game, no winner
+        if (getPlayers().size() < 2) // 1 player game, no winner
             return;
         int alivePlayers = 0;
         Player alive = null;
-        for (Player cur : players) {
+        for (Player cur : getPlayers()) {
             if (cur.isAlive) {
                 alivePlayers++;
                 alive = cur;
@@ -153,7 +206,7 @@ public class GameRound implements Runnable {
 
     public void startGame() {
         paused.set(false);
-        for (Player p : players)
+        for (Player p : getPlayers())
             if (STATUS.Connected == p.getStatus())
                 p.setStatus(STATUS.Alive);
         broadcastPlayerList();

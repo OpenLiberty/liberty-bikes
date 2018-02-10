@@ -23,8 +23,11 @@
   </div>
   <div class="row">
     <div class="col-md-2 offset-md-1">
-      <input type="submit" class="btn btn-success" value="Login" (click)="joinRound()">
-      <input type="submit" class="btn btn-success" value="Create Round" (click)="createRound()">
+      <button type="button" class="btn btn-success" (click)="joinRound()">Login</button>
+      <button type="button" class="btn btn-success" (click)="createRound()">Create Round</button>
+      <button id="hostButton" type="button" class="btn btn-info" (click)="hostRound()" data-loading-text="Connecting..." autocomplete="off">
+      Host A Round
+      </button>
     </div>
   </div>
 </div>

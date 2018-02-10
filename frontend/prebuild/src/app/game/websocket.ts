@@ -1,3 +1,4 @@
+import * as $ from 'jquery';
 import { Whiteboard } from './whiteboard';
 
 export class GameWebsocket {
@@ -9,7 +10,7 @@ export class GameWebsocket {
   output: HTMLElement;
 
   constructor(whiteboard: Whiteboard) {
-    this.roundId = localStorage.getItem('roundId');
+    this.roundId = sessionStorage.getItem('roundId');
     this.baseUri = `ws://${document.location.hostname}:8080/round/ws`;
     this.wsUri = `${this.baseUri}/${this.roundId}`;
     this.websocket = new WebSocket(this.wsUri);
@@ -43,7 +44,7 @@ export class GameWebsocket {
       }
       if (json.requeue) {
         this.roundId = json.requeue;
-        localStorage.setItem('roundId', this.roundId);
+        sessionStorage.setItem('roundId', this.roundId);
         location.reload();
       }
       if (json.playerlocs) {
@@ -59,8 +60,19 @@ export class GameWebsocket {
   }
 
   onConnect(evt: MessageEvent) {
-    const name = localStorage.getItem('username');
-    this.sendText(JSON.stringify({'playerjoined': name}));
+    const name = sessionStorage.getItem('username');
+    const isSpectator = sessionStorage.getItem('isSpectator');
+    if (isSpectator === 'true') {
+      console.log('is a spectator... showing game id');
+      // Set the Round ID and make visible
+      const gameId = $('#gameIdDisplay');
+      gameId.html('Round ID: ' + this.roundId);
+      gameId.removeClass('d-none');
+      gameId.addClass('d-inline-block');
+      this.sendText(JSON.stringify({'spectatorjoined': true}));
+    } else {
+      this.sendText(JSON.stringify({'playerjoined': name}));
+    }
   }
 
   writeToScreen(message: string) {

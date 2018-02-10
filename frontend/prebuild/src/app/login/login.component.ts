@@ -17,13 +17,25 @@ export class LoginComponent implements OnInit {
 
   createRound() {
     $.post(`http://${document.location.hostname}:8080/round/create`, function(data) {
-      alert('Response is: ' + data);
+      alert('Created round: ' + data);
     });
   }
 
   joinRound() {
-    localStorage.setItem('username', $('#username').val());
-    localStorage.setItem('roundId', $('#roundid').val());
+    sessionStorage.setItem('username', $('#username').val());
+    sessionStorage.setItem('roundId', $('#roundid').val());
     this.router.navigate(['/game']);
+  }
+
+  hostRound() {
+    // TODO: update the button on click to indicate a waiting state in case
+    // this post request takes a noticeable amount of time
+    let router = this.router;
+    $.post(`http://${document.location.hostname}:8080/round/create`, function(data) {
+      console.log(`Created round with id=` + data);
+      sessionStorage.setItem('isSpectator', 'true');
+      sessionStorage.setItem('roundId', data);
+      router.navigate(['/game']);
+    });
   }
 }

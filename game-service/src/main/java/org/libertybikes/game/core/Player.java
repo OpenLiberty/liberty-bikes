@@ -3,13 +3,6 @@
  */
 package org.libertybikes.game.core;
 
-import java.io.IOException;
-
-import javax.websocket.Session;
-
-/**
- * @author Andrew
- */
 public class Player {
 
     public static enum DIRECTION {
@@ -27,7 +20,6 @@ public class Player {
         Disconnected
     }
 
-    private Session client;
     public final String color;
     public DIRECTION direction = DIRECTION.RIGHT;
     private DIRECTION lastDirection = null;
@@ -38,14 +30,12 @@ public class Player {
     public boolean isAlive = true;
     private STATUS playerStatus = STATUS.Connected;
 
-    public Player(Session client, String color) {
+    public Player(String color) {
         this.color = color;
-        this.client = client;
     }
 
-    public Player(Session client, String color, int xstart, int ystart) {
+    public Player(String color, int xstart, int ystart) {
         this.color = color;
-        this.client = client;
         x = xstart;
         y = ystart;
     }
@@ -63,6 +53,9 @@ public class Player {
     }
 
     public void setDirection(DIRECTION newDirection) {
+        if (newDirection == direction)
+            return;
+
         // Make sure the player doesn't move backwards on themselves
         if (lastDirection != null) {
             if ((newDirection == DIRECTION.UP && lastDirection == DIRECTION.DOWN) ||
@@ -125,18 +118,7 @@ public class Player {
         return isAlive;
     }
 
-    public void sendTextToClient(String message) {
-        if (client != null) {
-            try {
-                client.getBasicRemote().sendText(message);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public void disconnect() {
-        this.client = null;
         setStatus(STATUS.Disconnected);
     }
 
