@@ -10,6 +10,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.json.Json;
@@ -31,6 +32,7 @@ public class GameRound implements Runnable {
     public static final int BOARD_SIZE = 121;
 
     private static final Random r = new Random();
+    private static final AtomicInteger runningGames = new AtomicInteger();
 
     public final String id;
     public final String nextRoundId;
@@ -41,6 +43,7 @@ public class GameRound implements Runnable {
     private boolean[][] board = new boolean[BOARD_SIZE][BOARD_SIZE];
     private AtomicBoolean gameRunning = new AtomicBoolean(false);
     private AtomicBoolean paused = new AtomicBoolean(false);
+    private int ticksWithoutMoves = 0;
 
     // Get a string of 6 random uppercase letters (A-Z)
     private static String getRandomId() {
@@ -59,32 +62,29 @@ public class GameRound implements Runnable {
         nextRoundId = getRandomId();
     }
 
-    public void handleMessage(ClientMessage msg, Session client) {
-        if (msg.event != null) {
-            if (GameEvent.GAME_START == msg.event)
-                startGame();
-            else if (GameEvent.GAME_PAUSE == msg.event)
-                pause();
-        }
+    public void handleMessage(ClientMessage msg, Session session) {
+        if (GameEvent.GAME_START == msg.event)
+            startGame();
 
         if (msg.direction != null) {
-            Player p = clients.get(client).player;
-            p.setDirection(msg.direction);
+            Client c = clients.get(session);
+            if (c.isPlayer())
+                c.player.setDirection(msg.direction);
         }
 
         if (msg.playerJoinedId != null) {
-            addPlayer(client, msg.playerJoinedId);
+            addPlayer(session, msg.playerJoinedId);
         }
 
         if (Boolean.TRUE == msg.isSpectator) {
-            addSpectator(client);
+            addSpectator(session);
         }
     }
 
     public void addPlayer(Session s, String playerId) {
         Player p = PlayerFactory.initNextPlayer(this, playerId);
         clients.put(s, new Client(s, p));
-        System.out.println("Player " + getPlayers().size() + " has joined.");
+        System.out.println("Player " + playerId + " has joined.");
         broadcastPlayerList();
         broadcastPlayerLocations();
     }
@@ -123,14 +123,16 @@ public class GameRound implements Runnable {
             Arrays.fill(board[i], true);
         gameRunning.set(true);
         System.out.println("Starting round: " + id);
-
+        int numGames = runningGames.incrementAndGet();
+        if (numGames > 3)
+            System.out.println("WARNING: There are currently " + numGames + " game instances running.");
         while (gameRunning.get()) {
-            while (!paused.get()) {
-                delay(GAME_TICK_SPEED);
-                gameTick();
-            }
-            delay(500); // don't thrash when game is paused
+            delay(GAME_TICK_SPEED);
+            gameTick();
+            if (ticksWithoutMoves > 5)
+                gameRunning.set(false); // end the game if nobody can move anymore
         }
+        runningGames.decrementAndGet();
         System.out.println("Finished round: " + id);
     }
 
@@ -150,8 +152,13 @@ public class GameRound implements Runnable {
             }
         }
 
-        if (playersMoved)
+        if (playersMoved) {
+            ticksWithoutMoves = 0;
             broadcastPlayerLocations();
+        } else {
+            ticksWithoutMoves++;
+        }
+
         if (playerStatusChange)
             broadcastPlayerList();
     }
@@ -200,8 +207,9 @@ public class GameRound implements Runnable {
                 alive = cur;
             }
         }
-        if (alivePlayers == 1)
+        if (alivePlayers == 1) {
             alive.setStatus(STATUS.Winner);
+        }
     }
 
     public void startGame() {
@@ -220,13 +228,4 @@ public class GameRound implements Runnable {
             }
         }
     }
-
-    public void pause() {
-        paused.set(true);
-    }
-
-    public void stopGame() {
-        gameRunning.set(false);
-    }
-
 }

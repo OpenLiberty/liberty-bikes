@@ -67,10 +67,6 @@ export class Whiteboard {
     this.gamesocket.sendText(JSON.stringify({ message: 'GAME_START' }));
   }
 
-  pauseGame() {
-    this.gamesocket.sendText(JSON.stringify({ message: 'GAME_PAUSE' }));
-  }
-
   requeue() {
     this.gamesocket.sendText(JSON.stringify({ message: 'GAME_REQUEUE' }));
   }

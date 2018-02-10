@@ -18,10 +18,6 @@ export class GameComponent implements OnInit {
     this.gameBoard.startGame();
   }
 
-  pauseGame() {
-    this.gameBoard.pauseGame();
-  }
-
   requeue() {
     this.gameBoard.requeue();
   }

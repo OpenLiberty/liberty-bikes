@@ -9,7 +9,6 @@ public class ClientMessage {
 
     public static enum GameEvent {
         GAME_START,
-        GAME_PAUSE,
         GAME_REQUEUE
     }
 
