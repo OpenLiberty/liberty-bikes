@@ -8,11 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import javax.enterprise.concurrent.ManagedScheduledExecutorService;
+import javax.enterprise.inject.spi.CDI;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.naming.InitialContext;
@@ -21,6 +22,8 @@ import javax.websocket.Session;
 
 import org.libertybikes.game.core.ClientMessage.GameEvent;
 import org.libertybikes.game.core.Player.STATUS;
+import org.libertybikes.game.round.service.GameRoundService;
+import org.libertybikes.game.round.service.GameRoundWebsocket;
 
 public class GameRound implements Runnable {
 
@@ -134,6 +137,13 @@ public class GameRound implements Runnable {
         }
         runningGames.decrementAndGet();
         System.out.println("Finished round: " + id);
+
+        System.out.println("Clients flagged for auto-requeue will be redirected to the next round in 5 seconds...");
+        delay(5000);
+        GameRoundService gameSvc = CDI.current().select(GameRoundService.class).get();
+        for (Client c : clients.values())
+            if (c.autoRequeue)
+                GameRoundWebsocket.requeueClient(gameSvc, this, c.session);
     }
 
     private void gameTick() {
@@ -220,7 +230,7 @@ public class GameRound implements Runnable {
         broadcastPlayerList();
         if (!gameRunning.get()) {
             try {
-                ExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedExecutorService");
+                ManagedScheduledExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
                 exec.submit(this);
             } catch (NamingException e) {
                 System.out.println("Unable to start game due to: " + e);

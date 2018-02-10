@@ -57,20 +57,24 @@ public class GameRoundWebsocket {
             System.out.println("[onMessage] roundId=" + roundId + "  msg=" + message);
 
             if (msg.event != null && GameEvent.GAME_REQUEUE == msg.event) {
-                GameRound nextGame = gameSvc.requeue(round);
-                String requeueMsg = Json.createObjectBuilder()
-                                .add("requeue", nextGame.id)
-                                .build()
-                                .toString();
-                sendTextToClient(session, requeueMsg);
-                if (round.removeClient(session) == 0)
-                    gameSvc.deleteRound(roundId);
+                requeueClient(gameSvc, round, session);
             } else {
                 round.handleMessage(msg, session);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void requeueClient(GameRoundService gameSvc, GameRound oldRound, Session s) {
+        GameRound nextGame = gameSvc.requeue(oldRound);
+        String requeueMsg = Json.createObjectBuilder()
+                        .add("requeue", nextGame.id)
+                        .build()
+                        .toString();
+        sendTextToClient(s, requeueMsg);
+        if (oldRound.removeClient(s) == 0)
+            gameSvc.deleteRound(oldRound.id);
     }
 
     public static void sendTextToClient(Session client, String message) {
