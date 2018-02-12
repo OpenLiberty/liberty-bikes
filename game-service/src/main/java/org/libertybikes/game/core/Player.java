@@ -3,13 +3,6 @@
  */
 package org.libertybikes.game.core;
 
-import java.io.IOException;
-
-import javax.websocket.Session;
-
-/**
- * @author Andrew
- */
 public class Player {
 
     public static enum DIRECTION {
@@ -27,24 +20,22 @@ public class Player {
         Disconnected
     }
 
-    private Session client;
     public final String color;
     public DIRECTION direction = DIRECTION.RIGHT;
     private DIRECTION lastDirection = null;
+    private DIRECTION desiredNextDirection = null;
     public int x;
     public int y;
     public String playerName;
     public boolean isAlive = true;
     private STATUS playerStatus = STATUS.Connected;
 
-    public Player(Session client, String color) {
+    public Player(String color) {
         this.color = color;
-        this.client = client;
     }
 
-    public Player(Session client, String color, int xstart, int ystart) {
+    public Player(String color, int xstart, int ystart) {
         this.color = color;
-        this.client = client;
         x = xstart;
         y = ystart;
     }
@@ -62,16 +53,18 @@ public class Player {
     }
 
     public void setDirection(DIRECTION newDirection) {
+        if (newDirection == direction)
+            return;
+
         // Make sure the player doesn't move backwards on themselves
         if (lastDirection != null) {
-            if (newDirection == DIRECTION.UP && lastDirection == DIRECTION.DOWN)
+            if ((newDirection == DIRECTION.UP && lastDirection == DIRECTION.DOWN) ||
+                (newDirection == DIRECTION.DOWN && lastDirection == DIRECTION.UP) ||
+                (newDirection == DIRECTION.LEFT && lastDirection == DIRECTION.RIGHT) ||
+                (newDirection == DIRECTION.RIGHT && lastDirection == DIRECTION.LEFT)) {
+                desiredNextDirection = newDirection;
                 return;
-            else if (newDirection == DIRECTION.DOWN && lastDirection == DIRECTION.UP)
-                return;
-            else if (newDirection == DIRECTION.LEFT && lastDirection == DIRECTION.RIGHT)
-                return;
-            else if (newDirection == DIRECTION.RIGHT && lastDirection == DIRECTION.LEFT)
-                return;
+            }
         }
 
         direction = newDirection;
@@ -89,6 +82,13 @@ public class Player {
     public boolean movePlayer(boolean[][] board) {
         // Consume the space the player was in before the move
         board[x][y] = false;
+
+        // If a player issues two moves in the same game tick and the second direction is illegal,
+        // spread out the moves across two ticks rather than ignoring the second move entirely
+        if (desiredNextDirection != null && lastDirection == direction) {
+            setDirection(desiredNextDirection);
+            desiredNextDirection = null;
+        }
 
         switch (direction) {
             case UP:
@@ -118,18 +118,7 @@ public class Player {
         return isAlive;
     }
 
-    public void sendTextToClient(String message) {
-        if (client != null) {
-            try {
-                client.getBasicRemote().sendText(message);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public void disconnect() {
-        this.client = null;
         setStatus(STATUS.Disconnected);
     }
 

@@ -10,13 +10,17 @@
         <br>
         <br>
       </div>
-      
-      <ul id="playerList" class='list-group col-md-3 d-inline-block align-top'>
-      </ul>
+      <div class="col-md-3 d-inline-block align-top">
+	      <button id="gameIdDisplay" class='d-none btn-primary btn-lg' disabled>
+	      </button>
+	      <br>
+	      <br>
+	      <ul id="playerList" class='list-group'>
+	      </ul>
+      </div>
     </div>
     <div class="panel-footer">
       <button type="button" class="btn btn-success" (click)="startGame()">Start Game</button>
-      <button type="button" class="btn btn-danger" (click)="pauseGame()">Pause Game</button>
       <button type="button" class="btn btn-warning" (click)="requeue()">Requeue</button>
     </div>
   </div>

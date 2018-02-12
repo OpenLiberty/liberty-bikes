@@ -27,14 +27,6 @@ export class Whiteboard {
     };
   }
 
-  getCurrentPos(evt) {
-    const rect = this.canvas.getBoundingClientRect();
-    return {
-      x: evt.clientX - rect.left,
-      y: evt.clientY - rect.top
-    };
-  }
-
   drawSquare(data) {
     const json = JSON.parse(data);
     this.context.fillStyle = json.color;
@@ -73,10 +65,6 @@ export class Whiteboard {
 
   startGame() {
     this.gamesocket.sendText(JSON.stringify({ message: 'GAME_START' }));
-  }
-
-  pauseGame() {
-    this.gamesocket.sendText(JSON.stringify({ message: 'GAME_PAUSE' }));
   }
 
   requeue() {

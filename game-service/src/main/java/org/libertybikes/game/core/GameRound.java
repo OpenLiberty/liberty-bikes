@@ -1,19 +1,29 @@
 package org.libertybikes.game.core;
 
+import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToClient;
+import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToClients;
+
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
+import javax.enterprise.concurrent.ManagedScheduledExecutorService;
+import javax.enterprise.inject.spi.CDI;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.websocket.Session;
 
+import org.libertybikes.game.core.ClientMessage.GameEvent;
 import org.libertybikes.game.core.Player.STATUS;
+import org.libertybikes.game.round.service.GameRoundService;
+import org.libertybikes.game.round.service.GameRoundWebsocket;
 
 public class GameRound implements Runnable {
 
@@ -25,16 +35,18 @@ public class GameRound implements Runnable {
     public static final int BOARD_SIZE = 121;
 
     private static final Random r = new Random();
+    private static final AtomicInteger runningGames = new AtomicInteger();
 
     public final String id;
     public final String nextRoundId;
 
-    public Set<Player> players = new HashSet<Player>();
+    public final Map<Session, Client> clients = new HashMap<>();
     public State state = State.OPEN;
 
     private boolean[][] board = new boolean[BOARD_SIZE][BOARD_SIZE];
     private AtomicBoolean gameRunning = new AtomicBoolean(false);
     private AtomicBoolean paused = new AtomicBoolean(false);
+    private int ticksWithoutMoves = 0;
 
     // Get a string of 6 random uppercase letters (A-Z)
     private static String getRandomId() {
@@ -53,17 +65,59 @@ public class GameRound implements Runnable {
         nextRoundId = getRandomId();
     }
 
-    public void addPlayer(Player p) {
-        players.add(p);
-        System.out.println("Player " + players.size() + " has joined.");
-        broadcastPlayerLocations();
-        broadcastPlayerList();
+    public void handleMessage(ClientMessage msg, Session session) {
+        if (GameEvent.GAME_START == msg.event)
+            startGame();
+
+        if (msg.direction != null) {
+            Client c = clients.get(session);
+            if (c.isPlayer())
+                c.player.setDirection(msg.direction);
+        }
+
+        if (msg.playerJoinedId != null) {
+            addPlayer(session, msg.playerJoinedId);
+        }
+
+        if (Boolean.TRUE == msg.isSpectator) {
+            addSpectator(session);
+        }
     }
 
-    public void removePlayer(Player p) {
+    public void addPlayer(Session s, String playerId) {
+        Player p = PlayerFactory.initNextPlayer(this, playerId);
+        clients.put(s, new Client(s, p));
+        System.out.println("Player " + playerId + " has joined.");
+        broadcastPlayerList();
+        broadcastPlayerLocations();
+    }
+
+    public void addSpectator(Session s) {
+        System.out.println("A spectator has joined.");
+        clients.put(s, new Client(s));
+        sendTextToClient(s, getPlayerList());
+        sendTextToClient(s, getPlayerLocations());
+    }
+
+    private void removePlayer(Player p) {
         p.disconnect();
         System.out.println(p.playerName + " disconnected.");
         broadcastPlayerList();
+    }
+
+    public int removeClient(Session client) {
+        Client c = clients.remove(client);
+        if (c != null && c.player != null)
+            removePlayer(c.player);
+        return clients.size();
+    }
+
+    public Set<Player> getPlayers() {
+        return clients.values()
+                        .stream()
+                        .filter(c -> c.isPlayer())
+                        .map(c -> c.player)
+                        .collect(Collectors.toSet());
     }
 
     @Override
@@ -72,22 +126,31 @@ public class GameRound implements Runnable {
             Arrays.fill(board[i], true);
         gameRunning.set(true);
         System.out.println("Starting round: " + id);
-
+        int numGames = runningGames.incrementAndGet();
+        if (numGames > 3)
+            System.out.println("WARNING: There are currently " + numGames + " game instances running.");
         while (gameRunning.get()) {
-            while (!paused.get()) {
-                delay(GAME_TICK_SPEED);
-                gameTick();
-            }
-            delay(500); // don't thrash when game is paused
+            delay(GAME_TICK_SPEED);
+            gameTick();
+            if (ticksWithoutMoves > 5)
+                gameRunning.set(false); // end the game if nobody can move anymore
         }
+        runningGames.decrementAndGet();
         System.out.println("Finished round: " + id);
+
+        System.out.println("Clients flagged for auto-requeue will be redirected to the next round in 5 seconds...");
+        delay(5000);
+        GameRoundService gameSvc = CDI.current().select(GameRoundService.class).get();
+        for (Client c : clients.values())
+            if (c.autoRequeue)
+                GameRoundWebsocket.requeueClient(gameSvc, this, c.session);
     }
 
     private void gameTick() {
         // Move all living players forward 1
         boolean playerStatusChange = false;
         boolean playersMoved = false;
-        for (Player p : players) {
+        for (Player p : getPlayers()) {
             if (p.isAlive) {
                 if (p.movePlayer(board)) {
                     playersMoved = true;
@@ -99,8 +162,13 @@ public class GameRound implements Runnable {
             }
         }
 
-        if (playersMoved)
+        if (playersMoved) {
+            ticksWithoutMoves = 0;
             broadcastPlayerLocations();
+        } else {
+            ticksWithoutMoves++;
+        }
+
         if (playerStatusChange)
             broadcastPlayerList();
     }
@@ -112,54 +180,57 @@ public class GameRound implements Runnable {
         }
     }
 
-    private void broadcastPlayerLocations() {
+    private String getPlayerLocations() {
         JsonArrayBuilder arr = Json.createArrayBuilder();
-        for (Player p : players)
+        for (Player p : getPlayers())
             arr.add(p.toJson());
-        String playerLocations = Json.createObjectBuilder().add("playerlocs", arr).build().toString();
-        for (Player client : players)
-            client.sendTextToClient(playerLocations);
+        return Json.createObjectBuilder().add("playerlocs", arr).build().toString();
     }
 
-    private void broadcastPlayerList() {
+    private String getPlayerList() {
         JsonArrayBuilder array = Json.createArrayBuilder();
-        for (Player p : players) {
+        for (Player p : getPlayers()) {
             array.add(Json.createObjectBuilder()
                             .add("name", p.playerName)
                             .add("status", p.getStatus().toString())
                             .add("color", p.color));
         }
-        JsonObject obj = Json.createObjectBuilder().add("playerlist", array).build();
-        System.out.println("Playerlist: " + obj.toString());
+        return Json.createObjectBuilder().add("playerlist", array).build().toString();
+    }
 
-        for (Player player : players)
-            player.sendTextToClient(obj.toString());
+    private void broadcastPlayerLocations() {
+        sendTextToClients(clients.keySet(), getPlayerLocations());
+    }
+
+    private void broadcastPlayerList() {
+        sendTextToClients(clients.keySet(), getPlayerList());
     }
 
     private void checkForWinner(Player dead) {
-        if (players.size() < 2) // 1 player game, no winner
+        if (getPlayers().size() < 2) // 1 player game, no winner
             return;
         int alivePlayers = 0;
         Player alive = null;
-        for (Player cur : players) {
+        for (Player cur : getPlayers()) {
             if (cur.isAlive) {
                 alivePlayers++;
                 alive = cur;
             }
         }
-        if (alivePlayers == 1)
+        if (alivePlayers == 1) {
             alive.setStatus(STATUS.Winner);
+        }
     }
 
     public void startGame() {
         paused.set(false);
-        for (Player p : players)
+        for (Player p : getPlayers())
             if (STATUS.Connected == p.getStatus())
                 p.setStatus(STATUS.Alive);
         broadcastPlayerList();
         if (!gameRunning.get()) {
             try {
-                ExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedExecutorService");
+                ManagedScheduledExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
                 exec.submit(this);
             } catch (NamingException e) {
                 System.out.println("Unable to start game due to: " + e);
@@ -167,13 +238,4 @@ public class GameRound implements Runnable {
             }
         }
     }
-
-    public void pause() {
-        paused.set(true);
-    }
-
-    public void stopGame() {
-        gameRunning.set(false);
-    }
-
 }

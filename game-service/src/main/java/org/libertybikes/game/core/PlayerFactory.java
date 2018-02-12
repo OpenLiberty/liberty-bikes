@@ -3,14 +3,8 @@
  */
 package org.libertybikes.game.core;
 
-import javax.websocket.Session;
-
 import org.libertybikes.game.core.Player.DIRECTION;
 
-/**
- * @author Andrew
- *
- */
 public class PlayerFactory {
 
     public static int MAX_PLAYERS = PlayerData.values().length;
@@ -36,9 +30,9 @@ public class PlayerFactory {
 
     private static final PlayerData[] startingData = new PlayerData[] { PlayerData.START_1, PlayerData.START_2, PlayerData.START_3, PlayerData.START_4 };
 
-    public static Player initNextPlayer(GameRound g, Session client, String name) {
-        PlayerData data = startingData[g.players.size()];
-        Player p = new Player(client, data.color, data.x, data.y);
+    public static Player initNextPlayer(GameRound g, String name) {
+        PlayerData data = startingData[g.getPlayers().size()];
+        Player p = new Player(data.color, data.x, data.y);
         p.direction = data.dir;
         p.playerName = name;
         return p;
