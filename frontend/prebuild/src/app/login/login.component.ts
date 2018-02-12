@@ -17,7 +17,7 @@ export class LoginComponent implements OnInit {
 
   createRound() {
     $.post(`http://${document.location.hostname}:8080/round/create`, function(data) {
-      alert('Created round: ' + data);
+      alert(`Created round: ${data}`);
     });
   }
 
@@ -32,7 +32,7 @@ export class LoginComponent implements OnInit {
     // this post request takes a noticeable amount of time
     let router = this.router;
     $.post(`http://${document.location.hostname}:8080/round/create`, function(data) {
-      console.log(`Created round with id=` + data);
+      console.log(`Created round with id=${data}`);
       sessionStorage.setItem('isSpectator', 'true');
       sessionStorage.setItem('roundId', data);
       router.navigate(['/game']);
