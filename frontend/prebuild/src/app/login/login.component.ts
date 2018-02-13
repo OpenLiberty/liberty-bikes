@@ -22,9 +22,22 @@ export class LoginComponent implements OnInit {
   }
 
   joinRound() {
-    sessionStorage.setItem('username', $('#username').val());
-    sessionStorage.setItem('roundId', $('#roundid').val());
-    this.router.navigate(['/game']);
+    let lc = this;
+    let roundID: string = $('#roundid').val();
+    roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
+    if (roundID.length !== 6) {
+      alert('Not a Valid Round ID');
+      return;
+    }
+    $.post(`http://${document.location.hostname}:8080/round/joinRound/${roundID}`, function(data) {
+      if (data === 'VALID') {
+        sessionStorage.setItem('username', $('#username').val());
+        sessionStorage.setItem('roundId', roundID);
+        lc.router.navigate(['/game']);
+      } else {
+        alert('Response is: ' + data);
+      }
+    });
   }
 
   hostRound() {

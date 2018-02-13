@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.libertybikes.game.core.GameRound;
+import org.libertybikes.game.core.GameRound.State;
 
 @Path("/")
 @ApplicationScoped
@@ -29,6 +30,22 @@ public class GameRoundService {
     @Produces(MediaType.APPLICATION_JSON)
     public Collection<GameRound> listAllGames() {
         return allRounds.values();
+    }
+
+    @POST
+    @Path("/joinRound/{roundId}")
+    public String joinRound(@PathParam("roundId") String roundId) {
+        GameRound r = allRounds.get(roundId.toUpperCase());
+        if (r == null) {
+            return "Game Does Not Exist";
+        }
+        if (r.state.equals(State.FULL)) {
+            return "Game Is Full";
+        }
+        if (!r.state.equals(State.OPEN)) {
+            return "Game Already Started";
+        }
+        return "VALID";
     }
 
     @POST

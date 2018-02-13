@@ -26,6 +26,7 @@ public class Player {
     private DIRECTION desiredNextDirection = null;
     public int x;
     public int y;
+    public int playerNum;
     public String playerName;
     public boolean isAlive = true;
     private STATUS playerStatus = STATUS.Connected;
@@ -34,10 +35,11 @@ public class Player {
         this.color = color;
     }
 
-    public Player(String color, int xstart, int ystart) {
+    public Player(String color, int xstart, int ystart, int playerNum) {
         this.color = color;
         x = xstart;
         y = ystart;
+        this.playerNum = playerNum;
     }
 
     public String toJson() {
@@ -132,5 +134,9 @@ public class Player {
 
     public STATUS getStatus() {
         return this.playerStatus;
+    }
+
+    public int getPlayerNum() {
+        return this.playerNum;
     }
 }

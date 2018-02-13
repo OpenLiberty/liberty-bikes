@@ -30,9 +30,9 @@ public class PlayerFactory {
 
     private static final PlayerData[] startingData = new PlayerData[] { PlayerData.START_1, PlayerData.START_2, PlayerData.START_3, PlayerData.START_4 };
 
-    public static Player initNextPlayer(GameRound g, String name) {
-        PlayerData data = startingData[g.getPlayers().size()];
-        Player p = new Player(data.color, data.x, data.y);
+    public static Player initNextPlayer(GameRound g, String name, int playerNum) {
+        PlayerData data = startingData[playerNum];
+        Player p = new Player(data.color, data.x, data.y, playerNum);
         p.direction = data.dir;
         p.playerName = name;
         return p;
