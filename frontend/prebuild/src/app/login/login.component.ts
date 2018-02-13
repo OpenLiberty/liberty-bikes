@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 
 import * as $ from 'jquery';
@@ -9,7 +9,7 @@ import * as $ from 'jquery';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  constructor(private router: Router) {
+  constructor(private router: Router, private ngZone: NgZone) {
 
   }
 
@@ -31,11 +31,14 @@ export class LoginComponent implements OnInit {
     // TODO: update the button on click to indicate a waiting state in case
     // this post request takes a noticeable amount of time
     let router = this.router;
+    let ngZone = this.ngZone;
     $.post(`http://${document.location.hostname}:8080/round/create`, function(data) {
       console.log(`Created round with id=${data}`);
       sessionStorage.setItem('isSpectator', 'true');
       sessionStorage.setItem('roundId', data);
-      router.navigate(['/game']);
+      ngZone.run(() => {
+        router.navigate(['/game']);
+      });
     });
   }
 }
