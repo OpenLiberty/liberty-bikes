@@ -40,13 +40,16 @@ public class GameRound implements Runnable {
     public final String id;
     public final String nextRoundId;
 
-    public final Map<Session, Client> clients = new HashMap<>();
-    public State state = State.OPEN;
+    private final Map<Session, Client> clients = new HashMap<>();
+    public State gameState = State.OPEN;
 
     private boolean[][] board = new boolean[BOARD_SIZE][BOARD_SIZE];
     private AtomicBoolean gameRunning = new AtomicBoolean(false);
     private AtomicBoolean paused = new AtomicBoolean(false);
     private int ticksWithoutMoves = 0;
+    private int numOfPlayers = 0;
+
+    private boolean[] takenPlayerSlots = new boolean[PlayerFactory.MAX_PLAYERS];
 
     // Get a string of 6 random uppercase letters (A-Z)
     private static String getRandomId() {
@@ -85,7 +88,29 @@ public class GameRound implements Runnable {
     }
 
     public void addPlayer(Session s, String playerId) {
-        Player p = PlayerFactory.initNextPlayer(this, playerId);
+        // Front end should be preventing a player joining a full game but
+        // defensive programming
+        if (gameState != State.OPEN) {
+            return;
+        }
+
+        if (++numOfPlayers > PlayerFactory.MAX_PLAYERS - 1) {
+            gameState = State.FULL;
+        }
+
+        // Find first open player slot to fill, which determines position
+        int playerNum = -1;
+        for (int i = 0; i < takenPlayerSlots.length; i++) {
+            if (!takenPlayerSlots[i]) {
+                playerNum = i;
+                takenPlayerSlots[i] = true;
+                System.out.println("Player slot " + i + " taken");
+                break;
+            }
+        }
+
+        // Initialize Player
+        Player p = PlayerFactory.initNextPlayer(this, playerId, playerNum);
         clients.put(s, new Client(s, p));
         System.out.println("Player " + playerId + " has joined.");
         broadcastPlayerList();
@@ -103,6 +128,12 @@ public class GameRound implements Runnable {
         p.disconnect();
         System.out.println(p.playerName + " disconnected.");
         broadcastPlayerList();
+
+        // Open player slot for new joiners
+        if (--numOfPlayers < PlayerFactory.MAX_PLAYERS) {
+            gameState = (gameState == State.FULL) ? State.OPEN : gameState;
+        }
+        takenPlayerSlots[p.getPlayerNum()] = false;
     }
 
     public int removeClient(Session client) {
@@ -219,6 +250,7 @@ public class GameRound implements Runnable {
         }
         if (alivePlayers == 1) {
             alive.setStatus(STATUS.Winner);
+            gameState = State.FINISHED;
         }
     }
 
@@ -237,5 +269,6 @@ public class GameRound implements Runnable {
                 e.printStackTrace();
             }
         }
+        gameState = State.RUNNING;
     }
 }
