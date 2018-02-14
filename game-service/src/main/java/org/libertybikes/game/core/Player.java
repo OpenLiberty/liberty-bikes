@@ -72,7 +72,7 @@ public class Player {
         direction = newDirection;
     }
 
-    public DIRECTION getDrirection() {
+    public DIRECTION getDirection() {
         return direction;
     }
 
@@ -98,11 +98,11 @@ public class Player {
                     y--;
                 break;
             case DOWN:
-                if (y + 1 < GameRound.BOARD_SIZE)
+                if (y + 1 < GameBoard.BOARD_SIZE)
                     y++;
                 break;
             case RIGHT:
-                if (x + 1 < GameRound.BOARD_SIZE)
+                if (x + 1 < GameBoard.BOARD_SIZE)
                     x++;
                 break;
             case LEFT:

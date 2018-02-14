@@ -2,7 +2,7 @@ import * as $ from 'jquery';
 import { GameWebsocket } from './websocket';
 
 export class Whiteboard {
-  static readonly PLAYER_SIZE = 5;
+  static readonly BOX_SIZE = 5;
   canvas: any;
   context: any;
   gamesocket: GameWebsocket;
@@ -27,11 +27,16 @@ export class Whiteboard {
     };
   }
 
-  drawSquare(data) {
-    const json = JSON.parse(data);
-    this.context.fillStyle = json.color;
-    this.context.fillRect(Whiteboard.PLAYER_SIZE * json.coords.x, Whiteboard.PLAYER_SIZE * json.coords.y,
-                          Whiteboard.PLAYER_SIZE, Whiteboard.PLAYER_SIZE);
+  drawPlayer(player) {
+    this.context.fillStyle = player.color;
+    this.context.fillRect(Whiteboard.BOX_SIZE * player.x, Whiteboard.BOX_SIZE * player.y,
+                          Whiteboard.BOX_SIZE, Whiteboard.BOX_SIZE);
+  }
+  
+  drawObstacle(obstacle) {
+    this.context.fillStyle = '#808080'; // obstacles always grey
+    this.context.fillRect(Whiteboard.BOX_SIZE * obstacle.x, Whiteboard.BOX_SIZE * obstacle.y,
+                          Whiteboard.BOX_SIZE * obstacle.height, Whiteboard.BOX_SIZE * obstacle.width);
   }
 
   updatePlayerList(json) {

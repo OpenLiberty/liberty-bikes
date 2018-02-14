@@ -3,7 +3,6 @@ package org.libertybikes.game.core;
 import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToClient;
 import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToClients;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -16,6 +15,9 @@ import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.inject.spi.CDI;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.annotation.JsonbPropertyOrder;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.websocket.Session;
@@ -25,31 +27,30 @@ import org.libertybikes.game.core.Player.STATUS;
 import org.libertybikes.game.round.service.GameRoundService;
 import org.libertybikes.game.round.service.GameRoundWebsocket;
 
+@JsonbPropertyOrder({ "id", "gameState", "board", "nextRoundId" })
 public class GameRound implements Runnable {
 
     public static enum State {
         OPEN, FULL, RUNNING, FINISHED
     }
 
+    public static final Jsonb jsonb = JsonbBuilder.create();
     public static final int GAME_TICK_SPEED = 50; // ms
-    public static final int BOARD_SIZE = 121;
-
     private static final Random r = new Random();
     private static final AtomicInteger runningGames = new AtomicInteger();
 
+    // Properties exposed in JSON representation of object
     public final String id;
     public final String nextRoundId;
-
-    private final Map<Session, Client> clients = new HashMap<>();
     public State gameState = State.OPEN;
+    private final GameBoard board = new GameBoard();
 
-    private boolean[][] board = new boolean[BOARD_SIZE][BOARD_SIZE];
-    private AtomicBoolean gameRunning = new AtomicBoolean(false);
-    private AtomicBoolean paused = new AtomicBoolean(false);
-    private int ticksWithoutMoves = 0;
-    private int numOfPlayers = 0;
+    private final AtomicBoolean gameRunning = new AtomicBoolean(false);
+    private final AtomicBoolean paused = new AtomicBoolean(false);
+    private final Map<Session, Client> clients = new HashMap<>();
+    private final boolean[] takenPlayerSlots = new boolean[PlayerFactory.MAX_PLAYERS];
 
-    private boolean[] takenPlayerSlots = new boolean[PlayerFactory.MAX_PLAYERS];
+    private int ticksWithoutMovement = 0;
 
     // Get a string of 6 random uppercase letters (A-Z)
     private static String getRandomId() {
@@ -66,6 +67,11 @@ public class GameRound implements Runnable {
     public GameRound(String id) {
         this.id = id;
         nextRoundId = getRandomId();
+        board.addObstacle(new Obstacle(5, 5, 60, 60));
+    }
+
+    public GameBoard getBoard() {
+        return board;
     }
 
     public void handleMessage(ClientMessage msg, Session session) {
@@ -91,10 +97,11 @@ public class GameRound implements Runnable {
         // Front end should be preventing a player joining a full game but
         // defensive programming
         if (gameState != State.OPEN) {
+            System.out.println("Cannot add player " + playerId + " to game " + id + " because game has already started.");
             return;
         }
 
-        if (++numOfPlayers > PlayerFactory.MAX_PLAYERS - 1) {
+        if (board.players.size() + 1 > PlayerFactory.MAX_PLAYERS - 1) {
             gameState = State.FULL;
         }
 
@@ -111,17 +118,18 @@ public class GameRound implements Runnable {
 
         // Initialize Player
         Player p = PlayerFactory.initNextPlayer(this, playerId, playerNum);
+        board.addPlayer(p);
         clients.put(s, new Client(s, p));
         System.out.println("Player " + playerId + " has joined.");
         broadcastPlayerList();
-        broadcastPlayerLocations();
+        broadcastGameBoard();
     }
 
     public void addSpectator(Session s) {
         System.out.println("A spectator has joined.");
         clients.put(s, new Client(s));
         sendTextToClient(s, getPlayerList());
-        sendTextToClient(s, getPlayerLocations());
+        sendTextToClient(s, jsonb.toJson(board));
     }
 
     private void removePlayer(Player p) {
@@ -130,8 +138,8 @@ public class GameRound implements Runnable {
         broadcastPlayerList();
 
         // Open player slot for new joiners
-        if (--numOfPlayers < PlayerFactory.MAX_PLAYERS) {
-            gameState = (gameState == State.FULL) ? State.OPEN : gameState;
+        if (State.FULL == gameState && board.players.size() - 1 < PlayerFactory.MAX_PLAYERS) {
+            gameState = State.OPEN;
         }
         takenPlayerSlots[p.getPlayerNum()] = false;
     }
@@ -143,7 +151,8 @@ public class GameRound implements Runnable {
         return clients.size();
     }
 
-    public Set<Player> getPlayers() {
+    // @JsonbTransient // TODO re-enable this anno once Liberty upgrades to yasson 1.0.1
+    public Set<Player> players() {
         return clients.values()
                         .stream()
                         .filter(c -> c.isPlayer())
@@ -153,8 +162,6 @@ public class GameRound implements Runnable {
 
     @Override
     public void run() {
-        for (int i = 0; i < BOARD_SIZE; i++)
-            Arrays.fill(board[i], true);
         gameRunning.set(true);
         System.out.println("Starting round: " + id);
         int numGames = runningGames.incrementAndGet();
@@ -163,7 +170,7 @@ public class GameRound implements Runnable {
         while (gameRunning.get()) {
             delay(GAME_TICK_SPEED);
             gameTick();
-            if (ticksWithoutMoves > 5)
+            if (ticksWithoutMovement > 5)
                 gameRunning.set(false); // end the game if nobody can move anymore
         }
         runningGames.decrementAndGet();
@@ -181,9 +188,9 @@ public class GameRound implements Runnable {
         // Move all living players forward 1
         boolean playerStatusChange = false;
         boolean playersMoved = false;
-        for (Player p : getPlayers()) {
+        for (Player p : players()) {
             if (p.isAlive) {
-                if (p.movePlayer(board)) {
+                if (p.movePlayer(board.board())) {
                     playersMoved = true;
                 } else {
                     // Since someone died, check for winning player
@@ -194,10 +201,10 @@ public class GameRound implements Runnable {
         }
 
         if (playersMoved) {
-            ticksWithoutMoves = 0;
-            broadcastPlayerLocations();
+            ticksWithoutMovement = 0;
+            broadcastGameBoard();
         } else {
-            ticksWithoutMoves++;
+            ticksWithoutMovement++;
         }
 
         if (playerStatusChange)
@@ -211,16 +218,10 @@ public class GameRound implements Runnable {
         }
     }
 
-    private String getPlayerLocations() {
-        JsonArrayBuilder arr = Json.createArrayBuilder();
-        for (Player p : getPlayers())
-            arr.add(p.toJson());
-        return Json.createObjectBuilder().add("playerlocs", arr).build().toString();
-    }
-
     private String getPlayerList() {
+        // TODO: Use JSON-B instead of JSON-P here
         JsonArrayBuilder array = Json.createArrayBuilder();
-        for (Player p : getPlayers()) {
+        for (Player p : players()) {
             array.add(Json.createObjectBuilder()
                             .add("name", p.playerName)
                             .add("status", p.getStatus().toString())
@@ -229,8 +230,8 @@ public class GameRound implements Runnable {
         return Json.createObjectBuilder().add("playerlist", array).build().toString();
     }
 
-    private void broadcastPlayerLocations() {
-        sendTextToClients(clients.keySet(), getPlayerLocations());
+    private void broadcastGameBoard() {
+        sendTextToClients(clients.keySet(), jsonb.toJson(board));
     }
 
     private void broadcastPlayerList() {
@@ -238,11 +239,11 @@ public class GameRound implements Runnable {
     }
 
     private void checkForWinner(Player dead) {
-        if (getPlayers().size() < 2) // 1 player game, no winner
+        if (players().size() < 2) // 1 player game, no winner
             return;
         int alivePlayers = 0;
         Player alive = null;
-        for (Player cur : getPlayers()) {
+        for (Player cur : players()) {
             if (cur.isAlive) {
                 alivePlayers++;
                 alive = cur;
@@ -256,7 +257,7 @@ public class GameRound implements Runnable {
 
     public void startGame() {
         paused.set(false);
-        for (Player p : getPlayers())
+        for (Player p : players())
             if (STATUS.Connected == p.getStatus())
                 p.setStatus(STATUS.Alive);
         broadcastPlayerList();

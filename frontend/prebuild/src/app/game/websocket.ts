@@ -47,9 +47,14 @@ export class GameWebsocket {
         sessionStorage.setItem('roundId', this.roundId);
         location.reload();
       }
-      if (json.playerlocs) {
-        for (let playerLoc of json.playerlocs) {
-          this.whiteboard.drawSquare(playerLoc);
+      if (json.obstacles) {
+        for (let obstacle of json.obstacles) {
+          this.whiteboard.drawObstacle(obstacle);
+        }
+      }
+      if (json.players) {
+        for (let player of json.players) {
+          this.whiteboard.drawPlayer(player);
         }
       }
     }
