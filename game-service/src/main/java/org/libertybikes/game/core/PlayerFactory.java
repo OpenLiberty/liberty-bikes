@@ -11,9 +11,9 @@ public class PlayerFactory {
 
     private static enum PlayerData {
         START_1("#DF740C", 10, 10, DIRECTION.RIGHT),
-        START_2("#FF0000", 10, GameRound.BOARD_SIZE - 10, DIRECTION.UP),
-        START_3("#6FC3DF", GameRound.BOARD_SIZE - 10, 10, DIRECTION.DOWN),
-        START_4("#FFE64D", GameRound.BOARD_SIZE - 10, GameRound.BOARD_SIZE - 10, DIRECTION.LEFT);
+        START_2("#FF0000", 10, GameBoard.BOARD_SIZE - 10, DIRECTION.UP),
+        START_3("#6FC3DF", GameBoard.BOARD_SIZE - 10, 10, DIRECTION.DOWN),
+        START_4("#FFE64D", GameBoard.BOARD_SIZE - 10, GameBoard.BOARD_SIZE - 10, DIRECTION.LEFT);
 
         public final String color;
         public final int x;
