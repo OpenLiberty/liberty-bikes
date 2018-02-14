@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.json.JsonObject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -49,14 +48,6 @@ public class GameRoundService {
     @Produces(MediaType.APPLICATION_JSON)
     public GameRound getRound(@PathParam("roundId") String roundId) {
         return allRounds.get(roundId);
-    }
-
-    @GET
-    @Path("/roundStatus/{roundId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public JsonObject roundStatus(@PathParam("roundId") String roundId) {
-        GameRound gr = allRounds.get(roundId);
-        return gr != null ? gr.toJson() : null;
     }
 
     public GameRound requeue(GameRound oldRound) {

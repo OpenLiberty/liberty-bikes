@@ -16,7 +16,6 @@ import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.inject.spi.CDI;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.websocket.Session;
@@ -41,8 +40,8 @@ public class GameRound implements Runnable {
     public final String id;
     public final String nextRoundId;
 
-    public final Map<Session, Client> clients = new HashMap<>();
-    public State state = State.OPEN;
+    private final Map<Session, Client> clients = new HashMap<>();
+    public State gameState = State.OPEN;
 
     private boolean[][] board = new boolean[BOARD_SIZE][BOARD_SIZE];
     private AtomicBoolean gameRunning = new AtomicBoolean(false);
@@ -91,12 +90,12 @@ public class GameRound implements Runnable {
     public void addPlayer(Session s, String playerId) {
         // Front end should be preventing a player joining a full game but
         // defensive programming
-        if (state != State.OPEN) {
+        if (gameState != State.OPEN) {
             return;
         }
 
         if (++numOfPlayers > PlayerFactory.MAX_PLAYERS - 1) {
-            state = State.FULL;
+            gameState = State.FULL;
         }
 
         // Find first open player slot to fill, which determines position
@@ -132,7 +131,7 @@ public class GameRound implements Runnable {
 
         // Open player slot for new joiners
         if (--numOfPlayers < PlayerFactory.MAX_PLAYERS) {
-            state = (state == State.FULL) ? State.OPEN : state;
+            gameState = (gameState == State.FULL) ? State.OPEN : gameState;
         }
         takenPlayerSlots[p.getPlayerNum()] = false;
     }
@@ -251,7 +250,7 @@ public class GameRound implements Runnable {
         }
         if (alivePlayers == 1) {
             alive.setStatus(STATUS.Winner);
-            state = State.FINISHED;
+            gameState = State.FINISHED;
         }
     }
 
@@ -270,13 +269,6 @@ public class GameRound implements Runnable {
                 e.printStackTrace();
             }
         }
-        state = State.RUNNING;
-    }
-
-    /**
-     * @return
-     */
-    public JsonObject toJson() {
-        return Json.createObjectBuilder().add("gameId", id).add("gameState", state.toString()).build();
+        gameState = State.RUNNING;
     }
 }

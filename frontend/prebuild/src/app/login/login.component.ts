@@ -30,13 +30,13 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    $.get(`http://${document.location.hostname}:8080/round/roundStatus/${roundID}`, function(data) {
+    $.get(`http://${document.location.hostname}:8080/round/${roundID}`, function(data) {
       if (data === undefined) {
         alert('Game round does not exist!');
         return;
       }
       if (data.gameState === 'FULL') {
-        alert('Game round is FULL!');
+        alert('Game round is Full!');
         return;
       }   
       if (data.gameState === 'RUNNING') {
