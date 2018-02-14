@@ -44,7 +44,7 @@ subprojects {
     }
 
     libertyDebug.dependsOn 'libertyStop'    
-    libertyStart.dependsOn 'libertyStop'
+    libertyStart.dependsOn 'libertyStop', 'test'
     libertyRun.dependsOn   'libertyStop'
     
     task debug { dependsOn 'libertyDebug' }
