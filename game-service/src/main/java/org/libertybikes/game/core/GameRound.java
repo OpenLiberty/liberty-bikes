@@ -16,6 +16,7 @@ import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.inject.spi.CDI;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.websocket.Session;
@@ -270,5 +271,12 @@ public class GameRound implements Runnable {
             }
         }
         state = State.RUNNING;
+    }
+
+    /**
+     * @return
+     */
+    public JsonObject toJson() {
+        return Json.createObjectBuilder().add("gameId", id).add("gameState", state.toString()).build();
     }
 }

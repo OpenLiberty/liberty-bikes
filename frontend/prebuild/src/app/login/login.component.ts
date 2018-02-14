@@ -26,18 +26,32 @@ export class LoginComponent implements OnInit {
     let roundID: string = $('#roundid').val();
     roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
     if (roundID.length !== 6) {
-      alert('Not a Valid Round ID');
+      alert(roundID + ' is not a valid round ID, because it must be 6 letters long');
       return;
     }
-    $.post(`http://${document.location.hostname}:8080/round/joinRound/${roundID}`, function(data) {
-      if (data === 'VALID') {
-        sessionStorage.setItem('username', $('#username').val());
-        sessionStorage.setItem('roundId', roundID);
-        lc.router.navigate(['/game']);
-      } else {
-        alert('Response is: ' + data);
+
+    $.get(`http://${document.location.hostname}:8080/round/roundStatus/${roundID}`, function(data) {
+      if (data === undefined) {
+        alert('Game round does not exist!');
+        return;
       }
-    });
+      if (data.gameState === 'FULL') {
+        alert('Game round is FULL!');
+        return;
+      }   
+      if (data.gameState === 'RUNNING') {
+        alert('Game round has already started!');
+        return;
+      }
+      if (data.gameState === 'FINISHED') {
+        alert('Game round has already finished!');
+        return;
+      }
+      
+      sessionStorage.setItem('username', $('#username').val());
+      sessionStorage.setItem('roundId', roundID);
+      lc.router.navigate(['/game']);
+    });   
   }
 
   hostRound() {

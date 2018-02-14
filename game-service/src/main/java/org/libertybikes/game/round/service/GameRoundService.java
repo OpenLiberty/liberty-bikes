@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.json.JsonObject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -15,7 +16,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.libertybikes.game.core.GameRound;
-import org.libertybikes.game.core.GameRound.State;
 
 @Path("/")
 @ApplicationScoped
@@ -30,22 +30,6 @@ public class GameRoundService {
     @Produces(MediaType.APPLICATION_JSON)
     public Collection<GameRound> listAllGames() {
         return allRounds.values();
-    }
-
-    @POST
-    @Path("/joinRound/{roundId}")
-    public String joinRound(@PathParam("roundId") String roundId) {
-        GameRound r = allRounds.get(roundId.toUpperCase());
-        if (r == null) {
-            return "Game Does Not Exist";
-        }
-        if (r.state.equals(State.FULL)) {
-            return "Game Is Full";
-        }
-        if (!r.state.equals(State.OPEN)) {
-            return "Game Already Started";
-        }
-        return "VALID";
     }
 
     @POST
@@ -65,6 +49,14 @@ public class GameRoundService {
     @Produces(MediaType.APPLICATION_JSON)
     public GameRound getRound(@PathParam("roundId") String roundId) {
         return allRounds.get(roundId);
+    }
+
+    @GET
+    @Path("/roundStatus/{roundId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public JsonObject roundStatus(@PathParam("roundId") String roundId) {
+        GameRound gr = allRounds.get(roundId);
+        return gr != null ? gr.toJson() : null;
     }
 
     public GameRound requeue(GameRound oldRound) {
