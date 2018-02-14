@@ -222,11 +222,10 @@ public class GameRound implements Runnable {
         // TODO: Use JSON-B instead of JSON-P here
         JsonArrayBuilder array = Json.createArrayBuilder();
         for (Player p : players()) {
-            if (p.isAlive)
-                array.add(Json.createObjectBuilder()
-                                .add("name", p.playerName)
-                                .add("status", p.getStatus().toString())
-                                .add("color", p.color));
+            array.add(Json.createObjectBuilder()
+                            .add("name", p.playerName)
+                            .add("status", p.getStatus().toString())
+                            .add("color", p.color));
         }
         return Json.createObjectBuilder().add("playerlist", array).build().toString();
     }
