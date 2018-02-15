@@ -34,6 +34,18 @@ subprojects {
         testCompile group: 'org.glassfish', name: 'javax.json', version: '1.1.+'
     }
     
+    eclipse {
+	    classpath {
+	        defaultOutputDir =  file('build/classes/java/main')
+	        file {
+	            whenMerged {
+	                entries.findAll { it.path.startsWith('src/test') }
+	                       .each { it.output = "build/classes/java/test" }
+	            }
+	        }
+	    }
+	  }
+    
     liberty {
         install {
             // use 1 liberty install for the whole repo
