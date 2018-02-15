@@ -8,6 +8,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { GameComponent } from './game/game.component';
+import { ControlsComponent } from './controls/controls.component';
 
 @NgModule({
   imports: [
@@ -19,6 +20,7 @@ import { GameComponent } from './game/game.component';
     AppComponent,
     LoginComponent,
     GameComponent,
+    ControlsComponent,
   ],
   providers: [ ],
   bootstrap: [ AppComponent ]
