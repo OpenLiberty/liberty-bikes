@@ -11,12 +11,13 @@
         <br>
       </div>
       <div class="col-md-3 d-inline-block align-top">
-	      <button id="gameIdDisplay" class='d-none btn-primary btn-lg' disabled>
-	      </button>
-	      <br>
-	      <br>
-	      <ul id="playerList" class='list-group'>
-	      </ul>
+	    <button id="gameIdDisplay" class='d-none btn-primary btn-lg' disabled>
+          Round ID <span id="gameIDHolder" style="font-family:'Monaco',monospace;border:1px solid #dae1e9;letter-spacing:2px;padding:3px 8px;border-radius:4px;background-color:#f4f7fa;color:#007bff"></span>
+	    </button>
+	    <br>
+	    <br>
+	    <ul id="playerList" class='list-group'>
+	    </ul>
       </div>
     </div>
     <div class="panel-footer">
@@ -25,7 +26,8 @@
     </div>
   </div>
 </div>
-<div id="output"></div>
+<div id="output">
+</div>
 </div>
 <script type="text/javascript" src="websocket.js"></script>
 <script type="text/javascript" src="whiteboard.js"></script>
