@@ -51,7 +51,7 @@ subprojects {
             // use 1 liberty install for the whole repo
             // TODO: re-enable this one liberty-gradle-plugin bug is fixed
             // baseDir = rootProject.buildDir
-            runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2017.12.0.0.zip"
+            runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2018.2.0.0.zip"
         }
     }
 
