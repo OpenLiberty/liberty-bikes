@@ -9,8 +9,19 @@ liberty {
 		name = 'auth-service'
 		dropins = [war]
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
+		configDirectory = file('src/main/liberty/config')
+		features {
+                   name = ['sociallogin-1.0']
+                   acceptLicense = true
+            }
 	}
 }
+dependencies {
+    providedCompile group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.api.security', version: '1.2.19'
+    providedCompile group: 'com.ibm.websphere.appserver.api', name: 'com.ibm.websphere.appserver.api.jwt', version: '1.1.19'
+    providedCompile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
+}
+
 
 libertyStart.doLast {
 	println "Application available at: ${appUrl}"
