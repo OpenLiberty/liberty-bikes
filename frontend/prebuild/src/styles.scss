@@ -1,12 +1,14 @@
+$default-font: Arial, Helvetica, sans-serif;
+
 /* Master Styles */
 h1 {
   color: #369;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: $default-font;
   font-size: 250%;
 }
 h2, h3 {
   color: #444;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: $default-font;
   font-weight: lighter;
 }
 body {
@@ -14,14 +16,14 @@ body {
 }
 body, input[text], button {
   color: #888;
-  font-family: Cambria, Georgia;
+  font-family: $default-font;
 }
 a {
   cursor: pointer;
   cursor: hand;
 }
 button {
-  font-family: Arial;
+  font-family: $default-font;
   background-color: #eee;
   border: none;
   padding: 5px 10px;
@@ -61,5 +63,5 @@ nav a.active {
 
 /* everywhere else */
 * {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: $default-font;
 }

@@ -4,7 +4,7 @@ import { GameWebsocket } from '../net/websocket';
 @Component({
   selector: 'app-controls',
   templateUrl: './controls.component.html',
-  styleUrls: ['./controls.component.css']
+  styleUrls: ['./controls.component.scss']
 })
 export class ControlsComponent implements OnInit {
   roundId: string;
