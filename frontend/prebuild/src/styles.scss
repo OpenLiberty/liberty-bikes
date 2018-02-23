@@ -1,4 +1,4 @@
-$default-font: Arial, Helvetica, sans-serif;
+$default-font: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 
 /* Master Styles */
 h1 {
@@ -11,8 +11,12 @@ h2, h3 {
   font-family: $default-font;
   font-weight: lighter;
 }
+html {
+  height: 100%;
+}
 body {
-  margin: 2em;
+  background-color: #eee;
+  min-height: 100%;
 }
 body, input[text], button {
   color: #888;

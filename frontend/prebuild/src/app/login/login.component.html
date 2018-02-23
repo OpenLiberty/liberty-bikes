@@ -1,34 +1,26 @@
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-auto">
+<div id="login-container" class="container-fluid">
+  <div id="login-content">
+    <div id="login-title">
       <h1>Liberty Bikes</h1>
     </div>
-  </div>
-
-  <div class="row">
-    <div class="col-md-2 offset-md-1">
-      Enter Username:
+    <div id="login-form">
+      <div class="form-item">
+        <label>Username</label>
+        <input type="text" id="username" name="username" autofocus>
+      </div>
+      <div class="form-item">
+        <label>Code</label>
+        <input type="text" id="roundid" name="roundid">
+      </div>
     </div>
-    <div class="col-md-4">
-      <input type="text" id="username" name="username">
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-2 offset-md-1">
-      Enter Round ID:
-    </div>
-    <div class="col-md-4">
-      <input type="text" id="roundid" name="roundid">
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-2 offset-md-1">
+    <div id = "button-bar">
       <button type="button" class="btn btn-success" (click)="joinRound(true)">Login</button>
       <button type="button" class="btn btn-success" (click)="joinRound(false)">Login No Board</button>
       <button type="button" class="btn btn-success" (click)="createRound()">Create Round</button>
-      <button id="hostButton" type="button" class="btn btn-info" (click)="hostRound()" data-loading-text="Connecting..." autocomplete="off">
-      Host A Round
-      </button>
+      <button id="hostButton" type="button" class="btn btn-info" (click)="hostRound()" data-loading-text="Connecting..." autocomplete="off">Host Round</button>
     </div>
+  </div>
+  <div id="footer" class="container-fluid">
+    <p>The Liberty Bikes Project</p>
   </div>
 </div>
