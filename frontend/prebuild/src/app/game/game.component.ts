@@ -163,7 +163,7 @@ export class GameComponent implements OnInit {
     for (const player of json.playerlist) {
       list += `
 <li class="list-group-item">
-  <span style="color: ${player.color}; font-size: 5;">${player.name}</span>: ${this.getStatus(player.status)}
+  <span style="color: ${player.color};">${player.name}</span>: ${this.getStatus(player.status)}
 </li>
 `;
     }
