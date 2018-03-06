@@ -1,7 +1,115 @@
-#gameroot {
-  background-image: url('/assets/images/game_grid.jpg');
+$titlebar: 75px;
+$navbar-border: 1px solid #ccc;
+
+body {
+  margin: 0;
+  padding: 0;
 }
 
-#gameroot div {
+:host {
+  display: grid;
+  grid-template-rows: $titlebar 1fr 1fr $titlebar;
+  grid-template-columns: 1fr minmax(600px, 3fr);
+  height: 100vh;
+
+
   background-color: white;
+}
+
+.navbar {
+  background-color: #eee;
+
+  height: $titlebar;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0px 5px;
+}
+
+.navbar h1 {
+  flex: 1;
+  margin: 0px;
+}
+
+.navbar h2 {
+  margin: 0px;
+}
+
+#titlebar {
+  grid-area: 1 / 2 / span 1 / -1;
+
+  border-bottom: $navbar-border;
+}
+
+#titlebar h1 {
+  margin-left: 10px;
+}
+
+#titlebar h2 {
+  margin-right: 10px;
+}
+
+#game-code-display {
+  font-weight: bolder;
+}
+
+#game-code {
+  font-size: 1.5em;
+  font-family: "Avenir-Black", "Arial Black", "Roboto Black", sans-serif;
+}
+
+.navbar .btn {
+  font-size: 1.5em;
+  margin: 5px;
+  height: 75%;
+}
+
+#game-container {
+  grid-area: 1 / 1 / span 4 / span 1;
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  /* grid-template: calc(100vmin - #{$titlebar}) / 100vmin; */
+  grid-template: 100vmin / 100vmin;
+}
+
+#game-board {
+  background-color: black;
+  color: white;
+}
+
+#players {
+  grid-area: 2 / 2;
+}
+
+#leaderboard {
+  grid-area: 3 / 2;
+}
+
+#playerList {
+  padding: 0;
+  font-size: 2em;
+}
+
+.list-group-item {
+  font-size: 2em;
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  background: url('../../assets/images/game_floor.jpg');
+}
+
+#footer {
+  grid-area: 4 / 2;
+
+  border-top: $navbar-border;
+}
+
+#footer .btn {
+  width: calc(50% - 10px);
 }

@@ -1,33 +1,24 @@
-<div id="gameroot" class="container-fluid">
-<div class="offset-md-2 col-md-7">
-  <div class="panel panel-primary">
-    <div class="panel-heading">
-      <h1>Liberty Bikes Game</h1>
-    </div>
-    <div class="panel-body">
-      <div class="col-md-8 d-inline-block">
-        <canvas id="gameCanvas" width="600" height="600" style="border:1px solid #000000; background:url('assets/images/game_floor.jpg')"></canvas>
-        <br>
-        <br>
-      </div>
-      <div class="col-md-3 d-inline-block align-top">
-	    <button id="gameIdDisplay" class='d-none btn-primary btn-lg' disabled>
-          Round ID <span id="gameIDHolder" style="font-family:'Monaco',monospace;border:1px solid #dae1e9;letter-spacing:2px;padding:3px 8px;border-radius:4px;background-color:#f4f7fa;color:#007bff"></span>
-	    </button>
-	    <br>
-	    <br>
-	    <ul id="playerList" class='list-group'>
-	    </ul>
-      </div>
-    </div>
-    <div class="panel-footer">
-      <button type="button" class="btn btn-success" (click)="startGame()">Start Game</button>
-      <button type="button" class="btn btn-warning" (click)="requeue()">Requeue</button>
-    </div>
+<div id="titlebar" class="navbar">
+  <h1>Liberty Bikes</h1>
+  <div id="game-code-display" class="d-none">
+    <h2>code: <span id="game-code"></span></h2>
   </div>
 </div>
-<div id="output">
+<div id="game-container">
+  <div id="game-board">
+    <canvas width="600" height="600" id="gameCanvas"></canvas>
+  </div>
 </div>
+<div id="players">
+  <ul id="playerList" class="list-group">
+  </ul>
 </div>
-<script type="text/javascript" src="websocket.js"></script>
-<script type="text/javascript" src="whiteboard.js"></script>
+
+<div id="leaderboard">
+
+</div>
+
+<div id="footer" class="navbar">
+  <button type="button" class="btn btn-success" (click)="startGame()">Start Game</button>
+  <button type="button" class="btn btn-info" (click)="requeue()">Requeue</button>
+</div>

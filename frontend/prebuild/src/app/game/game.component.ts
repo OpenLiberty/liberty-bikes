@@ -1,6 +1,7 @@
 import * as $ from 'jquery';
 
 import { Component, OnInit } from '@angular/core';
+import { Meta } from '@angular/platform-browser';
 import { GameWebsocket } from '../net/websocket';
 
 @Component({
@@ -23,9 +24,10 @@ export class GameComponent implements OnInit {
   canvas: any;
   context: CanvasRenderingContext2D;
 
-  constructor() {  }
+  constructor(private meta: Meta) {  }
 
   ngOnInit() {
+    this.meta.addTag({name: 'viewport', content: 'width=1600'}, true);
     this.roundId = sessionStorage.getItem('roundId');
     console.log(`Round ID: ${this.roundId}`);
     this.serverHost = document.location.hostname;
@@ -101,8 +103,8 @@ export class GameComponent implements OnInit {
     if (isSpectator === 'true') {
       console.log('is a spectator... showing game id');
       // Set the Round ID and make visible
-      $('#gameIDHolder').html(this.roundId);
-      const gameId = $('#gameIdDisplay');
+      $('#game-code').html(this.roundId);
+      const gameId = $('#game-code-display');
       gameId.removeClass('d-none');
       gameId.addClass('d-inline-block');
       this.gameSocket.sendText(JSON.stringify({'spectatorjoined': true}));
@@ -163,7 +165,7 @@ export class GameComponent implements OnInit {
     for (const player of json.playerlist) {
       list += `
 <li class="list-group-item">
-  <span style="color: ${player.color}; font-size: 5;">${player.name}</span>: ${this.getStatus(player.status)}
+  <span style="color: ${player.color};">${player.name}</span>: ${this.getStatus(player.status)}
 </li>
 `;
     }
