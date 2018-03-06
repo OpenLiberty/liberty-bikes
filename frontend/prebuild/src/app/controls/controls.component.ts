@@ -13,14 +13,18 @@ export class ControlsComponent implements OnInit {
 
   gameSocket: GameWebsocket;
 
-  constructor() {  }
+  constructor() {}
 
   ngOnInit() {
     this.roundId = sessionStorage.getItem('roundId');
     console.log(`Round ID: ${this.roundId}`);
     this.serverHost = document.location.hostname;
     this.serverPort = '8080';
-    this.gameSocket = new GameWebsocket(this.serverHost, this.serverPort, this.roundId);
+    this.gameSocket = new GameWebsocket(
+      this.serverHost,
+      this.serverPort,
+      this.roundId
+    );
 
     window.onkeydown = (e: KeyboardEvent): any => {
       const key = e.keyCode ? e.keyCode : e.which;
@@ -47,7 +51,7 @@ export class ControlsComponent implements OnInit {
 
   onConnect(evt: MessageEvent) {
     const name = sessionStorage.getItem('username');
-    this.gameSocket.sendText(JSON.stringify({'playerjoined': name}));
+    this.gameSocket.sendText(JSON.stringify({ playerjoined: name }));
   }
 
   onMessage(evt: MessageEvent) {
@@ -62,6 +66,14 @@ export class ControlsComponent implements OnInit {
     }
   }
 
+  // Game actions
+  startGame() {
+    this.gameSocket.sendText(JSON.stringify({ message: 'GAME_START' }));
+  }
+
+  requeue() {
+    this.gameSocket.sendText(JSON.stringify({ message: 'GAME_REQUEUE' }));
+  }
 
   moveUp() {
     this.gameSocket.sendText(JSON.stringify({ direction: 'UP' }));
@@ -78,5 +90,4 @@ export class ControlsComponent implements OnInit {
   moveRight() {
     this.gameSocket.sendText(JSON.stringify({ direction: 'RIGHT' }));
   }
-
 }
