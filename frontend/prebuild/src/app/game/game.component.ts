@@ -1,6 +1,7 @@
 import * as $ from 'jquery';
 
 import { Component, OnInit } from '@angular/core';
+import { Meta } from '@angular/platform-browser';
 import { GameWebsocket } from '../net/websocket';
 
 @Component({
@@ -23,9 +24,10 @@ export class GameComponent implements OnInit {
   canvas: any;
   context: CanvasRenderingContext2D;
 
-  constructor() {  }
+  constructor(private meta: Meta) {  }
 
   ngOnInit() {
+    this.meta.addTag({name: 'viewport', content: 'width=1600'}, true);
     this.roundId = sessionStorage.getItem('roundId');
     console.log(`Round ID: ${this.roundId}`);
     this.serverHost = document.location.hostname;

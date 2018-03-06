@@ -1,4 +1,5 @@
 import { Component, OnInit, NgZone } from '@angular/core';
+import { Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
 import * as $ from 'jquery';
@@ -9,11 +10,13 @@ import * as $ from 'jquery';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
-  constructor(private router: Router, private ngZone: NgZone) {
+  constructor(private router: Router, private ngZone: NgZone, private meta: Meta) {
 
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.meta.removeTag('viewport');
+  }
 
   createRound() {
     $.post(`http://${document.location.hostname}:8080/round/create`, function(data) {
