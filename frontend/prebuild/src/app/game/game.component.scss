@@ -9,8 +9,9 @@ body {
 :host {
   display: grid;
   grid-template-rows: $titlebar 1fr 1fr $titlebar;
-  grid-template-columns: 1fr minmax(550px, 3fr);
+  grid-template-columns: 1fr minmax(600px, 3fr);
   height: 100vh;
+
 
   background-color: white;
 }
@@ -55,6 +56,7 @@ body {
 
 #game-code {
   font-size: 1.5em;
+  font-family: "Avenir-Black", "Arial Black", "Roboto Black", sans-serif;
 }
 
 .navbar .btn {
