@@ -26,15 +26,35 @@ body {
   padding: 0px 5px;
 }
 
+.navbar h1 {
+  flex: 1;
+  margin: 0px;
+}
+
+.navbar h2 {
+  margin: 0px;
+}
+
 #titlebar {
   grid-area: 1 / 2 / span 1 / -1;
 
   border-bottom: $navbar-border;
 }
 
-.navbar h1 {
-  flex: 1;
+#titlebar h1 {
   margin-left: 10px;
+}
+
+#titlebar h2 {
+  margin-right: 10px;
+}
+
+#game-code-display {
+  font-weight: bolder;
+}
+
+#game-code {
+  font-size: 1.5em;
 }
 
 .navbar .btn {

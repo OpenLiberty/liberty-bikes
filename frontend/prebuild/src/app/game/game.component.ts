@@ -101,8 +101,8 @@ export class GameComponent implements OnInit {
     if (isSpectator === 'true') {
       console.log('is a spectator... showing game id');
       // Set the Round ID and make visible
-      $('#gameIDHolder').html(this.roundId);
-      const gameId = $('#gameIdDisplay');
+      $('#game-code').html(this.roundId);
+      const gameId = $('#game-code-display');
       gameId.removeClass('d-none');
       gameId.addClass('d-inline-block');
       this.gameSocket.sendText(JSON.stringify({'spectatorjoined': true}));
