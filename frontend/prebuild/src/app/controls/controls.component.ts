@@ -11,11 +11,25 @@ export class ControlsComponent implements OnInit {
   serverHost: string;
   serverPort: string;
 
+  canvas: HTMLCanvasElement;
+  context: CanvasRenderingContext2D;
+
   gameSocket: GameWebsocket;
 
   constructor() {}
 
   ngOnInit() {
+    this.canvas = document.getElementById('dpad-canvas') as HTMLCanvasElement;
+    this.context = this.canvas.getContext('2d');
+
+    this.canvas.addEventListener("touchstart", (evt: TouchEvent) => {
+      this.touchStarted(evt);
+    });
+
+    this.canvas.addEventListener("mousedown", (evt: MouseEvent) => {
+      this.mouseDown(evt);
+    })
+
     this.roundId = sessionStorage.getItem('roundId');
     console.log(`Round ID: ${this.roundId}`);
     this.serverHost = document.location.hostname;
@@ -63,6 +77,38 @@ export class ControlsComponent implements OnInit {
         sessionStorage.setItem('roundId', this.roundId);
         location.reload();
       }
+    }
+  }
+
+  touchStarted(evt: TouchEvent) {
+    if (evt.touches.length > 0) {
+      this.canvasPressed(evt.touches[0].pageX, evt.touches[0].pageY);
+    }
+  }
+
+  mouseDown(evt: MouseEvent) {
+    this.canvasPressed(evt.pageX, evt.pageY);
+  }
+
+  canvasPressed(x: number, y: number) {
+    const locationX = ((x - this.canvas.offsetLeft) * this.canvas.width) / this.canvas.offsetWidth;
+    const locationY = ((y - this.canvas.offsetTop) * this.canvas.height) / this.canvas.offsetHeight;
+
+
+    if (locationX >= 300 && locationX < 500 && locationY >= 0 && locationY < 300) {
+      this.moveUp();
+    }
+
+    if (locationX >= 0 && locationX < 300 && locationY >= 300 && locationY < 500) {
+      this.moveLeft();
+    }
+
+    if (locationX >= 300 && locationX < 500 && locationY >= 500 && locationY < 800) {
+      this.moveDown();
+    }
+
+    if (locationX >= 500 && locationX < 800 && locationY >= 300 && locationY < 500) {
+      this.moveRight();
     }
   }
 
