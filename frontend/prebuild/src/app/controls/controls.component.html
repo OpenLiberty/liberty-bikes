@@ -1,24 +1,16 @@
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-auto">
-      <h1>Liberty Bikes</h1>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-md-1 offset-md-1">
-      <button type="button" class="btn" (click)="moveUp()">Up</button>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-1">
-      <button type="button" class="btn" (click)="moveLeft()">Left</button>
-    </div>
-    <div class="col-md-1">
-      <button type="button" class="btn" (click)="moveDown()">Down</button>
-    </div>
-    <div class="col-md-1">
-      <button type="button" class="btn" (click)="moveRight()">Right</button>
-    </div>
+<div id="titlebar" class="navbar">
+  <h1>Liberty Bikes</h1>
+</div>
+<div id="footer" class="navbar">
+  <button type="button" class="btn btn-success" (click)="startGame()">Start Game</button>
+  <button type="button" class="btn btn-info" (click)="requeue()">Requeue</button>
+</div>
+<div id="controller">
+  <div id="dpad">
+    <div id="up-button" class="dpad-button"><button type="button" class="btn" (click)="moveUp()">⬆</button></div>
+    <div id="left-button" class="dpad-button"><button type="button" class="btn" (click)="moveLeft()">⬅</button></div>
+    <div id="down-button" class="dpad-button"><button type="button" class="btn" (click)="moveDown()">⬇</button></div>
+    <div id="right-button" class="dpad-button"><button type="button" class="btn" (click)="moveRight()">➡</button></div>
   </div>
 </div>
+

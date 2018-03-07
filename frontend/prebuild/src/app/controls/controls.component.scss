@@ -1,0 +1,111 @@
+$titlebar: 50px;
+$navbar-border: 1px solid #ccc;
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+:host {
+  display: grid;
+  grid-template-rows: $titlebar $titlebar 1fr;
+  grid-template-columns: 1fr;
+/*   display: flex;
+  flex-direction: column; */
+
+  height: 100vh;
+
+  background-color: white;
+}
+
+.navbar {
+  background-color: #eee;
+
+  height: $titlebar;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0px 15px;
+}
+
+.navbar h1 {
+  flex: 1;
+  margin: 0px;
+  font-size: 1em;
+}
+
+#titlebar {
+  border-bottom: $navbar-border;
+}
+
+#controller {
+  grid-area: 3 / 1;
+  display: grid;
+  justify-content: center;
+  grid-template: 100vmin / 100vmin;
+}
+
+#dpad {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr);
+  align-content: center;
+  justify-content: center;
+  padding: 5px;
+}
+
+.dpad-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dpad-button .btn {
+  font-size: 3em;
+  width: 100%;
+  height: 100%;
+}
+
+#up-button {
+  grid-area: 1 / 2;
+}
+
+#left-button {
+  grid-area: 2 / 1;
+}
+
+#down-button {
+  grid-area: 3 / 2;
+}
+
+#right-button {
+  grid-area: 2 / 3;
+}
+
+#footer {
+  grid-area: 2 / 1;
+  border-bottom: $navbar-border;
+}
+
+@media screen and (orientation: landscape) {
+  #titlebar {
+    display: none;
+    position: absolute;
+  }
+
+  #controller {
+    grid-template: calc(100vh - #{($titlebar * 2) + 100}) / 100vh;
+
+  }
+
+  #footer {
+    grid-area: 1 / 1;
+  }
+}
+
+#footer .btn {
+  width: calc(50% - 10px);
+  height: 30px;
+  font-size: 0.8em;
+}
