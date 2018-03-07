@@ -1,16 +1,11 @@
 <div id="titlebar" class="navbar">
   <h1>Liberty Bikes</h1>
 </div>
-<div id="footer" class="navbar">
+<div id="game-buttons" class="navbar">
   <button type="button" class="btn btn-success" (click)="startGame()">Start Game</button>
   <button type="button" class="btn btn-info" (click)="requeue()">Requeue</button>
 </div>
 <div id="controller">
-  <div id="dpad">
-    <div id="up-button" class="dpad-button"><button type="button" class="btn" (click)="moveUp()">⬆</button></div>
-    <div id="left-button" class="dpad-button"><button type="button" class="btn" (click)="moveLeft()">⬅</button></div>
-    <div id="down-button" class="dpad-button"><button type="button" class="btn" (click)="moveDown()">⬇</button></div>
-    <div id="right-button" class="dpad-button"><button type="button" class="btn" (click)="moveRight()">➡</button></div>
-  </div>
+  <canvas id="dpad-canvas" width="800" height="800"></canvas>
 </div>
 

@@ -26,17 +26,15 @@ body {
   display: flex;
   align-items: center;
 
-  padding: 0px 15px;
+  padding: 0px 5px;
 }
 
 .navbar h1 {
-  flex: 1;
   margin: 0px;
-  font-size: 1em;
 }
 
 #titlebar {
-  border-bottom: $navbar-border;
+  justify-content: center;
 }
 
 #controller {
@@ -46,66 +44,46 @@ body {
   grid-template: 100vmin / 100vmin;
 }
 
-#dpad {
-  display: grid;
-  grid-template-rows: repeat(3, 1fr);
-  grid-template-columns: repeat(3, 1fr);
-  align-content: center;
-  justify-content: center;
-  padding: 5px;
-}
-
-.dpad-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dpad-button .btn {
-  font-size: 3em;
+#dpad-canvas {
+  display: block;
   width: 100%;
   height: 100%;
+
+  background-image: url('../../assets/images/dpad.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-#up-button {
-  grid-area: 1 / 2;
-}
-
-#left-button {
-  grid-area: 2 / 1;
-}
-
-#down-button {
-  grid-area: 3 / 2;
-}
-
-#right-button {
-  grid-area: 2 / 3;
-}
-
-#footer {
+#game-buttons {
   grid-area: 2 / 1;
   border-bottom: $navbar-border;
+  padding: 0px 5px;
 }
 
 @media screen and (orientation: landscape) {
+  :host {
+    grid-template-rows: $titlebar 1fr;
+  }
+
   #titlebar {
     display: none;
     position: absolute;
   }
 
   #controller {
-    grid-template: calc(100vh - #{($titlebar * 2) + 100}) / 100vh;
+    grid-area: 2 / 1;
+    grid-template: calc(100vmin - #{($titlebar) + 100px}) / calc(100vmin - #{($titlebar) + 100px});
 
   }
 
-  #footer {
+  #game-buttons {
     grid-area: 1 / 1;
   }
 }
 
-#footer .btn {
-  width: calc(50% - 10px);
-  height: 30px;
+#game-buttons .btn {
+  width: calc(50% - 2.5px);
+  height: 40px;
   font-size: 0.8em;
 }
