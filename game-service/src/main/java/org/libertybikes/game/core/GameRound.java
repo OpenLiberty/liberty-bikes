@@ -68,6 +68,8 @@ public class GameRound implements Runnable {
         this.id = id;
         nextRoundId = getRandomId();
         board.addObstacle(new Obstacle(5, 5, 60, 60));
+        board.addObstacle(new MovingObstacle(5, 5, 80, 85, -1, -1, 5));
+        board.addObstacle(new MovingObstacle(5, 5, 80, 95, 1, 1));
     }
 
     public GameBoard getBoard() {
@@ -185,6 +187,11 @@ public class GameRound implements Runnable {
     }
 
     private void gameTick() {
+        if (gameState != State.RUNNING)
+            return;
+
+        boolean boardUpdated = board.moveObjects();
+
         // Move all living players forward 1
         boolean playerStatusChange = false;
         boolean playersMoved = false;
@@ -200,7 +207,7 @@ public class GameRound implements Runnable {
             }
         }
 
-        if (playersMoved) {
+        if (playersMoved || boardUpdated) {
             ticksWithoutMovement = 0;
             broadcastGameBoard();
         } else {

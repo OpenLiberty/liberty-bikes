@@ -5,13 +5,6 @@ package org.libertybikes.game.core;
 
 public class Player {
 
-    public static enum DIRECTION {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
-    }
-
     public static enum STATUS {
         Connected,
         Alive,
@@ -81,9 +74,9 @@ public class Player {
      *
      * @return True if the player is still alive after moving forward one space. False otherwise.
      */
-    public boolean movePlayer(boolean[][] board) {
+    public boolean movePlayer(short[][] s) {
         // Consume the space the player was in before the move
-        board[x][y] = false;
+        s[x][y] = GameBoard.PLAYER_SPOT_TAKEN;
 
         // If a player issues two moves in the same game tick and the second direction is illegal,
         // spread out the moves across two ticks rather than ignoring the second move entirely
@@ -112,8 +105,7 @@ public class Player {
         }
 
         // Check if the player is now dead after moving
-        boolean spaceAvailable = board[x][y];
-        if (!spaceAvailable) {
+        if (s[x][y] != GameBoard.SPOT_AVAILABLE) {
             setStatus(STATUS.Dead);
         }
         lastDirection = direction;

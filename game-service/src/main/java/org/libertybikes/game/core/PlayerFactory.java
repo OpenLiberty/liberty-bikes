@@ -3,8 +3,6 @@
  */
 package org.libertybikes.game.core;
 
-import org.libertybikes.game.core.Player.DIRECTION;
-
 public class PlayerFactory {
 
     public static int MAX_PLAYERS = PlayerData.values().length;

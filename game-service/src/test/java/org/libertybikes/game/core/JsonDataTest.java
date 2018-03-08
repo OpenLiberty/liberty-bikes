@@ -56,13 +56,17 @@ public class JsonDataTest {
     @Test
     public void testGameBoard() {
         GameBoard board = new GameBoard();
-        assertEquals("{\"obstacles\":[],\"players\":[]}", jsonb.toJson(board));
+        assertEquals("{\"movingObstacles\":[],\"obstacles\":[],\"players\":[]}", jsonb.toJson(board));
 
         board.addObstacle(new Obstacle(1, 2, 3, 4));
-        assertEquals("{\"obstacles\":[{\"height\":2,\"width\":1,\"x\":3,\"y\":4}],\"players\":[]}", jsonb.toJson(board));
+        assertEquals("{\"movingObstacles\":[],\"obstacles\":[{\"height\":2,\"width\":1,\"x\":3,\"y\":4}],\"players\":[]}", jsonb.toJson(board));
 
         board.addPlayer(new Player("#1234", 10, 11, 0));
-        assertEquals("{\"obstacles\":[{\"height\":2,\"width\":1,\"x\":3,\"y\":4}],\"players\":[{\"color\":\"#1234\",\"direction\":\"RIGHT\",\"isAlive\":true,\"playerNum\":0,\"status\":\"Connected\",\"x\":10,\"y\":11}]}",
+        assertEquals("{\"movingObstacles\":[],\"obstacles\":[{\"height\":2,\"width\":1,\"x\":3,\"y\":4}],\"players\":[{\"color\":\"#1234\",\"direction\":\"RIGHT\",\"isAlive\":true,\"playerNum\":0,\"status\":\"Connected\",\"x\":10,\"y\":11}]}",
+                     jsonb.toJson(board));
+        
+        board.addObstacle(new MovingObstacle(11,12,13,14,-1,2,50));
+        assertEquals("{\"movingObstacles\":[{\"height\":12,\"width\":11,\"x\":13,\"y\":14,\"currentDelay\":0,\"hasMoved\":false,\"moveDelay\":50,\"oldX\":0,\"oldY\":0,\"xDir\":-1,\"yDir\":2}],\"obstacles\":[{\"height\":2,\"width\":1,\"x\":3,\"y\":4}],\"players\":[{\"color\":\"#1234\",\"direction\":\"RIGHT\",\"isAlive\":true,\"playerNum\":0,\"status\":\"Connected\",\"x\":10,\"y\":11}]}",
                      jsonb.toJson(board));
     }
 

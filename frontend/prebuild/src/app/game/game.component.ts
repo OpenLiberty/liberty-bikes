@@ -85,9 +85,16 @@ export class GameComponent implements OnInit {
           this.drawObstacle(obstacle);
         }
       }
+      if (json.movingObstacles) {
+        for (let obstacle of json.movingObstacles) {
+          this.drawMovingObstacle(obstacle);
+        }
+      }
       if (json.players) {
         for (let player of json.players) {
-          this.drawPlayer(player);
+          if (player.isAlive) {
+            this.drawPlayer(player);
+          }
         }
       }
     }
@@ -148,6 +155,16 @@ export class GameComponent implements OnInit {
 
   drawObstacle(obstacle) {
     this.context.fillStyle = '#808080'; // obstacles always grey
+    this.context.fillRect(GameComponent.BOX_SIZE * obstacle.x, GameComponent.BOX_SIZE * obstacle.y,
+                          GameComponent.BOX_SIZE * obstacle.height, GameComponent.BOX_SIZE * obstacle.width);
+  }
+  
+  drawMovingObstacle(obstacle) {
+    this.context.fillStyle = '#808080'; // obstacles always grey
+    if (obstacle.hasMoved) {
+      this.context.clearRect(GameComponent.BOX_SIZE * obstacle.oldX, GameComponent.BOX_SIZE * obstacle.oldY,
+                          GameComponent.BOX_SIZE * obstacle.height, GameComponent.BOX_SIZE * obstacle.width);
+    }
     this.context.fillRect(GameComponent.BOX_SIZE * obstacle.x, GameComponent.BOX_SIZE * obstacle.y,
                           GameComponent.BOX_SIZE * obstacle.height, GameComponent.BOX_SIZE * obstacle.width);
   }
