@@ -16,6 +16,8 @@ public class GameBoard {
     private final boolean[][] board = new boolean[BOARD_SIZE][BOARD_SIZE];
 
     public final Set<Obstacle> obstacles = new HashSet<>();
+    public final Set<MovingObstacle> movingObstacles = new HashSet<>();
+
     public final Set<Player> players = new HashSet<>();
 
     public GameBoard() {
@@ -23,7 +25,7 @@ public class GameBoard {
             Arrays.fill(board[i], SPOT_AVAILABLE);
     }
 
-    public boolean addObstacle(Obstacle o) {
+    public boolean verifyObstacle(Obstacle o) {
         if (o.x + o.width > BOARD_SIZE || o.y + o.height > BOARD_SIZE)
             throw new IllegalArgumentException("Obstacle does not fit on board: " + o);
 
@@ -40,7 +42,15 @@ public class GameBoard {
             for (int y = 0; y < o.height; y++)
                 board[o.x + x][o.y + y] = SPOT_TAKEN;
 
-        return obstacles.add(o);
+        return true;
+    }
+
+    public boolean addObstacle(Obstacle o) {
+        return verifyObstacle(o) ? obstacles.add(o) : false;
+    }
+
+    public boolean addObstacle(MovingObstacle o) {
+        return verifyObstacle(o) ? movingObstacles.add(o) : false;
     }
 
     public boolean addPlayer(Player p) {
@@ -65,6 +75,18 @@ public class GameBoard {
                 row.append(board[i][j] == SPOT_TAKEN ? "X" : "_");
             System.out.println(String.format("%03d %s", i, row.toString()));
         }
+    }
+
+    public boolean moveObjects() {
+        if (movingObstacles.isEmpty()) {
+            return false;
+        }
+
+        for (MovingObstacle obstacle : movingObstacles) {
+            obstacle.move(board);
+        }
+
+        return true;
     }
 
 }
