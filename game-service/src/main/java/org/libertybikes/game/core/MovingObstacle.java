@@ -9,6 +9,13 @@ package org.libertybikes.game.core;
  */
 public class MovingObstacle extends Obstacle {
 
+    private static enum DIRECTION {
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT
+    }
+
     public int xDir, yDir, oldX, oldY, moveDelay, currentDelay = 0;
     public boolean hasMoved = false;
 
@@ -42,16 +49,16 @@ public class MovingObstacle extends Obstacle {
 
         if (xDir != 0) {
             if (xDir > 0) {
-                if (x + width + 1 < GameBoard.BOARD_SIZE) {
+                if (x + width + 1 < GameBoard.BOARD_SIZE && !hasCollision(board, DIRECTION.RIGHT)) {
                     moveRight(board);
-                } else {
+                } else if (!hasCollision(board, DIRECTION.LEFT)) {
                     moveLeft(board);
                     xDir = xDir * -1;
                 }
             } else {
-                if (x - 1 >= 0) {
+                if (x - 1 >= 0 && !hasCollision(board, DIRECTION.LEFT)) {
                     moveLeft(board);
-                } else {
+                } else if (!hasCollision(board, DIRECTION.RIGHT)) {
                     moveRight(board);
                     xDir = xDir * -1;
                 }
@@ -60,16 +67,16 @@ public class MovingObstacle extends Obstacle {
 
         if (yDir != 0) {
             if (yDir > 0) {
-                if (y + height + 1 < GameBoard.BOARD_SIZE) {
+                if (y + height + 1 < GameBoard.BOARD_SIZE && !hasCollision(board, DIRECTION.DOWN)) {
                     moveDown(board);
-                } else {
+                } else if (!hasCollision(board, DIRECTION.UP)) {
                     moveUp(board);
                     yDir = yDir * -1;
                 }
             } else {
-                if (y - 1 >= 0) {
+                if (y - 1 >= 0 && !hasCollision(board, DIRECTION.UP)) {
                     moveUp(board);
-                } else {
+                } else if (!hasCollision(board, DIRECTION.DOWN)) {
                     moveDown(board);
                     yDir = yDir * -1;
                 }
@@ -77,7 +84,7 @@ public class MovingObstacle extends Obstacle {
         }
     }
 
-    public void moveRight(short[][] board) {
+    private void moveRight(short[][] board) {
         for (int i = 0; i <= height; i++) {
             board[x][y + i] = GameBoard.SPOT_AVAILABLE;
             board[x + width + 1][y + i] = GameBoard.OBJECT_SPOT_TAKEN;
@@ -85,7 +92,7 @@ public class MovingObstacle extends Obstacle {
         x++;
     }
 
-    public void moveLeft(short[][] board) {
+    private void moveLeft(short[][] board) {
         for (int i = 0; i <= height; i++) {
             board[x - 1][y + i] = GameBoard.OBJECT_SPOT_TAKEN;
             board[x + width][y + i] = GameBoard.SPOT_AVAILABLE;
@@ -93,7 +100,7 @@ public class MovingObstacle extends Obstacle {
         x--;
     }
 
-    public void moveUp(short[][] board) {
+    private void moveUp(short[][] board) {
         for (int i = 0; i <= width; i++) {
             board[x + i][y - 1] = GameBoard.OBJECT_SPOT_TAKEN;
             board[x + i][y + height] = GameBoard.SPOT_AVAILABLE;
@@ -101,12 +108,41 @@ public class MovingObstacle extends Obstacle {
         y--;
     }
 
-    public void moveDown(short[][] board) {
+    private void moveDown(short[][] board) {
         for (int i = 0; i <= width; i++) {
             board[x + i][y] = GameBoard.SPOT_AVAILABLE;
             board[x + i][y + height + 1] = GameBoard.OBJECT_SPOT_TAKEN;
         }
         y++;
+    }
+
+    private boolean hasCollision(short[][] board, DIRECTION dir) {
+        switch (dir) {
+            case UP:
+                for (int i = 0; i <= width; i++) {
+                    if (board[x + i][y - 1] == GameBoard.OBJECT_SPOT_TAKEN)
+                        return true;
+                }
+                return false;
+            case DOWN:
+                for (int i = 0; i <= width; i++) {
+                    if (board[x + i][y + height + 1] == GameBoard.OBJECT_SPOT_TAKEN)
+                        return true;
+                }
+                return false;
+            case LEFT:
+                for (int i = 0; i <= height; i++) {
+                    if (board[x - 1][y + i] == GameBoard.OBJECT_SPOT_TAKEN)
+                        return true;
+                }
+                return false;
+            default:
+                for (int i = 0; i <= height; i++) {
+                    if (board[x + width + 1][y + i] == GameBoard.OBJECT_SPOT_TAKEN)
+                        return true;
+                }
+                return false;
+        }
     }
 
 }
