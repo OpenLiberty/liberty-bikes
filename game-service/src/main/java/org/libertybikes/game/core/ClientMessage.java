@@ -12,7 +12,7 @@ public class ClientMessage {
         GAME_REQUEUE
     }
 
-    public Player.DIRECTION direction;
+    public DIRECTION direction;
 
     @JsonbProperty("playerjoined")
     public String playerJoinedId;

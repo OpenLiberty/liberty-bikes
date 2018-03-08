@@ -5,13 +5,6 @@ package org.libertybikes.game.core;
 
 public class MovingObstacle extends Obstacle {
 
-    private static enum DIRECTION {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
-    }
-
     public int xDir, yDir, oldX, oldY, moveDelay, currentDelay = 0;
     public boolean hasMoved = false;
 

@@ -5,13 +5,6 @@ package org.libertybikes.game.core;
 
 public class Player {
 
-    public static enum DIRECTION {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
-    }
-
     public static enum STATUS {
         Connected,
         Alive,
