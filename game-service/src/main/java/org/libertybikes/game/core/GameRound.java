@@ -187,6 +187,9 @@ public class GameRound implements Runnable {
     }
 
     private void gameTick() {
+        if (gameState != State.RUNNING)
+            return;
+
         boolean boardUpdated = board.moveObjects();
 
         // Move all living players forward 1

@@ -58,7 +58,7 @@ public class GameBoardTest {
     }
 
     private void verifyAvailable(int x, int y) {
-        if (board.board()[x][y] == GameBoard.SPOT_TAKEN) {
+        if (board.board()[x][y] != GameBoard.SPOT_AVAILABLE) {
             board.dumpBoard();
             fail("Spot should be availble but it was taken: [" + x + "][" + y + "]");
         }

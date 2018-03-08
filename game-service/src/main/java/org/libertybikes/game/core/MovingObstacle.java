@@ -28,7 +28,7 @@ public class MovingObstacle extends Obstacle {
         this.moveDelay = moveDelay;
     }
 
-    public void move(boolean[][] board) {
+    public void move(short[][] board) {
         if (++currentDelay < moveDelay) {
             // don't move yet
             hasMoved = false;
@@ -77,34 +77,34 @@ public class MovingObstacle extends Obstacle {
         }
     }
 
-    public void moveRight(boolean[][] board) {
-        for (int i = 0; i < height; i++) {
+    public void moveRight(short[][] board) {
+        for (int i = 0; i <= height; i++) {
             board[x][y + i] = GameBoard.SPOT_AVAILABLE;
-            board[x + width + 1][y + i] = GameBoard.SPOT_TAKEN;
+            board[x + width + 1][y + i] = GameBoard.OBJECT_SPOT_TAKEN;
         }
         x++;
     }
 
-    public void moveLeft(boolean[][] board) {
-        for (int i = 0; i < height; i++) {
-            board[x - 1][y + i] = GameBoard.SPOT_TAKEN;
+    public void moveLeft(short[][] board) {
+        for (int i = 0; i <= height; i++) {
+            board[x - 1][y + i] = GameBoard.OBJECT_SPOT_TAKEN;
             board[x + width][y + i] = GameBoard.SPOT_AVAILABLE;
         }
         x--;
     }
 
-    public void moveUp(boolean[][] board) {
-        for (int i = 0; i < width; i++) {
-            board[x + i][y - 1] = GameBoard.SPOT_TAKEN;
+    public void moveUp(short[][] board) {
+        for (int i = 0; i <= width; i++) {
+            board[x + i][y - 1] = GameBoard.OBJECT_SPOT_TAKEN;
             board[x + i][y + height] = GameBoard.SPOT_AVAILABLE;
         }
         y--;
     }
 
-    public void moveDown(boolean[][] board) {
-        for (int i = 0; i < width; i++) {
+    public void moveDown(short[][] board) {
+        for (int i = 0; i <= width; i++) {
             board[x + i][y] = GameBoard.SPOT_AVAILABLE;
-            board[x + i][y + height + 1] = GameBoard.SPOT_TAKEN;
+            board[x + i][y + height + 1] = GameBoard.OBJECT_SPOT_TAKEN;
         }
         y++;
     }
