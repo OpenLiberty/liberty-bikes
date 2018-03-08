@@ -26,13 +26,13 @@ public class GameBoard {
     }
 
     public boolean verifyObstacle(Obstacle o) {
-        if (o.x + o.width > BOARD_SIZE || o.y + o.height > BOARD_SIZE)
+        if (o.x < 0 || o.y < 0 || o.x + o.width > BOARD_SIZE || o.y + o.height > BOARD_SIZE)
             throw new IllegalArgumentException("Obstacle does not fit on board: " + o);
 
         // First make sure all spaces are available
         for (int x = 0; x < o.width; x++)
             for (int y = 0; y < o.height; y++)
-                if (board[o.x + x][o.y + y] != 0) {
+                if (board[o.x + x][o.y + y] != SPOT_AVAILABLE) {
                     System.out.println("Obstacle cannot be added to board because spot [" + o.x + x + "][" + o.y + y + "] is taken.");
                     return false;
                 }

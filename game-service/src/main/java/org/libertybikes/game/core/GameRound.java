@@ -68,7 +68,7 @@ public class GameRound implements Runnable {
         this.id = id;
         nextRoundId = getRandomId();
         board.addObstacle(new Obstacle(5, 5, 60, 60));
-        board.addObstacle(new MovingObstacle(5, 5, 80, 85, -1, -1, 2));
+        board.addObstacle(new MovingObstacle(5, 5, 80, 85, -1, -1, 5));
         board.addObstacle(new MovingObstacle(5, 5, 80, 95, 1, 1));
     }
 

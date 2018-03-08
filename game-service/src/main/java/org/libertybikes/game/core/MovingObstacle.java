@@ -3,10 +3,6 @@
  */
 package org.libertybikes.game.core;
 
-/**
- * @author OLENCOOK
- *
- */
 public class MovingObstacle extends Obstacle {
 
     private static enum DIRECTION {
@@ -49,8 +45,10 @@ public class MovingObstacle extends Obstacle {
 
         if (xDir != 0) {
             if (xDir > 0) {
+                // move right only if we can
                 if (x + width + 1 < GameBoard.BOARD_SIZE && !hasCollision(board, DIRECTION.RIGHT)) {
                     moveRight(board);
+                    // bounce left if we can't
                 } else if (!hasCollision(board, DIRECTION.LEFT)) {
                     moveLeft(board);
                     xDir = xDir * -1;
@@ -86,7 +84,9 @@ public class MovingObstacle extends Obstacle {
 
     private void moveRight(short[][] board) {
         for (int i = 0; i <= height; i++) {
+            // clear previous position
             board[x][y + i] = GameBoard.SPOT_AVAILABLE;
+            // take new position
             board[x + width + 1][y + i] = GameBoard.OBJECT_SPOT_TAKEN;
         }
         x++;
@@ -116,6 +116,8 @@ public class MovingObstacle extends Obstacle {
         y++;
     }
 
+    // loops through the spots we want to move to and see if they are already taken by
+    // only another object, we will move through players and their lines
     private boolean hasCollision(short[][] board, DIRECTION dir) {
         switch (dir) {
             case UP:
