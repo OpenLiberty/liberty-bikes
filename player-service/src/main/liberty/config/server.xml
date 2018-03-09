@@ -1,6 +1,6 @@
 <server>
     <featureManager>
-        <feature>microProfile-1.2</feature>
+        <feature>microProfile-1.3</feature>
     </featureManager>
 
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
