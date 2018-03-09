@@ -36,6 +36,7 @@ public class GameRound implements Runnable {
 
     public static final Jsonb jsonb = JsonbBuilder.create();
     public static final int GAME_TICK_SPEED = 50; // ms
+    private static final int DELAY_BETWEEN_ROUNDS = 5; //ticks
     private static final Random r = new Random();
     private static final AtomicInteger runningGames = new AtomicInteger();
 
@@ -50,12 +51,12 @@ public class GameRound implements Runnable {
     private final Map<Session, Client> clients = new HashMap<>();
     private final boolean[] takenPlayerSlots = new boolean[PlayerFactory.MAX_PLAYERS];
 
-    private int ticksWithoutMovement = 0;
+    private int ticksFromGameEnd = 0;
 
-    // Get a string of 6 random uppercase letters (A-Z)
+    // Get a string of 4 random uppercase letters (A-Z)
     private static String getRandomId() {
-        char[] chars = new char[6];
-        for (int i = 0; i < 6; i++)
+        char[] chars = new char[4];
+        for (int i = 0; i < 4; i++)
             chars[i] = (char) (r.nextInt(26) + 65);
         return new String(chars);
     }
@@ -166,13 +167,14 @@ public class GameRound implements Runnable {
     public void run() {
         gameRunning.set(true);
         System.out.println("Starting round: " + id);
+        ticksFromGameEnd = 0;
         int numGames = runningGames.incrementAndGet();
         if (numGames > 3)
             System.out.println("WARNING: There are currently " + numGames + " game instances running.");
         while (gameRunning.get()) {
             delay(GAME_TICK_SPEED);
             gameTick();
-            if (ticksWithoutMovement > 5)
+            if (ticksFromGameEnd > DELAY_BETWEEN_ROUNDS)
                 gameRunning.set(false); // end the game if nobody can move anymore
         }
         runningGames.decrementAndGet();
@@ -187,8 +189,10 @@ public class GameRound implements Runnable {
     }
 
     private void gameTick() {
-        if (gameState != State.RUNNING)
+        if (gameState != State.RUNNING) {
+            ticksFromGameEnd++;
             return;
+        }
 
         boolean boardUpdated = board.moveObjects();
 
@@ -207,12 +211,8 @@ public class GameRound implements Runnable {
             }
         }
 
-        if (playersMoved || boardUpdated) {
-            ticksWithoutMovement = 0;
+        if (playersMoved || boardUpdated)
             broadcastGameBoard();
-        } else {
-            ticksWithoutMovement++;
-        }
 
         if (playerStatusChange)
             broadcastPlayerList();
@@ -246,8 +246,10 @@ public class GameRound implements Runnable {
     }
 
     private void checkForWinner(Player dead) {
-        if (players().size() < 2) // 1 player game, no winner
+        if (players().size() < 2) {// 1 player game, no winner
+            gameState = State.FINISHED;
             return;
+        }
         int alivePlayers = 0;
         Player alive = null;
         for (Player cur : players()) {
