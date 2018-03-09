@@ -29,8 +29,8 @@ export class LoginComponent implements OnInit {
     let router = this.router;
     let roundID: string = $('#roundid').val();
     roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
-    if (roundID.length !== 6) {
-      alert(roundID + ' is not a valid round ID, because it must be 6 letters long');
+    if (roundID.length !== 4) {
+      alert(roundID + ' is not a valid round ID, because it must be 4 letters long');
       return;
     }
 
