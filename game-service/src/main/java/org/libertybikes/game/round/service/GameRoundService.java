@@ -10,18 +10,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
 
 import org.libertybikes.game.core.GameRound;
 
 @Path("/")
 @ApplicationScoped
 public class GameRoundService {
-
-    @Context
-    UriInfo uri;
 
     private final Map<String, GameRound> allRounds = new HashMap<>();
 

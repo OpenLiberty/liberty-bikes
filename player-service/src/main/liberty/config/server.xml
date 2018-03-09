@@ -1,6 +1,7 @@
 <server>
     <featureManager>
         <feature>microProfile-1.2</feature>
+        <feature>jaxrs-2.1</feature>
     </featureManager>
 
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
