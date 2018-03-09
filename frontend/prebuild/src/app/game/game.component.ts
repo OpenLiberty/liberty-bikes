@@ -105,9 +105,7 @@ export class GameComponent implements OnInit {
   }
 
   onConnect(evt: MessageEvent) {
-    const name = sessionStorage.getItem('username');
-    const isSpectator = sessionStorage.getItem('isSpectator');
-    if (isSpectator === 'true') {
+    if (sessionStorage.getItem('isSpectator') === 'true') {
       console.log('is a spectator... showing game id');
       // Set the Round ID and make visible
       $('#game-code').html(this.roundId);
@@ -116,7 +114,7 @@ export class GameComponent implements OnInit {
       gameId.addClass('d-inline-block');
       this.gameSocket.sendText(JSON.stringify({'spectatorjoined': true}));
     } else {
-      this.gameSocket.sendText(JSON.stringify({'playerjoined': name}));
+      this.gameSocket.sendText(JSON.stringify({'playerjoined': sessionStorage.getItem('userId')}));
     }
   }
 

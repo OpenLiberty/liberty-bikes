@@ -1,6 +1,7 @@
 <server>
     <featureManager>
-        <feature>microProfile-1.3</feature>
+        <feature>microProfile-1.2</feature>
+        <feature>mpRestClient-1.0</feature>
         <feature>websocket-1.1</feature>
         <feature>jaxrs-2.1</feature>
         <feature>jsonb-1.0</feature>

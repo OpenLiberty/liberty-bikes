@@ -45,7 +45,6 @@ public class PlayerService {
         return db.getAll();
     }
 
-    @GET
     @POST
     @Path("/create")
     public String createPlayer(@QueryParam("name") String name) {
@@ -61,7 +60,7 @@ public class PlayerService {
         return db.get(id);
     }
 
-    @GET
+    @POST
     @Path("/{playerId}/win")
     public Response addWin(@PathParam("playerId") String id) {
         Player p = getPlayerById(id);
@@ -74,7 +73,7 @@ public class PlayerService {
         return Response.ok(wins).build();
     }
 
-    @GET
+    @POST
     @Path("/{playerId}/loss")
     public Response addLoss(@PathParam("playerId") String id) {
         Player p = getPlayerById(id);

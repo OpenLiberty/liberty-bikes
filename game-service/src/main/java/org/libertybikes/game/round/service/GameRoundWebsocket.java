@@ -18,9 +18,11 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.ClientMessage;
 import org.libertybikes.game.core.ClientMessage.GameEvent;
 import org.libertybikes.game.core.GameRound;
+import org.libertybikes.restclient.PlayerService;
 
 @Dependent
 @ServerEndpoint("/round/ws/{roundId}")
@@ -28,6 +30,10 @@ public class GameRoundWebsocket {
 
     @Inject
     GameRoundService gameSvc;
+
+    @Inject
+    @RestClient
+    PlayerService playerSvc;
 
     private final Jsonb jsonb = JsonbBuilder.create();
 
@@ -59,7 +65,17 @@ public class GameRoundWebsocket {
             if (msg.event != null && GameEvent.GAME_REQUEUE == msg.event) {
                 requeueClient(gameSvc, round, session);
             } else {
-                round.handleMessage(msg, session);
+                if (GameEvent.GAME_START == msg.event)
+                    round.startGame();
+                if (msg.direction != null)
+                    round.updatePlayerDirection(session, msg);
+                if (msg.playerJoinedId != null) {
+                    org.libertybikes.restclient.Player playerResponse = playerSvc.getPlayerById(msg.playerJoinedId);
+                    round.addPlayer(session, msg.playerJoinedId, playerResponse.name);
+                }
+                if (Boolean.TRUE == msg.isSpectator) {
+                    round.addSpectator(session);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
