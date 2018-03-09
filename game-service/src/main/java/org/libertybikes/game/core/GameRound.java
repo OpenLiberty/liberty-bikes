@@ -22,7 +22,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.websocket.Session;
 
-import org.libertybikes.game.core.ClientMessage.GameEvent;
 import org.libertybikes.game.core.Player.STATUS;
 import org.libertybikes.game.round.service.GameRoundService;
 import org.libertybikes.game.round.service.GameRoundWebsocket;
@@ -49,7 +48,7 @@ public class GameRound implements Runnable {
     private final AtomicBoolean gameRunning = new AtomicBoolean(false);
     private final AtomicBoolean paused = new AtomicBoolean(false);
     private final Map<Session, Client> clients = new HashMap<>();
-    private final boolean[] takenPlayerSlots = new boolean[PlayerFactory.MAX_PLAYERS];
+    private final boolean[] takenPlayerSlots = new boolean[Player.MAX_PLAYERS];
 
     private int ticksFromGameEnd = 0;
 
@@ -77,26 +76,13 @@ public class GameRound implements Runnable {
         return board;
     }
 
-    public void handleMessage(ClientMessage msg, Session session) {
-        if (GameEvent.GAME_START == msg.event)
-            startGame();
-
-        if (msg.direction != null) {
-            Client c = clients.get(session);
-            if (c.isPlayer())
-                c.player.setDirection(msg.direction);
-        }
-
-        if (msg.playerJoinedId != null) {
-            addPlayer(session, msg.playerJoinedId);
-        }
-
-        if (Boolean.TRUE == msg.isSpectator) {
-            addSpectator(session);
-        }
+    public void updatePlayerDirection(Session playerSession, ClientMessage msg) {
+        Client c = clients.get(playerSession);
+        if (c.isPlayer())
+            c.player.setDirection(msg.direction);
     }
 
-    public void addPlayer(Session s, String playerId) {
+    public void addPlayer(Session s, String playerId, String playerName) {
         // Front end should be preventing a player joining a full game but
         // defensive programming
         if (gameState != State.OPEN) {
@@ -104,7 +90,7 @@ public class GameRound implements Runnable {
             return;
         }
 
-        if (board.players.size() + 1 > PlayerFactory.MAX_PLAYERS - 1) {
+        if (board.players.size() + 1 > Player.MAX_PLAYERS - 1) {
             gameState = State.FULL;
         }
 
@@ -120,7 +106,7 @@ public class GameRound implements Runnable {
         }
 
         // Initialize Player
-        Player p = PlayerFactory.initNextPlayer(this, playerId, playerNum);
+        Player p = new Player(playerId, playerName, playerNum);
         board.addPlayer(p);
         clients.put(s, new Client(s, p));
         System.out.println("Player " + playerId + " has joined.");
@@ -137,11 +123,11 @@ public class GameRound implements Runnable {
 
     private void removePlayer(Player p) {
         p.disconnect();
-        System.out.println(p.playerName + " disconnected.");
+        System.out.println(p.name + " disconnected.");
         broadcastPlayerList();
 
         // Open player slot for new joiners
-        if (State.FULL == gameState && board.players.size() - 1 < PlayerFactory.MAX_PLAYERS) {
+        if (State.FULL == gameState && board.players.size() - 1 < Player.MAX_PLAYERS) {
             gameState = State.OPEN;
         }
         takenPlayerSlots[p.getPlayerNum()] = false;
@@ -230,7 +216,7 @@ public class GameRound implements Runnable {
         JsonArrayBuilder array = Json.createArrayBuilder();
         for (Player p : players()) {
             array.add(Json.createObjectBuilder()
-                            .add("name", p.playerName)
+                            .add("name", p.name)
                             .add("status", p.getStatus().toString())
                             .add("color", p.color));
         }

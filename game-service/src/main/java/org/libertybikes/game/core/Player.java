@@ -3,6 +3,10 @@
  */
 package org.libertybikes.game.core;
 
+import javax.json.bind.annotation.JsonbPropertyOrder;
+import javax.json.bind.annotation.JsonbTransient;
+
+@JsonbPropertyOrder({ "id", "name", "color", "status", "x", "y", "isAlive" })
 public class Player {
 
     public static enum STATUS {
@@ -13,29 +17,58 @@ public class Player {
         Disconnected
     }
 
+    private static enum PlayerStartingData {
+        START_1("#DF740C", 10, 10, DIRECTION.RIGHT),
+        START_2("#FF0000", 10, GameBoard.BOARD_SIZE - 10, DIRECTION.UP),
+        START_3("#6FC3DF", GameBoard.BOARD_SIZE - 10, 10, DIRECTION.DOWN),
+        START_4("#FFE64D", GameBoard.BOARD_SIZE - 10, GameBoard.BOARD_SIZE - 10, DIRECTION.LEFT);
+
+        public final String color;
+        public final int x;
+        public final int y;
+        public final DIRECTION dir;
+
+        PlayerStartingData(String color, int x, int y, DIRECTION dir) {
+            this.color = color;
+            this.x = x;
+            this.y = y;
+            this.dir = dir;
+        }
+    }
+
+    public static final int MAX_PLAYERS = PlayerStartingData.values().length;
+    private static final PlayerStartingData[] startingData = new PlayerStartingData[] { PlayerStartingData.START_1, PlayerStartingData.START_2,
+                                                                                        PlayerStartingData.START_3, PlayerStartingData.START_4 };
+
+    // Properties exposed by JSON-B
+    public final String name;
+    public final String id;
     public final String color;
-    public DIRECTION direction = DIRECTION.RIGHT;
-    private DIRECTION lastDirection = null;
-    private DIRECTION desiredNextDirection = null;
     public int x;
     public int y;
-    public int playerNum;
-    public String playerName;
     public boolean isAlive = true;
     private STATUS playerStatus = STATUS.Connected;
 
-    public Player(String color) {
-        this.color = color;
-    }
+    private final int playerNum;
+    private DIRECTION direction;
+    private DIRECTION lastDirection = null;
+    private DIRECTION desiredNextDirection = null;
 
-    public Player(String color, int xstart, int ystart, int playerNum) {
-        this.color = color;
-        x = xstart;
-        y = ystart;
+    public Player(String id, String name, int playerNum) {
+        this.id = id;
+        this.name = name;
         this.playerNum = playerNum;
+
+        // Initialize starting data
+        PlayerStartingData data = startingData[playerNum];
+        color = data.color;
+        direction = data.dir;
+        x = data.x;
+        y = data.y;
     }
 
     public String toJson() {
+        // TODO: Use JSON-B to eliminate the need for this method
         // {"color":"#FF0000","coords":{"x":251,"y":89}}
         StringBuffer sb = new StringBuffer("{\"color\":\"");
         sb.append(this.color);
@@ -63,10 +96,6 @@ public class Player {
         }
 
         direction = newDirection;
-    }
-
-    public DIRECTION getDirection() {
-        return direction;
     }
 
     /**
@@ -128,6 +157,7 @@ public class Player {
         return this.playerStatus;
     }
 
+    @JsonbTransient
     public int getPlayerNum() {
         return this.playerNum;
     }

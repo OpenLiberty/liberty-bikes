@@ -12,6 +12,7 @@ liberty {
 		name = 'game-service'
 		dropins = [war]
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
+		jvmOptions = ['-Dorg.libertybikes.restclient.PlayerService/mp-rest/url=http://localhost:8081/']
 	}
 }
 

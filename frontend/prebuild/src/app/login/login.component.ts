@@ -28,9 +28,15 @@ export class LoginComponent implements OnInit {
     let ngZone = this.ngZone;
     let router = this.router;
     let roundID: string = $('#roundid').val();
+    let username: string = $('#username').val();
     roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
+    // TODO: Validate form input in a more elegant way than alert()
     if (roundID.length !== 4) {
       alert(roundID + ' is not a valid round ID, because it must be 4 letters long');
+      return;
+    }
+    if (username.length < 1) {
+      alert('Username must not be empty');
       return;
     }
 
@@ -51,18 +57,27 @@ export class LoginComponent implements OnInit {
         alert('Game round has already finished!');
         return;
       }
-
-      sessionStorage.setItem('username', $('#username').val());
-      sessionStorage.setItem('roundId', roundID);
-      if (gameBoard === true) {
-        ngZone.run(() => {
-          router.navigate(['/game']);
-        });
-      } else {
-        ngZone.run(() => {
-          router.navigate(['/play']);
-        });
-      }
+      
+      // TODO: Register the player here until we get a proper 'login' flow
+      $.post(`http://${document.location.hostname}:8081/player/create?name=${username}`, function(response) {
+    	    console.log(`Created a new player with ID=${response}`);
+    	    sessionStorage.setItem('userId', response);
+    	    
+    	    
+    	    // TEMP: to prevent a race condition, putting this code inside of the player create callback to ensure that
+    	    //       userId is set in the session storage before proceeding to the game board
+    	    sessionStorage.setItem('username', username);
+    	    sessionStorage.setItem('roundId', roundID);
+    	    if (gameBoard === true) {
+    	      ngZone.run(() => {
+    	        router.navigate(['/game']);
+    	      });
+    	    } else {
+    	      ngZone.run(() => {
+    	        router.navigate(['/play']);
+    	      });
+    	    }
+  	  });
   });
   }
 
