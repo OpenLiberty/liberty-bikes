@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -22,9 +23,11 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.websocket.Session;
 
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.Player.STATUS;
 import org.libertybikes.game.round.service.GameRoundService;
 import org.libertybikes.game.round.service.GameRoundWebsocket;
+import org.libertybikes.restclient.PlayerService;
 
 @JsonbPropertyOrder({ "id", "gameState", "board", "nextRoundId" })
 public class GameRound implements Runnable {
@@ -166,12 +169,37 @@ public class GameRound implements Runnable {
         runningGames.decrementAndGet();
         System.out.println("Finished round: " + id);
 
-        System.out.println("Clients flagged for auto-requeue will be redirected to the next round in 5 seconds...");
-        delay(5000);
+        long start = System.nanoTime();
+        updatePlayerStats();
+
+        // Wait for 5 seconds, but subtract the amount of time it took to update player stats
+        long nanoWait = TimeUnit.SECONDS.toNanos(5) - (System.nanoTime() - start);
+        delay(TimeUnit.NANOSECONDS.toMillis(nanoWait));
+        System.out.println("Clients flagged for auto-requeue will be redirected to the next round now");
         GameRoundService gameSvc = CDI.current().select(GameRoundService.class).get();
         for (Client c : clients.values())
             if (c.autoRequeue)
                 GameRoundWebsocket.requeueClient(gameSvc, this, c.session);
+    }
+
+    private void updatePlayerStats() {
+        if (gameState != State.FINISHED)
+            throw new IllegalStateException("Canot update player stats while game is still running.");
+
+        Set<Player> players = players();
+        if (players.size() < 2)
+            return; // Don't update player stats for single-player games
+
+        PlayerService playerSvc = CDI.current().select(PlayerService.class, RestClient.LITERAL).get();
+        for (Player p : players()) {
+            if (p.getStatus() == STATUS.Winner) {
+                System.out.println("Player " + p.name + " has won round " + id);
+                playerSvc.addWin(p.id);
+            } else {
+                System.out.println("Player " + p.name + " has participated in round " + id);
+                playerSvc.addLoss(p.id);
+            }
+        }
     }
 
     private void gameTick() {
@@ -191,7 +219,7 @@ public class GameRound implements Runnable {
                     playersMoved = true;
                 } else {
                     // Since someone died, check for winning player
-                    checkForWinner(p);
+                    checkForWinner();
                     playerStatusChange = true;
                 }
             }
@@ -205,6 +233,8 @@ public class GameRound implements Runnable {
     }
 
     private void delay(long ms) {
+        if (ms < 0)
+            return;
         try {
             Thread.sleep(ms);
         } catch (InterruptedException ie) {
@@ -231,7 +261,7 @@ public class GameRound implements Runnable {
         sendTextToClients(clients.keySet(), getPlayerList());
     }
 
-    private void checkForWinner(Player dead) {
+    private void checkForWinner() {
         if (players().size() < 2) {// 1 player game, no winner
             gameState = State.FINISHED;
             return;

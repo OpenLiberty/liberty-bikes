@@ -13,7 +13,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.libertybikes.player.data.PlayerDB;
 
@@ -29,9 +28,9 @@ public class PlayerService {
         // TODO use MP-Config to only run this for local dev mode
         Random r = new Random();
         for (int i = 0; i < 10; i++) {
-            String id = createPlayer("Bob-" + i);
-            int wins = r.nextInt(10);
-            int losses = r.nextInt(10);
+            String id = createPlayer("SamplePlayer-" + i);
+            int wins = r.nextInt(3);
+            int losses = r.nextInt(3);
             for (int w = 0; w < wins; w++)
                 addWin(id);
             for (int l = 0; l < losses; l++)
@@ -49,6 +48,7 @@ public class PlayerService {
     @Path("/create")
     public String createPlayer(@QueryParam("name") String name) {
         Player p = new Player(name);
+        System.out.println("Created a new player with name=" + name + " and id=" + p.id);
         db.put(p);
         return p.id;
     }
@@ -57,32 +57,33 @@ public class PlayerService {
     @Path("/{playerId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Player getPlayerById(@PathParam("playerId") String id) {
-        return db.get(id);
+        Player p = db.get(id);
+        if (p == null)
+            System.out.println("Unable to find any player with id=" + id);
+        return p;
     }
 
     @POST
     @Path("/{playerId}/win")
-    public Response addWin(@PathParam("playerId") String id) {
+    public void addWin(@PathParam("playerId") String id) {
         Player p = getPlayerById(id);
         if (p == null)
-            return Response.status(404).build();
-        int wins = p.stats.numWins++;
+            return;
+        p.stats.numWins++;
         p.stats.totalGames++;
         db.put(p);
         System.out.println("Player " + id + " has won " + p.stats.numWins + " games and played in " + p.stats.totalGames + " games.");
-        return Response.ok(wins).build();
     }
 
     @POST
     @Path("/{playerId}/loss")
-    public Response addLoss(@PathParam("playerId") String id) {
+    public void addLoss(@PathParam("playerId") String id) {
         Player p = getPlayerById(id);
         if (p == null)
-            return Response.status(404).build();
-        int games = p.stats.totalGames++;
+            return;
+        p.stats.totalGames++;
         db.put(p);
         System.out.println("Player " + id + " has won " + p.stats.numWins + " games and played in " + p.stats.totalGames + " games.");
-        return Response.ok(games).build();
     }
 
 }
