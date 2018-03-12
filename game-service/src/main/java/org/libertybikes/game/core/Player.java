@@ -67,19 +67,6 @@ public class Player {
         y = data.y;
     }
 
-    public String toJson() {
-        // TODO: Use JSON-B to eliminate the need for this method
-        // {"color":"#FF0000","coords":{"x":251,"y":89}}
-        StringBuffer sb = new StringBuffer("{\"color\":\"");
-        sb.append(this.color);
-        sb.append("\",\"coords\":{\"x\":");
-        sb.append(this.x);
-        sb.append(",\"y\":");
-        sb.append(this.y);
-        sb.append("}}");
-        return sb.toString();
-    }
-
     public void setDirection(DIRECTION newDirection) {
         if (newDirection == direction)
             return;

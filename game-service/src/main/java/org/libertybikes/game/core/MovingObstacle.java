@@ -25,6 +25,7 @@ public class MovingObstacle extends Obstacle {
     }
 
     public void move(short[][] board) {
+
         if (++currentDelay < moveDelay) {
             // don't move yet
             hasMoved = false;
@@ -76,35 +77,35 @@ public class MovingObstacle extends Obstacle {
     }
 
     private void moveRight(short[][] board) {
-        for (int i = 0; i <= height; i++) {
+        for (int i = 0; i < height; i++) {
             // clear previous position
             board[x][y + i] = GameBoard.SPOT_AVAILABLE;
             // take new position
-            board[x + width + 1][y + i] = GameBoard.OBJECT_SPOT_TAKEN;
+            board[x + width][y + i] = GameBoard.OBJECT_SPOT_TAKEN;
         }
         x++;
     }
 
     private void moveLeft(short[][] board) {
-        for (int i = 0; i <= height; i++) {
+        for (int i = 0; i < height; i++) {
             board[x - 1][y + i] = GameBoard.OBJECT_SPOT_TAKEN;
-            board[x + width][y + i] = GameBoard.SPOT_AVAILABLE;
+            board[x + width - 1][y + i] = GameBoard.SPOT_AVAILABLE;
         }
         x--;
     }
 
     private void moveUp(short[][] board) {
-        for (int i = 0; i <= width; i++) {
+        for (int i = 0; i < width; i++) {
             board[x + i][y - 1] = GameBoard.OBJECT_SPOT_TAKEN;
-            board[x + i][y + height] = GameBoard.SPOT_AVAILABLE;
+            board[x + i][y + height - 1] = GameBoard.SPOT_AVAILABLE;
         }
         y--;
     }
 
     private void moveDown(short[][] board) {
-        for (int i = 0; i <= width; i++) {
+        for (int i = 0; i < width; i++) {
             board[x + i][y] = GameBoard.SPOT_AVAILABLE;
-            board[x + i][y + height + 1] = GameBoard.OBJECT_SPOT_TAKEN;
+            board[x + i][y + height] = GameBoard.OBJECT_SPOT_TAKEN;
         }
         y++;
     }
@@ -114,26 +115,26 @@ public class MovingObstacle extends Obstacle {
     private boolean hasCollision(short[][] board, DIRECTION dir) {
         switch (dir) {
             case UP:
-                for (int i = 0; i <= width; i++) {
+                for (int i = 0; i < width; i++) {
                     if (board[x + i][y - 1] == GameBoard.OBJECT_SPOT_TAKEN)
                         return true;
                 }
                 return false;
             case DOWN:
-                for (int i = 0; i <= width; i++) {
-                    if (board[x + i][y + height + 1] == GameBoard.OBJECT_SPOT_TAKEN)
+                for (int i = 0; i < width; i++) {
+                    if (board[x + i][y + height] == GameBoard.OBJECT_SPOT_TAKEN)
                         return true;
                 }
                 return false;
             case LEFT:
-                for (int i = 0; i <= height; i++) {
+                for (int i = 0; i < height; i++) {
                     if (board[x - 1][y + i] == GameBoard.OBJECT_SPOT_TAKEN)
                         return true;
                 }
                 return false;
             default:
-                for (int i = 0; i <= height; i++) {
-                    if (board[x + width + 1][y + i] == GameBoard.OBJECT_SPOT_TAKEN)
+                for (int i = 0; i < height; i++) {
+                    if (board[x + width][y + i] == GameBoard.OBJECT_SPOT_TAKEN)
                         return true;
                 }
                 return false;
