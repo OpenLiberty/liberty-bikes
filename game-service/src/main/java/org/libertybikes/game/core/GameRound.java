@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.inject.spi.CDI;
@@ -51,7 +50,6 @@ public class GameRound implements Runnable {
     private final AtomicBoolean gameRunning = new AtomicBoolean(false);
     private final AtomicBoolean paused = new AtomicBoolean(false);
     private final Map<Session, Client> clients = new HashMap<>();
-    private final boolean[] takenPlayerSlots = new boolean[Player.MAX_PLAYERS];
 
     private int ticksFromGameEnd = 0;
 
@@ -70,9 +68,8 @@ public class GameRound implements Runnable {
     public GameRound(String id) {
         this.id = id;
         nextRoundId = getRandomId();
-        board.addObstacle(new Obstacle(5, 5, 60, 60));
-        board.addObstacle(new MovingObstacle(5, 5, 80, 85, -1, -1, 5));
-        board.addObstacle(new MovingObstacle(5, 5, 80, 95, 1, 1));
+        board.addObstacle(new MovingObstacle(5, 5, GameBoard.BOARD_SIZE / 2, GameBoard.BOARD_SIZE / 3, -1, -1, 1));
+        board.addObstacle(new MovingObstacle(5, 5, GameBoard.BOARD_SIZE / 2, GameBoard.BOARD_SIZE / 3 * 2, 1, 1));
     }
 
     public GameBoard getBoard() {
@@ -93,26 +90,17 @@ public class GameRound implements Runnable {
             return;
         }
 
-        if (board.players.size() + 1 > Player.MAX_PLAYERS - 1) {
+        if (players().size() + 1 >= Player.MAX_PLAYERS) {
             gameState = State.FULL;
         }
 
-        // Find first open player slot to fill, which determines position
-        int playerNum = -1;
-        for (int i = 0; i < takenPlayerSlots.length; i++) {
-            if (!takenPlayerSlots[i]) {
-                playerNum = i;
-                takenPlayerSlots[i] = true;
-                System.out.println("Player slot " + i + " taken");
-                break;
-            }
+        Player p = board.addPlayer(playerId, playerName);
+        if (p != null) {
+            clients.put(s, new Client(s, p));
+            System.out.println("Player " + playerId + " has joined.");
+        } else {
+            System.out.println("Player " + playerId + " already exists.");
         }
-
-        // Initialize Player
-        Player p = new Player(playerId, playerName, playerNum);
-        board.addPlayer(p);
-        clients.put(s, new Client(s, p));
-        System.out.println("Player " + playerId + " has joined.");
         broadcastPlayerList();
         broadcastGameBoard();
     }
@@ -127,13 +115,20 @@ public class GameRound implements Runnable {
     private void removePlayer(Player p) {
         p.disconnect();
         System.out.println(p.name + " disconnected.");
-        broadcastPlayerList();
 
         // Open player slot for new joiners
-        if (State.FULL == gameState && board.players.size() - 1 < Player.MAX_PLAYERS) {
+        if (gameState == State.FULL && players().size() - 1 < Player.MAX_PLAYERS) {
             gameState = State.OPEN;
         }
-        takenPlayerSlots[p.getPlayerNum()] = false;
+
+        if (gameState == State.OPEN) {
+            board.removePlayer(p);
+        } else if (gameState == State.RUNNING) {
+            checkForWinner();
+        }
+
+        if (gameState != State.FINISHED)
+            broadcastPlayerList();
     }
 
     public int removeClient(Session client) {
@@ -145,11 +140,7 @@ public class GameRound implements Runnable {
 
     // @JsonbTransient // TODO re-enable this anno once Liberty upgrades to yasson 1.0.1
     public Set<Player> players() {
-        return clients.values()
-                        .stream()
-                        .filter(c -> c.isPlayer())
-                        .map(c -> c.player)
-                        .collect(Collectors.toSet());
+        return board.players;
     }
 
     @Override
@@ -191,7 +182,7 @@ public class GameRound implements Runnable {
             return; // Don't update player stats for single-player games
 
         PlayerService playerSvc = CDI.current().select(PlayerService.class, RestClient.LITERAL).get();
-        for (Player p : players()) {
+        for (Player p : players) {
             if (p.getStatus() == STATUS.Winner) {
                 System.out.println("Player " + p.name + " has won round " + id);
                 playerSvc.addWin(p.id);

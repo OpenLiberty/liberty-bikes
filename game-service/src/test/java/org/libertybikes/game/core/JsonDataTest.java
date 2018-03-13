@@ -64,7 +64,7 @@ public class JsonDataTest {
 
         // @JsonbPropertyOrder({ "id", "name", "color", "x", "y", "isAlive" })
         String bobJson = "{\"id\":\"1234\",\"name\":\"Bob\",\"color\":\"#DF740C\",\"status\":\"Connected\",\"x\":10,\"y\":10,\"isAlive\":true}";
-        board.addPlayer(new Player("1234", "Bob", 0));
+        board.addPlayer("1234", "Bob");
         assertEquals("{\"movingObstacles\":[],\"obstacles\":[" + obstacleJson + "],\"players\":[" + bobJson + "]}",
                      jsonb.toJson(board));
 
