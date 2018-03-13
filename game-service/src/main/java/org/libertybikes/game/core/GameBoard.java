@@ -78,6 +78,7 @@ public class GameBoard {
 
     public boolean removePlayer(Player p) {
         takenPlayerSlots[p.getPlayerNum()] = false;
+        board[p.x][p.y] = SPOT_AVAILABLE;
         return players.remove(p);
     }
 
