@@ -16,6 +16,10 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     this.meta.removeTag('viewport');
+    let viewWidth = $(window).width();
+    let viewHeight = $(window).height();
+
+    this.meta.addTag({name: 'viewport', content: `width=${viewWidth}px, height=${viewHeight}px, initial-scale=1.0`}, true);
   }
 
   createRound() {
