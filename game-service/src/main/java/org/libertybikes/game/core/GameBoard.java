@@ -117,6 +117,10 @@ public class GameBoard {
         }
 
         for (MovingObstacle obstacle : movingObstacles) {
+            obstacle.checkCollision(board);
+        }
+
+        for (MovingObstacle obstacle : movingObstacles) {
             obstacle.move(board);
         }
 

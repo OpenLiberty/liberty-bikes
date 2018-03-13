@@ -7,6 +7,7 @@ public class MovingObstacle extends Obstacle {
 
     public int xDir, yDir, oldX, oldY, moveDelay, currentDelay = 0;
     public boolean hasMoved = false;
+    private boolean willCollideX, willCollideY = false;
 
     public MovingObstacle(int w, int h, int x, int y) {
         super(w, h, x, y);
@@ -22,6 +23,34 @@ public class MovingObstacle extends Obstacle {
     public MovingObstacle(int w, int h, int x, int y, int xDir, int yDir, int moveDelay) {
         this(w, h, x, y, xDir, yDir);
         this.moveDelay = moveDelay;
+    }
+
+    public void checkCollision(short[][] board) {
+        willCollideX = false;
+        willCollideY = false;
+
+        if (xDir != 0) {
+            if (xDir > 0) {
+                if (x + width + 1 >= GameBoard.BOARD_SIZE || hasCollision(board, DIRECTION.RIGHT)) {
+                    willCollideX = true;
+                }
+            } else {
+                if (x - 1 < 0 || hasCollision(board, DIRECTION.LEFT)) {
+                    willCollideX = true;
+                }
+            }
+        }
+        if (yDir != 0) {
+            if (yDir > 0) {
+                if (y + height + 1 >= GameBoard.BOARD_SIZE || hasCollision(board, DIRECTION.DOWN)) {
+                    willCollideY = true;
+                }
+            } else {
+                if (y - 1 < 0 || hasCollision(board, DIRECTION.UP)) {
+                    willCollideY = true;
+                }
+            }
+        }
     }
 
     public void move(short[][] board) {
@@ -40,7 +69,7 @@ public class MovingObstacle extends Obstacle {
         if (xDir != 0) {
             if (xDir > 0) {
                 // move right only if we can
-                if (x + width + 1 < GameBoard.BOARD_SIZE && !hasCollision(board, DIRECTION.RIGHT)) {
+                if (!willCollideX) {
                     moveRight(board);
                     // bounce left if we can't
                 } else if (!hasCollision(board, DIRECTION.LEFT)) {
@@ -48,7 +77,7 @@ public class MovingObstacle extends Obstacle {
                     xDir = xDir * -1;
                 }
             } else {
-                if (x - 1 >= 0 && !hasCollision(board, DIRECTION.LEFT)) {
+                if (!willCollideX) {
                     moveLeft(board);
                 } else if (!hasCollision(board, DIRECTION.RIGHT)) {
                     moveRight(board);
@@ -59,14 +88,14 @@ public class MovingObstacle extends Obstacle {
 
         if (yDir != 0) {
             if (yDir > 0) {
-                if (y + height + 1 < GameBoard.BOARD_SIZE && !hasCollision(board, DIRECTION.DOWN)) {
+                if (!willCollideY) {
                     moveDown(board);
                 } else if (!hasCollision(board, DIRECTION.UP)) {
                     moveUp(board);
                     yDir = yDir * -1;
                 }
             } else {
-                if (y - 1 >= 0 && !hasCollision(board, DIRECTION.UP)) {
+                if (!willCollideY) {
                     moveUp(board);
                 } else if (!hasCollision(board, DIRECTION.DOWN)) {
                     moveDown(board);

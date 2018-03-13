@@ -154,17 +154,17 @@ export class GameComponent implements OnInit {
   drawObstacle(obstacle) {
     this.context.fillStyle = '#808080'; // obstacles always grey
     this.context.fillRect(GameComponent.BOX_SIZE * obstacle.x, GameComponent.BOX_SIZE * obstacle.y,
-                          GameComponent.BOX_SIZE * obstacle.height, GameComponent.BOX_SIZE * obstacle.width);
+                          GameComponent.BOX_SIZE * obstacle.width, GameComponent.BOX_SIZE * obstacle.height);
   }
   
   drawMovingObstacle(obstacle) {
     this.context.fillStyle = '#808080'; // obstacles always grey
     if (obstacle.hasMoved) {
       this.context.clearRect(GameComponent.BOX_SIZE * obstacle.oldX, GameComponent.BOX_SIZE * obstacle.oldY,
-                          GameComponent.BOX_SIZE * obstacle.height, GameComponent.BOX_SIZE * obstacle.width);
+                          GameComponent.BOX_SIZE * obstacle.width, GameComponent.BOX_SIZE * obstacle.height);
     }
     this.context.fillRect(GameComponent.BOX_SIZE * obstacle.x, GameComponent.BOX_SIZE * obstacle.y,
-                          GameComponent.BOX_SIZE * obstacle.height, GameComponent.BOX_SIZE * obstacle.width);
+                          GameComponent.BOX_SIZE * obstacle.width, GameComponent.BOX_SIZE * obstacle.height);
   }
 
   writeToScreen(message: string) {
