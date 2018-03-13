@@ -1,4 +1,4 @@
-<div id="login-container" class="container-fluid">
+<div id="login-container">
   <div id="login-content">
     <div id="login-title">
       <h1>Liberty Bikes</h1>
@@ -13,14 +13,11 @@
         <input type="text" id="roundid" name="roundid" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       </div>
     </div>
-    <div id = "button-bar">
-      <button type="button" class="btn btn-success" (click)="joinRound(true)">Login</button>
-      <button type="button" class="btn btn-success" (click)="joinRound(false)">Login No Board</button>
-      <button type="button" class="btn btn-success" (click)="createRound()">Create Round</button>
-      <button id="hostButton" type="button" class="btn btn-info" (click)="hostRound()" data-loading-text="Connecting..." autocomplete="off">Host Round</button>
+    <div id="button-bar">
+      <button type="button" (click)="joinRound(true)">Login</button>
+      <button type="button" (click)="joinRound(false)">Login No Board</button>
+      <button type="button" (click)="createRound()">Create Round</button>
+      <button id="hostButton" type="button" (click)="hostRound()" data-loading-text="Connecting..." autocomplete="off">Host Round</button>
     </div>
-  </div>
-  <div id="footer" class="container-fluid">
-    <p>The Liberty Bikes Project</p>
   </div>
 </div>

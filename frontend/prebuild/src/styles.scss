@@ -12,39 +12,31 @@ h2, h3 {
   font-weight: lighter;
 }
 html {
-  height: 100vh;
+  min-height: 100%;
 }
 body {
-  background-color: #eee;
-  height: 100vh;
-  min-height: 100vh;
+  background: linear-gradient(#01001d, #03004e, #700067) fixed;
+  min-height: 100%;
   margin: 0;
   padding: 0;
-}
-body, input[text], button {
   color: #888;
   font-family: $default-font;
 }
+
 a {
   cursor: pointer;
   cursor: hand;
 }
+
 button {
-  font-family: $default-font;
-  background-color: #eee;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  cursor: hand;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid #ccc;
+  color: #fff;
+  transition: all 0.3s ease-in-out;
 }
+
 button:hover {
-  background-color: #cfd8dc;
-}
-button:disabled {
-  background-color: #eee;
-  color: #aaa;
-  cursor: auto;
+  text-shadow: 0 0 5px #fff;
 }
 
 /* Navigation link styles */
