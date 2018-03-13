@@ -17,8 +17,8 @@ public class GameBoard {
 
     public final Set<Obstacle> obstacles = new HashSet<>();
     public final Set<MovingObstacle> movingObstacles = new HashSet<>();
-
     public final Set<Player> players = new HashSet<>();
+    private final boolean[] takenPlayerSlots = new boolean[Player.MAX_PLAYERS];
 
     public GameBoard() {
         for (int i = 0; i < BOARD_SIZE; i++)
@@ -52,13 +52,33 @@ public class GameBoard {
         return verifyObstacle(o) ? movingObstacles.add(o) : false;
     }
 
-    public boolean addPlayer(Player p) {
+    public Player addPlayer(String playerId, String playerName) {
+
+        // Find first open player slot to fill, which determines position
+        int playerNum = -1;
+        for (int i = 0; i < takenPlayerSlots.length; i++) {
+            if (!takenPlayerSlots[i]) {
+                playerNum = i;
+                takenPlayerSlots[i] = true;
+                System.out.println("Player slot " + i + " taken");
+                break;
+            }
+        }
+
+        // Initialize Player
+        Player p = new Player(playerId, playerName, playerNum);
+
         if (p.x > BOARD_SIZE || p.y > BOARD_SIZE)
             throw new IllegalArgumentException("Player does not fit on board: " + p);
 
         board[p.x][p.y] = PLAYER_SPOT_TAKEN;
 
-        return players.add(p);
+        return players.add(p) ? p : null;
+    }
+
+    public boolean removePlayer(Player p) {
+        takenPlayerSlots[p.getPlayerNum()] = false;
+        return players.remove(p);
     }
 
     // TODO: once OpenLiberty moves up to yasson 1.0.1 this method can be removed
