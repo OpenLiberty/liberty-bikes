@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.inject.spi.CDI;
@@ -49,10 +50,7 @@ public class GameRound implements Runnable {
 
     private final AtomicBoolean gameRunning = new AtomicBoolean(false);
     private final AtomicBoolean paused = new AtomicBoolean(false);
-    // inbound clients
     private final Map<Session, Client> clients = new HashMap<>();
-    // outbound clients (excludes phones)
-    private final Map<Session, Client> broadcastClients = new HashMap<>();
 
     private int ticksFromGameEnd = 0;
 
@@ -102,11 +100,9 @@ public class GameRound implements Runnable {
         Player p = board.addPlayer(playerId, playerName);
         if (p != null) {
             Client c = new Client(s, p);
+            c.isPhone = hasGameBoard ? false : true;
             clients.put(s, c);
             System.out.println("Player " + playerId + " has joined.");
-            if (hasGameBoard) {
-                broadcastClients.put(s, c);
-            }
         } else {
             System.out.println("Player " + playerId + " already exists.");
         }
@@ -116,9 +112,7 @@ public class GameRound implements Runnable {
 
     public void addSpectator(Session s) {
         System.out.println("A spectator has joined.");
-        Client c = new Client(s);
-        clients.put(s, c);
-        broadcastClients.put(s, c);
+        clients.put(s, new Client(s));
         sendTextToClient(s, getPlayerList());
         sendTextToClient(s, jsonb.toJson(board));
     }
@@ -144,7 +138,6 @@ public class GameRound implements Runnable {
 
     public int removeClient(Session client) {
         Client c = clients.remove(client);
-        broadcastClients.remove(client);
         if (c != null && c.player != null)
             removePlayer(c.player);
         return clients.size();
@@ -257,12 +250,16 @@ public class GameRound implements Runnable {
         return Json.createObjectBuilder().add("playerlist", array).build().toString();
     }
 
+    public Set<Session> getNonMobileSessions() {
+        return clients.entrySet().stream().filter(c -> !c.getValue().isPhone).map(s -> s.getKey()).collect(Collectors.toSet());
+    }
+
     private void broadcastGameBoard() {
-        sendTextToClients(broadcastClients.keySet(), jsonb.toJson(board));
+        sendTextToClients(getNonMobileSessions(), jsonb.toJson(board));
     }
 
     private void broadcastPlayerList() {
-        sendTextToClients(broadcastClients.keySet(), getPlayerList());
+        sendTextToClients(getNonMobileSessions(), getPlayerList());
     }
 
     private void checkForWinner() {
