@@ -114,7 +114,7 @@ export class GameComponent implements OnInit {
       gameId.addClass('d-inline-block');
       this.gameSocket.sendText(JSON.stringify({'spectatorjoined': true}));
     } else {
-      this.gameSocket.sendText(JSON.stringify({'playerjoined': sessionStorage.getItem('userId')}));
+      this.gameSocket.sendText(JSON.stringify({'playerjoined': sessionStorage.getItem('userId'), 'hasGameBoard' : 'true'}));
     }
   }
 

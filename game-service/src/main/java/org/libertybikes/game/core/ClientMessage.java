@@ -23,4 +23,7 @@ public class ClientMessage {
     @JsonbProperty("spectatorjoined")
     public Boolean isSpectator;
 
+    @JsonbProperty("hasGameBoard")
+    public Boolean hasGameBoard;
+
 }

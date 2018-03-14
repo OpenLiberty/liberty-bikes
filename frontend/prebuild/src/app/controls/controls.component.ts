@@ -110,7 +110,7 @@ export class ControlsComponent implements OnInit {
 
   onConnect(evt: MessageEvent) {
     const name = sessionStorage.getItem('username');
-    this.gameSocket.sendText(JSON.stringify({ 'playerjoined': sessionStorage.getItem('userId') }));
+    this.gameSocket.sendText(JSON.stringify({ 'playerjoined': sessionStorage.getItem('userId'), 'hasGameBoard' : 'false'}));
   }
 
   onMessage(evt: MessageEvent) {
