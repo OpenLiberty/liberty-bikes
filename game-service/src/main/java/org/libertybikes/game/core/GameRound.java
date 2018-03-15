@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.inject.spi.CDI;
@@ -68,7 +69,7 @@ public class GameRound implements Runnable {
     public GameRound(String id) {
         this.id = id;
         nextRoundId = getRandomId();
-        board.addObstacle(new MovingObstacle(10, 5, 60, 60, 0, -1));
+        board.addObstacle(new MovingObstacle(10, 5, 60, 60, 0, -1, 5));
         board.addObstacle(new MovingObstacle(10, 5, 60, 65, 0, 1));
         board.addObstacle(new MovingObstacle(5, 5, GameBoard.BOARD_SIZE / 2, GameBoard.BOARD_SIZE / 3, -1, -1, 1));
         board.addObstacle(new MovingObstacle(5, 5, GameBoard.BOARD_SIZE / 2, GameBoard.BOARD_SIZE / 3 * 2, 1, 1));
@@ -84,7 +85,7 @@ public class GameRound implements Runnable {
             c.player.setDirection(msg.direction);
     }
 
-    public void addPlayer(Session s, String playerId, String playerName) {
+    public void addPlayer(Session s, String playerId, String playerName, Boolean hasGameBoard) {
         // Front end should be preventing a player joining a full game but
         // defensive programming
         if (gameState != State.OPEN) {
@@ -98,7 +99,9 @@ public class GameRound implements Runnable {
 
         Player p = board.addPlayer(playerId, playerName);
         if (p != null) {
-            clients.put(s, new Client(s, p));
+            Client c = new Client(s, p);
+            c.isPhone = hasGameBoard ? false : true;
+            clients.put(s, c);
             System.out.println("Player " + playerId + " has joined.");
         } else {
             System.out.println("Player " + playerId + " already exists.");
@@ -161,6 +164,7 @@ public class GameRound implements Runnable {
         }
         runningGames.decrementAndGet();
         System.out.println("Finished round: " + id);
+        broadcastPlayerList();
 
         long start = System.nanoTime();
         updatePlayerStats();
@@ -246,12 +250,16 @@ public class GameRound implements Runnable {
         return Json.createObjectBuilder().add("playerlist", array).build().toString();
     }
 
+    public Set<Session> getNonMobileSessions() {
+        return clients.entrySet().stream().filter(c -> !c.getValue().isPhone).map(s -> s.getKey()).collect(Collectors.toSet());
+    }
+
     private void broadcastGameBoard() {
-        sendTextToClients(clients.keySet(), jsonb.toJson(board));
+        sendTextToClients(getNonMobileSessions(), jsonb.toJson(board));
     }
 
     private void broadcastPlayerList() {
-        sendTextToClients(clients.keySet(), getPlayerList());
+        sendTextToClients(getNonMobileSessions(), getPlayerList());
     }
 
     private void checkForWinner() {

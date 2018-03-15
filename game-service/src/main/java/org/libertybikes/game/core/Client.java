@@ -10,6 +10,7 @@ public class Client {
     public final Session session;
     public final Player player;
     public final boolean autoRequeue;
+    public boolean isPhone = false;
 
     /**
      * Create a client which is only a spectator of a game

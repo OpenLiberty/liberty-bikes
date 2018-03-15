@@ -71,7 +71,7 @@ public class GameRoundWebsocket {
                     round.updatePlayerDirection(session, msg);
                 if (msg.playerJoinedId != null) {
                     org.libertybikes.restclient.Player playerResponse = playerSvc.getPlayerById(msg.playerJoinedId);
-                    round.addPlayer(session, msg.playerJoinedId, playerResponse.name);
+                    round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard);
                 }
                 if (Boolean.TRUE == msg.isSpectator) {
                     round.addSpectator(session);
