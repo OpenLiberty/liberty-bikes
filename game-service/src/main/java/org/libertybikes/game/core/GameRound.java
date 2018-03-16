@@ -250,16 +250,16 @@ public class GameRound implements Runnable {
         return Json.createObjectBuilder().add("playerlist", array).build().toString();
     }
 
-    public Set<Session> getNonMobileSessions() {
+    public Set<Session> nonMobileSessions() {
         return clients.entrySet().stream().filter(c -> !c.getValue().isPhone).map(s -> s.getKey()).collect(Collectors.toSet());
     }
 
     private void broadcastGameBoard() {
-        sendTextToClients(getNonMobileSessions(), jsonb.toJson(board));
+        sendTextToClients(nonMobileSessions(), jsonb.toJson(board));
     }
 
     private void broadcastPlayerList() {
-        sendTextToClients(getNonMobileSessions(), getPlayerList());
+        sendTextToClients(nonMobileSessions(), getPlayerList());
     }
 
     private void checkForWinner() {
