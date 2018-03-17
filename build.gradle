@@ -11,6 +11,11 @@ buildscript {
     }
 }
 
+task clean(type: Delete) {
+  subprojects.each { dependsOn("${it.name}:clean") };
+  delete 'build'
+}
+
 subprojects {
     apply plugin: 'liberty'
     apply plugin: 'war'
@@ -58,10 +63,11 @@ subprojects {
         install {
             // use 1 liberty install for the whole repo
             baseDir = rootProject.buildDir
-            runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2018.2.0.0.zip"
+            runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2018.3.0.0.zip"
         }
     }
 
+    clean.dependsOn 'libertyStop'
     libertyDebug.dependsOn 'libertyStop'    
     libertyStart.dependsOn 'libertyStop', 'test'
     libertyRun.dependsOn   'libertyStop'
