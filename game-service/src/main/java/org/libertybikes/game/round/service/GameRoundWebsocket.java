@@ -8,7 +8,6 @@ import java.util.Set;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import javax.json.Json;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.websocket.OnClose;
@@ -19,9 +18,10 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.libertybikes.game.core.ClientMessage;
-import org.libertybikes.game.core.ClientMessage.GameEvent;
 import org.libertybikes.game.core.GameRound;
+import org.libertybikes.game.core.InboundMessage;
+import org.libertybikes.game.core.InboundMessage.GameEvent;
+import org.libertybikes.game.core.OutboundMessage;
 import org.libertybikes.restclient.PlayerService;
 
 @Dependent
@@ -35,7 +35,7 @@ public class GameRoundWebsocket {
     @RestClient
     PlayerService playerSvc;
 
-    private final Jsonb jsonb = JsonbBuilder.create();
+    private final static Jsonb jsonb = JsonbBuilder.create();
 
     @OnOpen
     public void onOpen(@PathParam("roundId") String roundId, Session session) {
@@ -58,7 +58,7 @@ public class GameRoundWebsocket {
     @OnMessage
     public void onMessage(@PathParam("roundId") final String roundId, String message, Session session) {
         try {
-            final ClientMessage msg = jsonb.fromJson(message, ClientMessage.class);
+            final InboundMessage msg = jsonb.fromJson(message, InboundMessage.class);
             final GameRound round = gameSvc.getRound(roundId);
             System.out.println("[onMessage] roundId=" + roundId + "  msg=" + message);
 
@@ -84,10 +84,7 @@ public class GameRoundWebsocket {
 
     public static void requeueClient(GameRoundService gameSvc, GameRound oldRound, Session s) {
         GameRound nextGame = gameSvc.requeue(oldRound);
-        String requeueMsg = Json.createObjectBuilder()
-                        .add("requeue", nextGame.id)
-                        .build()
-                        .toString();
+        String requeueMsg = jsonb.toJson(new OutboundMessage.RequeueGame(nextGame.id));
         sendTextToClient(s, requeueMsg);
         if (oldRound.removeClient(s) == 0)
             gameSvc.deleteRound(oldRound.id);

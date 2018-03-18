@@ -7,13 +7,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.json.bind.annotation.JsonbTransient;
+
 public class GameBoard {
 
     public static final int BOARD_SIZE = 121;
     public static final short SPOT_AVAILABLE = 0, TRAIL_SPOT_TAKEN = -10, OBJECT_SPOT_TAKEN = -8, PLAYER_SPOT_TAKEN = 1;
 
-    // @JsonbTransient // TODO use annotation here once OpenLiberty upgrades to yasson 1.0.1 (contains bug fix)
-    private final short[][] board = new short[BOARD_SIZE][BOARD_SIZE];
+    @JsonbTransient
+    public final short[][] board = new short[BOARD_SIZE][BOARD_SIZE];
 
     public final Set<Obstacle> obstacles = new HashSet<>();
     public final Set<MovingObstacle> movingObstacles = new HashSet<>();
@@ -91,11 +93,6 @@ public class GameBoard {
 //        }
 
         return players.remove(p);
-    }
-
-    // TODO: once OpenLiberty moves up to yasson 1.0.1 this method can be removed
-    public short[][] board() {
-        return board;
     }
 
     // For debugging

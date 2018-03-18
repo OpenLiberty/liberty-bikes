@@ -14,11 +14,10 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.inject.spi.CDI;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.annotation.JsonbPropertyOrder;
+import javax.json.bind.annotation.JsonbTransient;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.websocket.Session;
@@ -33,19 +32,20 @@ import org.libertybikes.restclient.PlayerService;
 public class GameRound implements Runnable {
 
     public static enum State {
-        OPEN, FULL, RUNNING, FINISHED
+        OPEN, FULL, STARTING, RUNNING, FINISHED
     }
 
     public static final Jsonb jsonb = JsonbBuilder.create();
     public static final int GAME_TICK_SPEED = 50; // ms
     private static final int DELAY_BETWEEN_ROUNDS = 5; //ticks
+    private static final int STARTING_COUNTDOWN = 3; // seconds
     private static final Random r = new Random();
     private static final AtomicInteger runningGames = new AtomicInteger();
 
     // Properties exposed in JSON representation of object
     public final String id;
     public final String nextRoundId;
-    public State gameState = State.OPEN;
+    public volatile State gameState = State.OPEN;
     private final GameBoard board = new GameBoard();
 
     private final AtomicBoolean gameRunning = new AtomicBoolean(false);
@@ -79,7 +79,7 @@ public class GameRound implements Runnable {
         return board;
     }
 
-    public void updatePlayerDirection(Session playerSession, ClientMessage msg) {
+    public void updatePlayerDirection(Session playerSession, InboundMessage msg) {
         Client c = clients.get(playerSession);
         if (c.isPlayer())
             c.player.setDirection(msg.direction);
@@ -93,7 +93,7 @@ public class GameRound implements Runnable {
             return;
         }
 
-        if (players().size() + 1 >= Player.MAX_PLAYERS) {
+        if (getPlayers().size() + 1 >= Player.MAX_PLAYERS) {
             gameState = State.FULL;
         }
 
@@ -113,7 +113,7 @@ public class GameRound implements Runnable {
     public void addSpectator(Session s) {
         System.out.println("A spectator has joined.");
         clients.put(s, new Client(s));
-        sendTextToClient(s, getPlayerList());
+        sendTextToClient(s, jsonb.toJson(new OutboundMessage.PlayerList(getPlayers())));
         sendTextToClient(s, jsonb.toJson(board));
     }
 
@@ -122,7 +122,7 @@ public class GameRound implements Runnable {
         System.out.println(p.name + " disconnected.");
 
         // Open player slot for new joiners
-        if (gameState == State.FULL && players().size() - 1 < Player.MAX_PLAYERS) {
+        if (gameState == State.FULL && getPlayers().size() - 1 < Player.MAX_PLAYERS) {
             gameState = State.OPEN;
         }
 
@@ -143,8 +143,8 @@ public class GameRound implements Runnable {
         return clients.size();
     }
 
-    // @JsonbTransient // TODO re-enable this anno once Liberty upgrades to yasson 1.0.1
-    public Set<Player> players() {
+    @JsonbTransient
+    public Set<Player> getPlayers() {
         return board.players;
     }
 
@@ -183,7 +183,7 @@ public class GameRound implements Runnable {
         if (gameState != State.FINISHED)
             throw new IllegalStateException("Canot update player stats while game is still running.");
 
-        Set<Player> players = players();
+        Set<Player> players = getPlayers();
         if (players.size() < 2)
             return; // Don't update player stats for single-player games
 
@@ -211,9 +211,9 @@ public class GameRound implements Runnable {
         // Move all living players forward 1
         boolean playerStatusChange = false;
         boolean playersMoved = false;
-        for (Player p : players()) {
+        for (Player p : getPlayers()) {
             if (p.isAlive) {
-                if (p.movePlayer(board.board())) {
+                if (p.movePlayer(board.board)) {
                     playersMoved = true;
                 } else {
                     death = true;
@@ -242,38 +242,30 @@ public class GameRound implements Runnable {
         }
     }
 
-    private String getPlayerList() {
-        // TODO: Use JSON-B instead of JSON-P here
-        JsonArrayBuilder array = Json.createArrayBuilder();
-        for (Player p : players()) {
-            array.add(Json.createObjectBuilder()
-                            .add("name", p.name)
-                            .add("status", p.getStatus().toString())
-                            .add("color", p.color));
-        }
-        return Json.createObjectBuilder().add("playerlist", array).build().toString();
-    }
-
-    public Set<Session> nonMobileSessions() {
-        return clients.entrySet().stream().filter(c -> !c.getValue().isPhone).map(s -> s.getKey()).collect(Collectors.toSet());
+    private Set<Session> getNonMobileSessions() {
+        return clients.entrySet()
+                        .stream()
+                        .filter(c -> !c.getValue().isPhone)
+                        .map(s -> s.getKey())
+                        .collect(Collectors.toSet());
     }
 
     private void broadcastGameBoard() {
-        sendTextToClients(nonMobileSessions(), jsonb.toJson(board));
+        sendTextToClients(getNonMobileSessions(), jsonb.toJson(board));
     }
 
     private void broadcastPlayerList() {
-        sendTextToClients(nonMobileSessions(), getPlayerList());
+        sendTextToClients(getNonMobileSessions(), jsonb.toJson(new OutboundMessage.PlayerList(getPlayers())));
     }
 
     private void checkForWinner() {
-        if (players().size() < 2) {// 1 player game, no winner
+        if (getPlayers().size() < 2) {// 1 player game, no winner
             gameState = State.FINISHED;
             return;
         }
         int alivePlayers = 0;
         Player alive = null;
-        for (Player cur : players()) {
+        for (Player cur : getPlayers()) {
             if (cur.isAlive) {
                 alivePlayers++;
                 alive = cur;
@@ -290,8 +282,17 @@ public class GameRound implements Runnable {
     }
 
     public void startGame() {
+        if (gameState != State.OPEN && gameState != State.FULL)
+            return;
+
+        // Issue a countdown to all of the clients
+        gameState = State.STARTING;
+
+        sendTextToClients(clients.keySet(), jsonb.toJson(new OutboundMessage.StartingCountdown(STARTING_COUNTDOWN)));
+        delay(TimeUnit.SECONDS.toMillis(STARTING_COUNTDOWN));
+
         paused.set(false);
-        for (Player p : players())
+        for (Player p : getPlayers())
             if (STATUS.Connected == p.getStatus())
                 p.setStatus(STATUS.Alive);
         broadcastPlayerList();
