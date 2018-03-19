@@ -57,7 +57,7 @@ async joinRound(gameBoard: boolean) {
   try {
     let data: any = await this.http.get(`http://${document.location.hostname}:8080/round/${roundID}`).toPromise();
     console.log(JSON.stringify(data));
-    if (data === undefined) {
+    if (data === null) {
       alert('Game round does not exist!');
       return;
     }
