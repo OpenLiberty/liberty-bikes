@@ -2,7 +2,7 @@ import * as $ from 'jquery';
 
 import { Component, OnInit } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
-import { GameWebsocket } from '../net/websocket';
+import { GameService } from './game.service';
 
 @Component({
   selector: 'app-game',
@@ -11,8 +11,6 @@ import { GameWebsocket } from '../net/websocket';
 })
 export class GameComponent implements OnInit {
   static readonly BOX_SIZE = 5;
-
-  gameSocket: GameWebsocket;
 
   roundId: string;
   serverHost: string;
@@ -24,54 +22,9 @@ export class GameComponent implements OnInit {
   canvas: any;
   context: CanvasRenderingContext2D;
 
-  constructor(private meta: Meta) {  }
-
-  ngOnInit() {
-    this.meta.addTag({name: 'viewport', content: 'width=1600'}, true);
-    this.roundId = sessionStorage.getItem('roundId');
-    console.log(`Round ID: ${this.roundId}`);
-    this.serverHost = document.location.hostname;
-    this.serverPort = '8080';
-    this.gameSocket = new GameWebsocket(this.serverHost, this.serverPort, this.roundId);
-
-    this.output = document.getElementById('output');
-    this.idDisplay = document.getElementById('gameIdDisplay');
-
-    this.canvas = document.getElementById('gameCanvas');
-    this.context = this.canvas.getContext('2d');
-
-    this.gameSocket.messageCallback = (evt: MessageEvent): any => {
-      this.onMessage(evt);
-    };
-
-    this.gameSocket.errorCallback = (evt: MessageEvent): any => {
-      this.onError(evt);
-    };
-
-    this.gameSocket.openCallback = (evt: MessageEvent): any => {
-      this.onConnect(evt);
-    };
-
-    window.onkeydown = (e: KeyboardEvent): any => {
-      const key = e.keyCode ? e.keyCode : e.which;
-
-      if (key === 38) {
-        this.moveUp();
-      } else if (key === 40) {
-        this.moveDown();
-      } else if (key === 37) {
-        this.moveLeft();
-      } else if (key === 39) {
-        this.moveRight();
-      }
-    };
-  }
-
-  // Handlers
-  onMessage(evt: MessageEvent) {
-    console.log(`received: ${evt.data}`);
-    if (typeof evt.data === 'string') {
-      const json = JSON.parse(evt.data);
+  constructor(private meta: Meta, private gameService: GameService) {
+    gameService.messages.subscribe((msg) => {
+      const json = msg as any;
       if (json.playerlist) {
         this.updatePlayerList(json);
       }
@@ -97,14 +50,14 @@ export class GameComponent implements OnInit {
           }
         }
       }
-    }
+    }, (err) => {
+      console.log(`Error occurred: ${err}`);
+    });
   }
 
-  onError(evt: MessageEvent) {
-    this.writeToScreen(`<span style="color: red;">ERROR:</span> ${evt.data}`);
-  }
+  ngOnInit() {
+    this.roundId = sessionStorage.getItem('roundId');
 
-  onConnect(evt: MessageEvent) {
     if (sessionStorage.getItem('isSpectator') === 'true') {
       console.log('is a spectator... showing game id');
       // Set the Round ID and make visible
@@ -112,36 +65,58 @@ export class GameComponent implements OnInit {
       const gameId = $('#game-code-display');
       gameId.removeClass('d-none');
       gameId.addClass('d-inline-block');
-      this.gameSocket.sendText(JSON.stringify({'spectatorjoined': true}));
+      this.gameService.send({'spectatorjoined': true});
     } else {
-      this.gameSocket.sendText(JSON.stringify({'playerjoined': sessionStorage.getItem('userId'), 'hasGameBoard' : 'true'}));
+      this.gameService.send({'playerjoined': sessionStorage.getItem('userId'), 'hasGameBoard' : 'true'});
     }
-  }
 
+
+    this.meta.addTag({name: 'viewport', content: 'width=1600'}, true);
+
+    this.output = document.getElementById('output');
+    this.idDisplay = document.getElementById('gameIdDisplay');
+
+    this.canvas = document.getElementById('gameCanvas');
+    this.context = this.canvas.getContext('2d');
+
+    window.onkeydown = (e: KeyboardEvent): any => {
+      const key = e.keyCode ? e.keyCode : e.which;
+
+      if (key === 38) {
+        this.moveUp();
+      } else if (key === 40) {
+        this.moveDown();
+      } else if (key === 37) {
+        this.moveLeft();
+      } else if (key === 39) {
+        this.moveRight();
+      }
+    };
+  }
 
   // Game actions
   startGame() {
-    this.gameSocket.sendText(JSON.stringify({ message: 'GAME_START' }));
+    this.gameService.send({ message: 'GAME_START' });
   }
 
   requeue() {
-    this.gameSocket.sendText(JSON.stringify({ message: 'GAME_REQUEUE' }));
+    this.gameService.send({ message: 'GAME_REQUEUE' });
   }
 
   moveUp() {
-    this.gameSocket.sendText(JSON.stringify({ direction: 'UP' }));
+    this.gameService.send({ direction: 'UP' });
   }
 
   moveDown() {
-    this.gameSocket.sendText(JSON.stringify({ direction: 'DOWN' }));
+    this.gameService.send({ direction: 'DOWN' });
   }
 
   moveLeft() {
-    this.gameSocket.sendText(JSON.stringify({ direction: 'LEFT' }));
+    this.gameService.send({ direction: 'LEFT' });
   }
 
   moveRight() {
-    this.gameSocket.sendText(JSON.stringify({ direction: 'RIGHT' }));
+    this.gameService.send({ direction: 'RIGHT' });
   }
 
   // Update display
@@ -156,7 +131,7 @@ export class GameComponent implements OnInit {
     this.context.fillRect(GameComponent.BOX_SIZE * obstacle.x, GameComponent.BOX_SIZE * obstacle.y,
                           GameComponent.BOX_SIZE * obstacle.width, GameComponent.BOX_SIZE * obstacle.height);
   }
-  
+
   drawMovingObstacle(obstacle) {
     this.context.fillStyle = '#808080'; // obstacles always grey
     if (obstacle.hasMoved) {
