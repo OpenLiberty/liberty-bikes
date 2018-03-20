@@ -1,5 +1,5 @@
 $titlebar: 75px;
-$navbar-border: 1px solid #ccc;
+$navbar-border: 1px solid white;
 
 body {
   margin: 0;
@@ -8,32 +8,44 @@ body {
 
 :host {
   display: grid;
-  grid-template-rows: $titlebar 1fr 1fr $titlebar;
+  grid-template-rows: $titlebar 1fr 4fr $titlebar;
   grid-template-columns: 1fr minmax(600px, 3fr);
   height: 100vh;
-
-
-  background-color: white;
 }
 
 .navbar {
-  background-color: #eee;
+  background-color: rgba(0, 0, 0, 0.2);
 
   height: $titlebar;
 
   display: flex;
   align-items: center;
 
-  padding: 0px 5px;
+  padding: 10px 10px;
 }
 
 .navbar h1 {
   flex: 1;
   margin: 0px;
+
 }
 
 .navbar h2 {
   margin: 0px;
+}
+
+.navbar button {
+  width: calc(50% - 5px);
+  height: 100%;
+  background-color: rgba(0, 0, 20, 0.2);
+
+  font-size: 1.7em;
+
+  text-transform: lowercase;
+  font-variant: small-caps;
+  letter-spacing: .1em;
+
+  border-color: #bbb;
 }
 
 #titlebar {
@@ -43,11 +55,18 @@ body {
 }
 
 #titlebar h1 {
+  color: #fff;
+  font-size: 1.5em;
+  font-weight: 300;
+  font-variant: small-caps;
+  text-transform: uppercase;
   margin-left: 10px;
+  letter-spacing: .7em;
 }
 
 #titlebar h2 {
   margin-right: 10px;
+  color: white;
 }
 
 #game-code-display {
@@ -81,6 +100,8 @@ body {
 
 #players {
   grid-area: 2 / 2;
+
+  border-bottom: 1px solid white;
 }
 
 #leaderboard {

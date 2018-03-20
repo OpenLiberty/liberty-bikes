@@ -10,6 +10,8 @@ import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { GameComponent } from './game/game.component';
 import { ControlsComponent } from './controls/controls.component';
+import { PlayerListComponent } from './game/playerlist/playerlist.component';
+import { PlayerComponent } from './game/player/player.component';
 
 @NgModule({
   imports: [
@@ -23,6 +25,8 @@ import { ControlsComponent } from './controls/controls.component';
     LoginComponent,
     GameComponent,
     ControlsComponent,
+    PlayerListComponent,
+    PlayerComponent,
   ],
   providers: [ ],
   bootstrap: [ AppComponent ]
