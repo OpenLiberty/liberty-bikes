@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { GameWebsocket } from '../net/websocket';
+import { GameService } from '../game/game.service';
 import { Triangle } from '../geom/triangle';
 import { Point } from '../geom/point';
 
@@ -16,19 +16,30 @@ export class ControlsComponent implements OnInit {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
 
-  gameSocket: GameWebsocket;
-
   upTriangle: Triangle;
   leftTriangle: Triangle;
   downTriangle: Triangle;
   rightTriangle: Triangle;
 
-  constructor() {}
+  constructor(private gameService: GameService) {
+    gameService.messages.subscribe((msg) => {
+      const json = msg as any;
+      console.log(`received: ${JSON.stringify(json)}`);
+      if (json.requeue) {
+        this.roundId = json.requeue;
+        sessionStorage.setItem('roundId', this.roundId);
+        location.reload();
+      }
+    }, (err) => {
+      console.log(err);
+    });
+  }
 
   ngOnInit() {
-    this.initCanvas();
+    const name = sessionStorage.getItem('username');
+    this.gameService.send({ 'playerjoined': sessionStorage.getItem('userId'), 'hasGameBoard' : 'false'});
 
-    this.initSocket();
+    this.initCanvas();
 
     window.onkeydown = (e: KeyboardEvent): any => {
       const key = e.keyCode ? e.keyCode : e.which;
@@ -88,43 +99,6 @@ export class ControlsComponent implements OnInit {
     );
   }
 
-  initSocket() {
-    this.roundId = sessionStorage.getItem('roundId');
-    console.log(`Round ID: ${this.roundId}`);
-    this.serverHost = document.location.hostname;
-    this.serverPort = '8080';
-    this.gameSocket = new GameWebsocket(
-      this.serverHost,
-      this.serverPort,
-      this.roundId
-    );
-
-    this.gameSocket.openCallback = (evt: MessageEvent): any => {
-      this.onConnect(evt);
-    };
-
-    this.gameSocket.messageCallback = (evt: MessageEvent): any => {
-      this.onMessage(evt);
-    };
-  }
-
-  onConnect(evt: MessageEvent) {
-    const name = sessionStorage.getItem('username');
-    this.gameSocket.sendText(JSON.stringify({ 'playerjoined': sessionStorage.getItem('userId'), 'hasGameBoard' : 'false'}));
-  }
-
-  onMessage(evt: MessageEvent) {
-    console.log(`received: ${evt.data}`);
-    if (typeof evt.data === 'string') {
-      const json = JSON.parse(evt.data);
-      if (json.requeue) {
-        this.roundId = json.requeue;
-        sessionStorage.setItem('roundId', this.roundId);
-        location.reload();
-      }
-    }
-  }
-
   touchStarted(evt: TouchEvent) {
     console.log(evt);
     if (evt.touches.length > 0) {
@@ -162,26 +136,26 @@ export class ControlsComponent implements OnInit {
 
   // Game actions
   startGame() {
-    this.gameSocket.sendText(JSON.stringify({ message: 'GAME_START' }));
+    this.gameService.send({ message: 'GAME_START' });
   }
 
   requeue() {
-    this.gameSocket.sendText(JSON.stringify({ message: 'GAME_REQUEUE' }));
+    this.gameService.send({ message: 'GAME_REQUEUE' });
   }
 
   moveUp() {
-    this.gameSocket.sendText(JSON.stringify({ direction: 'UP' }));
+    this.gameService.send({ direction: 'UP' });
   }
 
   moveDown() {
-    this.gameSocket.sendText(JSON.stringify({ direction: 'DOWN' }));
+    this.gameService.send({ direction: 'DOWN' });
   }
 
   moveLeft() {
-    this.gameSocket.sendText(JSON.stringify({ direction: 'LEFT' }));
+    this.gameService.send({ direction: 'LEFT' });
   }
 
   moveRight() {
-    this.gameSocket.sendText(JSON.stringify({ direction: 'RIGHT' }));
+    this.gameService.send({ direction: 'RIGHT' });
   }
 }
