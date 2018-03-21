@@ -207,6 +207,7 @@ public class GameRound implements Runnable {
 
         boolean boardUpdated = board.moveObjects();
 
+        boolean death = false;
         // Move all living players forward 1
         boolean playerStatusChange = false;
         boolean playersMoved = false;
@@ -215,11 +216,14 @@ public class GameRound implements Runnable {
                 if (p.movePlayer(board.board())) {
                     playersMoved = true;
                 } else {
-                    // Since someone died, check for winning player
-                    checkForWinner();
-                    playerStatusChange = true;
+                    death = true;
                 }
             }
+        }
+
+        if (death) {
+            checkForWinner();
+            playerStatusChange = true;
         }
 
         if (playersMoved || boardUpdated)
@@ -277,6 +281,10 @@ public class GameRound implements Runnable {
         }
         if (alivePlayers == 1) {
             alive.setStatus(STATUS.Winner);
+            gameState = State.FINISHED;
+        }
+
+        if (alivePlayers == 0) {
             gameState = State.FINISHED;
         }
     }

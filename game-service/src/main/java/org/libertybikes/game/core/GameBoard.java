@@ -10,7 +10,7 @@ import java.util.Set;
 public class GameBoard {
 
     public static final int BOARD_SIZE = 121;
-    public static final short SPOT_AVAILABLE = 0, PLAYER_SPOT_TAKEN = 1, OBJECT_SPOT_TAKEN = -1;
+    public static final short SPOT_AVAILABLE = 0, TRAIL_SPOT_TAKEN = -10, OBJECT_SPOT_TAKEN = -8, PLAYER_SPOT_TAKEN = 1;
 
     // @JsonbTransient // TODO use annotation here once OpenLiberty upgrades to yasson 1.0.1 (contains bug fix)
     private final short[][] board = new short[BOARD_SIZE][BOARD_SIZE];
@@ -55,8 +55,8 @@ public class GameBoard {
     public Player addPlayer(String playerId, String playerName) {
 
         // Find first open player slot to fill, which determines position
-        int playerNum = -1;
-        for (int i = 0; i < takenPlayerSlots.length; i++) {
+        short playerNum = -1;
+        for (short i = 0; i < takenPlayerSlots.length; i++) {
             if (!takenPlayerSlots[i]) {
                 playerNum = i;
                 takenPlayerSlots[i] = true;
@@ -71,14 +71,25 @@ public class GameBoard {
         if (p.x > BOARD_SIZE || p.y > BOARD_SIZE)
             throw new IllegalArgumentException("Player does not fit on board: " + p);
 
-        board[p.x][p.y] = PLAYER_SPOT_TAKEN;
+        for (int i = 0; i < p.width; i++) {
+            for (int j = 0; j < p.height; j++) {
+                board[p.x + i][p.y + j] = (short) (PLAYER_SPOT_TAKEN + playerNum);
+            }
+        }
 
         return players.add(p) ? p : null;
     }
 
     public boolean removePlayer(Player p) {
         takenPlayerSlots[p.getPlayerNum()] = false;
-        board[p.x][p.y] = SPOT_AVAILABLE;
+
+        // Right now we don't clear their dead body while drawing the canvas
+//        for (int i = 0; i < p.width; i++) {
+//            for (int j = 0; j < p.height; j++) {
+//                board[p.x + i][p.y + j] = SPOT_AVAILABLE;
+//            }
+//        }
+
         return players.remove(p);
     }
 
@@ -93,16 +104,20 @@ public class GameBoard {
             StringBuilder row = new StringBuilder();
             for (int j = 0; j < BOARD_SIZE; j++) {
                 switch (board[i][j]) {
-                    case (PLAYER_SPOT_TAKEN): {
-                        row.append("X");
+                    case (SPOT_AVAILABLE): {
+                        row.append("-");
                         break;
                     }
                     case (OBJECT_SPOT_TAKEN): {
                         row.append("O");
                         break;
                     }
+                    case (TRAIL_SPOT_TAKEN): {
+                        row.append("X");
+                        break;
+                    }
                     default: {
-                        row.append("_");
+                        row.append(board[i][j]);
                         break;
                     }
                 }

@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.json.bind.annotation.JsonbPropertyOrder;
 
 import org.junit.Test;
 import org.libertybikes.game.core.ClientMessage.GameEvent;
@@ -62,8 +63,8 @@ public class JsonDataTest {
         board.addObstacle(new Obstacle(1, 2, 3, 4));
         assertEquals("{\"movingObstacles\":[],\"obstacles\":[" + obstacleJson + "],\"players\":[]}", jsonb.toJson(board));
 
-        // @JsonbPropertyOrder({ "id", "name", "color", "x", "y", "isAlive" })
-        String bobJson = "{\"id\":\"1234\",\"name\":\"Bob\",\"color\":\"#DF740C\",\"status\":\"Connected\",\"x\":10,\"y\":10,\"isAlive\":true}";
+        // @JsonbPropertyOrder({ "id", "name", "color", "status", "isAlive", "x", "y", "width", "height", "oldX", "oldY", "trailPosX", "trailPosY", "trailPosX2", "trailPosY2" })
+        String bobJson = "{\"id\":\"1234\",\"name\":\"Bob\",\"color\":\"#DF740C\",\"status\":\"Connected\",\"isAlive\":true,\"x\":9,\"y\":9,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":9,\"trailPosX\":10,\"trailPosY\":10,\"trailPosX2\":10,\"trailPosY2\":10}";
         board.addPlayer("1234", "Bob");
         assertEquals("{\"movingObstacles\":[],\"obstacles\":[" + obstacleJson + "],\"players\":[" + bobJson + "]}",
                      jsonb.toJson(board));

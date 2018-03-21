@@ -119,8 +119,17 @@ export class GameComponent implements OnInit {
   // Update display
   drawPlayer(player) {
     this.context.fillStyle = player.color;
+    this.context.clearRect(GameComponent.BOX_SIZE * player.oldX, GameComponent.BOX_SIZE * player.oldY,
+                          GameComponent.BOX_SIZE * player.width, GameComponent.BOX_SIZE * player.height);
     this.context.fillRect(GameComponent.BOX_SIZE * player.x, GameComponent.BOX_SIZE * player.y,
+                          GameComponent.BOX_SIZE * player.width, GameComponent.BOX_SIZE * player.height);
+    this.context.fillRect(GameComponent.BOX_SIZE * player.trailPosX, GameComponent.BOX_SIZE * player.trailPosY,
                           GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
+    this.context.fillRect(GameComponent.BOX_SIZE * player.trailPosX2, GameComponent.BOX_SIZE * player.trailPosY2,
+                          GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
+    this.context.fillStyle = '#e8e5e5';
+    this.context.fillRect(GameComponent.BOX_SIZE * player.x + player.width/4 * GameComponent.BOX_SIZE, GameComponent.BOX_SIZE * player.y + player.height/4 * GameComponent.BOX_SIZE,
+                          GameComponent.BOX_SIZE * (player.width/2), GameComponent.BOX_SIZE * (player.height/2));  
   }
 
   drawObstacle(obstacle) {
