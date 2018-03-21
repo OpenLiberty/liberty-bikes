@@ -25,9 +25,6 @@ export class GameComponent implements OnInit {
   constructor(private meta: Meta, private gameService: GameService) {
     gameService.messages.subscribe((msg) => {
       const json = msg as any;
-      if (json.playerlist) {
-        this.updatePlayerList(json);
-      }
       if (json.requeue) {
         this.roundId = json.requeue;
         sessionStorage.setItem('roundId', this.roundId);
@@ -147,20 +144,6 @@ export class GameComponent implements OnInit {
     pre.style.wordWrap = 'break-word';
     pre.innerHTML = message;
     this.output.appendChild(pre);
-  }
-
-  updatePlayerList(json) {
-    let list = '<li class="list-group-item active">Players</li>';
-
-    for (const player of json.playerlist) {
-      list += `
-<li class="list-group-item">
-  <span style="color: ${player.color};">${player.name}</span>: ${this.getStatus(player.status)}
-</li>
-`;
-    }
-
-    $('#playerList').html(list);
   }
 
   getStatus(status) {

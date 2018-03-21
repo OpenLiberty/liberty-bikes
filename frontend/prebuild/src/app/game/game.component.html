@@ -10,8 +10,7 @@
   </div>
 </div>
 <div id="players">
-  <ul id="playerList" class="list-group">
-  </ul>
+  <player-list></player-list>
 </div>
 
 <div id="leaderboard">
@@ -19,6 +18,6 @@
 </div>
 
 <div id="footer" class="navbar">
-  <button type="button" class="btn btn-success" (click)="startGame()">Start Game</button>
-  <button type="button" class="btn btn-info" (click)="requeue()">Requeue</button>
+  <button type="button" (click)="startGame()">Start Game</button>
+  <button type="button" (click)="requeue()">Requeue</button>
 </div>

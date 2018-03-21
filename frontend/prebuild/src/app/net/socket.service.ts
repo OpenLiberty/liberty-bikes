@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
 import { Observer } from 'rxjs/Observer';
+import 'rxjs/add/operator/share';
 
 @Injectable()
 export class SocketService {
@@ -44,7 +45,7 @@ export class SocketService {
   get socket(): Subject<MessageEvent> {
     console.log(`retrieving socket: ${this.subject}`);
     if (!this.initialized) {
-      console.log("Socket not initialized yet");
+      console.warn("Socket not initialized yet");
     }
     return this.subject;
   }
@@ -84,7 +85,7 @@ export class SocketService {
       }
     };
 
-    return Subject.create(observer, observable);
+    return Subject.create(observer, observable.share());
   }
 
 }
