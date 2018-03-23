@@ -49,33 +49,33 @@ public class GameBoardTest {
         verifyAvailable(4, 10);
         verifyAvailable(5, 10);
     }
-    
+
     @Test
     public void testIllegalObstacle() {
         try {
-            board.addObstacle(new Obstacle(2,1,-3,4));
+            board.addObstacle(new Obstacle(2, 1, -3, 4));
             fail("Should not be able to add obstacle off of board");
         } catch (IllegalArgumentException e) {
             // expected
         }
-        
+
         try {
             board.addObstacle(new Obstacle(BOARD_SIZE + 1, 1, 3, 4));
             fail("Should not be able to add obstacle off of board");
-        }  catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             // expected
         }
     }
 
     private void verifyTaken(int x, int y) {
-        if (board.board()[x][y] != GameBoard.OBJECT_SPOT_TAKEN) {
+        if (board.board[x][y] != GameBoard.OBJECT_SPOT_TAKEN) {
             board.dumpBoard();
             fail("Spot should be taken but it was available: [" + x + "][" + y + "]");
         }
     }
 
     private void verifyAvailable(int x, int y) {
-        if (board.board()[x][y] != GameBoard.SPOT_AVAILABLE) {
+        if (board.board[x][y] != GameBoard.SPOT_AVAILABLE) {
             board.dumpBoard();
             fail("Spot should be availble but it was taken: [" + x + "][" + y + "]");
         }

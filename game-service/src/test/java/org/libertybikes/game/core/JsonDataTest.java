@@ -6,12 +6,16 @@ package org.libertybikes.game.core;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
+
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
-import javax.json.bind.annotation.JsonbPropertyOrder;
 
 import org.junit.Test;
-import org.libertybikes.game.core.ClientMessage.GameEvent;
+import org.libertybikes.game.core.InboundMessage.GameEvent;
+import org.libertybikes.game.core.OutboundMessage.PlayerList;
+import org.libertybikes.game.core.OutboundMessage.RequeueGame;
+import org.libertybikes.game.core.OutboundMessage.StartingCountdown;
 
 public class JsonDataTest {
 
@@ -19,28 +23,28 @@ public class JsonDataTest {
 
     @Test
     public void testPlayerJoined() {
-        ClientMessage playerJoined = new ClientMessage();
+        InboundMessage playerJoined = new InboundMessage();
         playerJoined.playerJoinedId = "1234";
         assertEquals("{\"playerjoined\":\"1234\"}", jsonb.toJson(playerJoined));
     }
 
     @Test
     public void testGameEventRequeue() {
-        ClientMessage gameEvent = new ClientMessage();
+        InboundMessage gameEvent = new InboundMessage();
         gameEvent.event = GameEvent.GAME_REQUEUE;
         assertEquals("{\"message\":\"GAME_REQUEUE\"}", jsonb.toJson(gameEvent));
     }
 
     @Test
     public void testGameEventStart() {
-        ClientMessage gameEvent = new ClientMessage();
+        InboundMessage gameEvent = new InboundMessage();
         gameEvent.event = GameEvent.GAME_START;
         assertEquals("{\"message\":\"GAME_START\"}", jsonb.toJson(gameEvent));
     }
 
     @Test
     public void testSpectatorJoined() {
-        ClientMessage msg = new ClientMessage();
+        InboundMessage msg = new InboundMessage();
         msg.isSpectator = Boolean.FALSE;
         assertEquals("{\"spectatorjoined\":false}", jsonb.toJson(msg));
 
@@ -89,6 +93,25 @@ public class JsonDataTest {
         org.libertybikes.restclient.Player p = jsonb.fromJson(playerSvcResponse, org.libertybikes.restclient.Player.class);
         assertEquals("112233", p.id);
         assertEquals("andy", p.name);
+    }
+
+    @Test
+    public void testPlayerList() {
+        PlayerList list = new OutboundMessage.PlayerList(Collections.singleton(new Player("123", "Bob", (short) 1)));
+        assertEquals("{\"playerlist\":[{\"id\":\"123\",\"name\":\"Bob\",\"color\":\"#FF0000\",\"status\":\"Connected\",\"isAlive\":true,\"x\":9,\"y\":110,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":110,\"trailPosX\":10,\"trailPosY\":111,\"trailPosX2\":10,\"trailPosY2\":111}]}",
+                     jsonb.toJson(list));
+    }
+
+    @Test
+    public void testRequeue() {
+        RequeueGame req = new OutboundMessage.RequeueGame("1234");
+        assertEquals("{\"requeue\":\"1234\"}", jsonb.toJson(req));
+    }
+
+    @Test
+    public void testCountdown() {
+        StartingCountdown countdown = new OutboundMessage.StartingCountdown(5);
+        assertEquals("{\"countdown\":5}", jsonb.toJson(countdown));
     }
 
     private void assertContains(String expected, String search) {

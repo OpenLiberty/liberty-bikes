@@ -5,7 +5,7 @@ package org.libertybikes.game.core;
 
 import javax.json.bind.annotation.JsonbProperty;
 
-public class ClientMessage {
+public class InboundMessage {
 
     public static enum GameEvent {
         GAME_START,

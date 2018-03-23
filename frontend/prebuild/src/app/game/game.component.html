@@ -4,6 +4,11 @@
     <h2>code: <span id="game-code"></span></h2>
   </div>
 </div>
+	
+<div id="loader-overlay" class="loader-overlay d-none" data-ng-hide="vm.hideLoader">
+	<div class="spin-loader" data-ng-class="{'shrink': vm.shrinkOnHide, 'expand': !vm.shrinkOnHide}"></div>
+</div>
+	
 <div id="game-container">
   <div id="game-board">
     <canvas width="600" height="600" id="gameCanvas"></canvas>

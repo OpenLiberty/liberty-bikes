@@ -47,6 +47,9 @@ export class GameComponent implements OnInit {
           }
         }
       }
+      if (json.countdown) {
+        this.startingCountdown(json.countdown);
+      }
     }, (err) => {
       console.log(`Error occurred: ${err}`);
     });
@@ -99,7 +102,7 @@ export class GameComponent implements OnInit {
   requeue() {
     this.gameService.send({ message: 'GAME_REQUEUE' });
   }
-
+  
   moveUp() {
     this.gameService.send({ direction: 'UP' });
   }
@@ -168,6 +171,14 @@ export class GameComponent implements OnInit {
     if (status === 'Disconnected') {
       return '<span class=\'badge badge-pill badge-secondary\'>Disconnected</span>';
     }
+  }
+  
+  startingCountdown(seconds) {
+	const loader = $('#loader-overlay');
+	loader.removeClass('d-none');
+	setTimeout(function() {
+		loader.addClass('d-none');
+	}, (1000 * seconds));
   }
 
 }

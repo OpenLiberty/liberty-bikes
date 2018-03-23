@@ -134,3 +134,71 @@ body {
 #footer .btn {
   width: calc(50% - 10px);
 }
+
+$loaderHeightWidth:120px;
+$loaderPrimaryColor:#18bc9c;
+$loaderBorderSize:3px;
+$loaderMinHeightWidth:10px;
+$loaderMaxHeightWidth:400px;
+$animationTime: 0.3s;
+$animationStyle:linear;
+$animationStyle:cubic-bezier(.23,.78,.69,.84);
+
+.spin-loader {
+	position:fixed;
+	top:25%;
+	left:50%;
+	margin-left:-($loaderHeightWidth/2);
+	height:$loaderHeightWidth;
+	width:$loaderHeightWidth;
+	background:transparent;
+	border:$loaderBorderSize solid;
+	border-color:
+		$loaderPrimaryColor 
+		$loaderPrimaryColor 
+		$loaderPrimaryColor 
+		darken($loaderPrimaryColor, 30);
+	border-radius:50%;
+	transition:all $animationTime $animationStyle;
+	animation: spin 0.75s infinite linear;
+}
+
+.loader-overlay {
+	position:fixed;
+	top:55px;
+	bottom:0;
+	right:0;
+	left:0;
+	background:rgba(0,0,0,0.5);
+	-moz-transition: opacity $animationTime $animationStyle;
+	-o-transition: opacity $animationTime $animationStyle;
+	-webkit-transition: opacity $animationTime $animationStyle;
+	transition: opacity $animationTime $animationStyle;
+	
+	&.ng-hide {
+		opacity: 0;
+		
+		.spin-loader.shrink {
+			top: calc(25% + #{($loaderHeightWidth/2)});
+			margin-left:0;
+			width:$loaderMinHeightWidth;
+			height:$loaderMinHeightWidth;
+		}
+		.spin-loader.expand {
+			top: calc(25% - #{($loaderMaxHeightWidth/4)});
+			margin-left:-($loaderMaxHeightWidth/2);
+			width:$loaderMaxHeightWidth;
+			height:$loaderMaxHeightWidth;
+		}
+	}
+}
+
+
+@keyframes spin {
+	0% {
+		transform:rotate(0deg);
+	}
+	100% {
+		transform:rotate(360deg);
+	}
+}

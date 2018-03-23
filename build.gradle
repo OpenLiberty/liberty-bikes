@@ -11,6 +11,11 @@ buildscript {
     }
 }
 
+task clean(type: Delete) {
+  subprojects.each { dependsOn("${it.name}:clean") };
+  delete 'build'
+}
+
 subprojects {
     apply plugin: 'liberty'
     apply plugin: 'war'
@@ -38,7 +43,7 @@ subprojects {
         providedCompile group: 'org.eclipse.microprofile', name: 'microprofile', version: '1.3'
         providedCompile group: 'javax', name: 'javaee-api', version: '8.0'
         testCompile group: 'junit', name: 'junit', version: '4.+'
-        testCompile group: 'org.eclipse', name: 'yasson', version: '1.0'
+        testCompile group: 'org.eclipse', name: 'yasson', version: '1.0.1'
         testCompile group: 'org.glassfish', name: 'javax.json', version: '1.1.+'
     }
     
@@ -58,10 +63,11 @@ subprojects {
         install {
             // use 1 liberty install for the whole repo
             baseDir = rootProject.buildDir
-            runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2018.2.0.0.zip"
+            runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2018.3.0.0.zip"
         }
     }
 
+    clean.dependsOn 'libertyStop'
     libertyDebug.dependsOn 'libertyStop'    
     libertyStart.dependsOn 'libertyStop', 'test'
     libertyRun.dependsOn   'libertyStop'
