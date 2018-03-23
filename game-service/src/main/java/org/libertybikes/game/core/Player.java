@@ -160,11 +160,12 @@ public class Player {
             trailPosX = trailP.x;
             trailPosY = trailP.y;
             s[trailPosX][trailPosY] = GameBoard.TRAIL_SPOT_TAKEN;
+            s[trailPosX2][trailPosY2] = GameBoard.TRAIL_SPOT_TAKEN;
             if (lastDirection != direction) {
                 TrailPosition trailP2 = trail.remove();
                 trailPosX2 = trailP2.x;
                 trailPosY2 = trailP2.y;
-                s[trailPosX2][trailPosY2] = GameBoard.TRAIL_SPOT_TAKEN;
+                s[trailPosX2][trailPosY2] = (short) (GameBoard.PLAYER_SPOT_TAKEN + playerNum);
             } else {
                 trailPosX2 = trailPosX;
                 trailPosY2 = trailPosY;
