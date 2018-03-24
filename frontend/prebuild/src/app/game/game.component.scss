@@ -8,7 +8,7 @@ body {
 
 :host {
   display: grid;
-  grid-template-rows: $titlebar 1fr 4fr $titlebar;
+  grid-template-rows: $titlebar minmax(140px, 1fr) 4fr $titlebar;
   grid-template-columns: 1fr minmax(600px, 3fr);
   height: 100vh;
 }
