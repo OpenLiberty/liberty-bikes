@@ -10,12 +10,8 @@ body {
   display: grid;
   grid-template-rows: $titlebar $titlebar 1fr;
   grid-template-columns: 1fr;
-/*   display: flex;
-  flex-direction: column; */
 
   height: 100vh;
-
-  background-color: white;
 }
 
 .navbar {
@@ -48,11 +44,6 @@ body {
   display: block;
   width: 100%;
   height: 100%;
-
-  background-image: url('../../assets/images/dpad.png');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
 }
 
 #game-buttons {
