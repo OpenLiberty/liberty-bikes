@@ -21,6 +21,11 @@ export class ControlsComponent implements OnInit {
   downTriangle: Triangle;
   rightTriangle: Triangle;
 
+  upPressed: boolean;
+  leftPressed: boolean;
+  downPressed: boolean;
+  rightPressed: boolean;
+
   constructor(private gameService: GameService) {
     gameService.messages.subscribe((msg) => {
       const json = msg as any;
@@ -97,6 +102,66 @@ export class ControlsComponent implements OnInit {
       new Point(canvasWidth, canvasHeight),
       new Point(canvasWidth / 2, canvasHeight / 2)
     );
+
+    window.requestAnimationFrame(() => this.draw());
+  }
+
+  draw() {
+    const ctx = this.context;
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.strokeStyle = 'white';
+    ctx.fillStyle = 'white';
+
+
+    // Draw up button
+    ctx.beginPath();
+    ctx.moveTo(this.upTriangle.point1.x, this.upTriangle.point1.y);
+    ctx.lineTo(this.upTriangle.point2.x, this.upTriangle.point2.y);
+    ctx.lineTo(this.upTriangle.point3.x, this.upTriangle.point3.y);
+    ctx.closePath();
+    ctx.stroke();
+
+    if (this.upPressed) {
+      ctx.fill();
+    }
+
+    // Draw left button
+    ctx.beginPath();
+    ctx.moveTo(this.leftTriangle.point1.x, this.leftTriangle.point1.y);
+    ctx.lineTo(this.leftTriangle.point2.x, this.leftTriangle.point2.y);
+    ctx.lineTo(this.leftTriangle.point3.x, this.leftTriangle.point3.y);
+    ctx.closePath();
+    ctx.stroke();
+
+    if (this.leftPressed) {
+      ctx.fill();
+    }
+
+    // Draw down button
+    ctx.beginPath();
+    ctx.moveTo(this.downTriangle.point1.x, this.downTriangle.point1.y);
+    ctx.lineTo(this.downTriangle.point2.x, this.downTriangle.point2.y);
+    ctx.lineTo(this.downTriangle.point3.x, this.downTriangle.point3.y);
+    ctx.closePath();
+    ctx.stroke();
+
+    if (this.downPressed) {
+      ctx.fill();
+    }
+
+    // Draw right button
+    ctx.beginPath();
+    ctx.moveTo(this.rightTriangle.point1.x, this.rightTriangle.point1.y);
+    ctx.lineTo(this.rightTriangle.point2.x, this.rightTriangle.point2.y);
+    ctx.lineTo(this.rightTriangle.point3.x, this.rightTriangle.point3.y);
+    ctx.closePath();
+    ctx.stroke();
+
+    if (this.rightPressed) {
+      ctx.fill();
+    }
+
+    window.requestAnimationFrame(() => this.draw());
   }
 
   touchStarted(evt: TouchEvent) {
@@ -118,19 +183,31 @@ export class ControlsComponent implements OnInit {
     const location = new Point(locationX, locationY);
 
     if (this.upTriangle.containsPoint(location)) {
+      this.upPressed = true;
       this.moveUp();
+    } else {
+      this.upPressed = false;
     }
 
     if (this.leftTriangle.containsPoint(location)) {
+      this.leftPressed = true;
       this.moveLeft();
+    } else {
+      this.leftPressed = false;
     }
 
     if (this.downTriangle.containsPoint(location)) {
+      this.downPressed = true;
       this.moveDown();
+    } else {
+      this.downPressed = false;
     }
 
     if (this.rightTriangle.containsPoint(location)) {
+      this.rightPressed = true;
       this.moveRight();
+    } else {
+      this.rightPressed = false;
     }
   }
 
