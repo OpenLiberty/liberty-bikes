@@ -72,34 +72,42 @@ export class ControlsComponent implements OnInit {
       evt.preventDefault();
     });
 
+    this.canvas.addEventListener('touchend', (evt:TouchEvent) => {
+      this.touchEnded(evt);
+    });
+
     this.canvas.addEventListener('mousedown', (evt: MouseEvent) => {
       this.mouseDown(evt);
+    });
+
+    this.canvas.addEventListener('mouseup', (evt: MouseEvent) => {
+      this.mouseUp(evt);
     });
 
     const canvasWidth = this.canvas.width;
     const canvasHeight = this.canvas.height;
 
     this.upTriangle = new Triangle(
-      new Point(0, 0),
-      new Point(canvasWidth, 0),
+      new Point(0 + 1, 0 + 1),
+      new Point(canvasWidth - 1, 0 + 1),
       new Point(canvasWidth / 2, canvasHeight / 2)
     );
 
     this.leftTriangle = new Triangle(
-      new Point(0, canvasHeight),
-      new Point(0, 0),
+      new Point(0 + 1, canvasHeight - 1),
+      new Point(0 + 1, 0 + 1),
       new Point(canvasWidth / 2, canvasHeight / 2)
     );
 
     this.downTriangle = new Triangle(
-      new Point(canvasWidth, canvasHeight),
-      new Point(0, canvasHeight),
+      new Point(canvasWidth - 1, canvasHeight - 1),
+      new Point(0 + 1, canvasHeight - 1),
       new Point(canvasWidth / 2, canvasHeight / 2)
     );
 
     this.rightTriangle = new Triangle(
-      new Point(canvasWidth, 0),
-      new Point(canvasWidth, canvasHeight),
+      new Point(canvasWidth - 1, 0 + 1),
+      new Point(canvasWidth - 1, canvasHeight - 1),
       new Point(canvasWidth / 2, canvasHeight / 2)
     );
 
@@ -110,7 +118,9 @@ export class ControlsComponent implements OnInit {
     const ctx = this.context;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.strokeStyle = 'white';
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+
+    ctx.lineWidth = 2;
 
 
     // Draw up button
@@ -125,6 +135,15 @@ export class ControlsComponent implements OnInit {
       ctx.fill();
     }
 
+    // Draw up arrow
+    const upArrow = this.upTriangle.scale(0.3).rotate(Math.PI);
+    ctx.beginPath();
+    ctx.moveTo(upArrow.point1.x, upArrow.point1.y);
+    ctx.lineTo(upArrow.point2.x, upArrow.point2.y);
+    ctx.lineTo(upArrow.point3.x, upArrow.point3.y);
+    ctx.closePath();
+    ctx.stroke();
+
     // Draw left button
     ctx.beginPath();
     ctx.moveTo(this.leftTriangle.point1.x, this.leftTriangle.point1.y);
@@ -136,6 +155,15 @@ export class ControlsComponent implements OnInit {
     if (this.leftPressed) {
       ctx.fill();
     }
+
+    // Draw left arrow
+    const leftArrow = this.leftTriangle.scale(0.3).rotate(Math.PI);
+    ctx.beginPath();
+    ctx.moveTo(leftArrow.point1.x, leftArrow.point1.y);
+    ctx.lineTo(leftArrow.point2.x, leftArrow.point2.y);
+    ctx.lineTo(leftArrow.point3.x, leftArrow.point3.y);
+    ctx.closePath();
+    ctx.stroke();
 
     // Draw down button
     ctx.beginPath();
@@ -149,6 +177,15 @@ export class ControlsComponent implements OnInit {
       ctx.fill();
     }
 
+    // Draw down arrow
+    const downArrow = this.downTriangle.scale(0.3).rotate(Math.PI);
+    ctx.beginPath();
+    ctx.moveTo(downArrow.point1.x, downArrow.point1.y);
+    ctx.lineTo(downArrow.point2.x, downArrow.point2.y);
+    ctx.lineTo(downArrow.point3.x, downArrow.point3.y);
+    ctx.closePath();
+    ctx.stroke();
+
     // Draw right button
     ctx.beginPath();
     ctx.moveTo(this.rightTriangle.point1.x, this.rightTriangle.point1.y);
@@ -161,6 +198,15 @@ export class ControlsComponent implements OnInit {
       ctx.fill();
     }
 
+    // Draw right arrow
+    const rightArrow = this.rightTriangle.scale(0.3).rotate(Math.PI);
+    ctx.beginPath();
+    ctx.moveTo(rightArrow.point1.x, rightArrow.point1.y);
+    ctx.lineTo(rightArrow.point2.x, rightArrow.point2.y);
+    ctx.lineTo(rightArrow.point3.x, rightArrow.point3.y);
+    ctx.closePath();
+    ctx.stroke();
+
     window.requestAnimationFrame(() => this.draw());
   }
 
@@ -171,9 +217,19 @@ export class ControlsComponent implements OnInit {
     }
   }
 
+  touchEnded(evt: TouchEvent) {
+    console.log(evt);
+    this.canvasReleased(evt.changedTouches[0].pageX, evt.changedTouches[0].pageY);
+  }
+
   mouseDown(evt: MouseEvent) {
     console.log(evt);
     this.canvasPressed(evt.pageX, evt.pageY);
+  }
+
+  mouseUp(evt: MouseEvent) {
+    console.log(evt);
+    this.canvasReleased(evt.pageX, evt.pageY);
   }
 
   canvasPressed(x: number, y: number) {
@@ -207,6 +263,29 @@ export class ControlsComponent implements OnInit {
       this.rightPressed = true;
       this.moveRight();
     } else {
+      this.rightPressed = false;
+    }
+  }
+
+  canvasReleased(x: number, y: number) {
+    const locationX = (x - this.canvas.offsetLeft) * this.canvas.width / this.canvas.offsetWidth;
+    const locationY = (y - this.canvas.offsetTop) * this.canvas.height / this.canvas.offsetHeight;
+
+    const location = new Point(locationX, locationY);
+
+    if (this.upTriangle.containsPoint(location)) {
+      this.upPressed = false;
+    }
+
+    if (this.leftTriangle.containsPoint(location)) {
+      this.leftPressed = false;
+    }
+
+    if (this.downTriangle.containsPoint(location)) {
+      this.downPressed = false;
+    }
+
+    if (this.rightTriangle.containsPoint(location)) {
       this.rightPressed = false;
     }
   }
