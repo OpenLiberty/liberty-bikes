@@ -68,7 +68,7 @@ public class JsonDataTest {
         assertEquals("{\"movingObstacles\":[],\"obstacles\":[" + obstacleJson + "],\"players\":[]}", jsonb.toJson(board));
 
         // @JsonbPropertyOrder({ "id", "name", "color", "status", "isAlive", "x", "y", "width", "height", "oldX", "oldY", "trailPosX", "trailPosY", "trailPosX2", "trailPosY2" })
-        String bobJson = "{\"id\":\"1234\",\"name\":\"Bob\",\"color\":\"#DF740C\",\"status\":\"Connected\",\"isAlive\":true,\"x\":9,\"y\":9,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":9,\"trailPosX\":10,\"trailPosY\":10,\"trailPosX2\":10,\"trailPosY2\":10}";
+        String bobJson = "{\"id\":\"1234\",\"name\":\"Bob\",\"color\":\"#DF740C\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":9,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":9,\"trailPosX\":10,\"trailPosY\":10,\"trailPosX2\":10,\"trailPosY2\":10}";
         board.addPlayer("1234", "Bob");
         assertEquals("{\"movingObstacles\":[],\"obstacles\":[" + obstacleJson + "],\"players\":[" + bobJson + "]}",
                      jsonb.toJson(board));
@@ -98,7 +98,7 @@ public class JsonDataTest {
     @Test
     public void testPlayerList() {
         PlayerList list = new OutboundMessage.PlayerList(Collections.singleton(new Player("123", "Bob", (short) 1)));
-        assertEquals("{\"playerlist\":[{\"id\":\"123\",\"name\":\"Bob\",\"color\":\"#FF0000\",\"status\":\"Connected\",\"isAlive\":true,\"x\":9,\"y\":110,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":110,\"trailPosX\":10,\"trailPosY\":111,\"trailPosX2\":10,\"trailPosY2\":111}]}",
+        assertEquals("{\"playerlist\":[{\"id\":\"123\",\"name\":\"Bob\",\"color\":\"#FF0000\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":110,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":110,\"trailPosX\":10,\"trailPosY\":111,\"trailPosX2\":10,\"trailPosY2\":111}]}",
                      jsonb.toJson(list));
     }
 

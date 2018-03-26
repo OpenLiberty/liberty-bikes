@@ -9,6 +9,8 @@ import java.util.Set;
 
 import javax.json.bind.annotation.JsonbTransient;
 
+import org.libertybikes.game.bot.Hal;
+
 public class GameBoard {
 
     public static final int BOARD_SIZE = 121;
@@ -20,6 +22,7 @@ public class GameBoard {
     public final Set<Obstacle> obstacles = new HashSet<>();
     public final Set<MovingObstacle> movingObstacles = new HashSet<>();
     public final Set<Player> players = new HashSet<>();
+    private final Set<AIPlayer> ai = new HashSet<>();
     private final boolean[] takenPlayerSlots = new boolean[Player.MAX_PLAYERS];
 
     public GameBoard() {
@@ -137,6 +140,60 @@ public class GameBoard {
         }
 
         return true;
+    }
+
+    public boolean broadcastToAI() {
+        if (ai.isEmpty()) {
+            return false;
+        }
+
+        for (AIPlayer p : ai) {
+            try {
+                p.broadCastBoard(board);
+            } catch (Exception e) {
+                // bad ai
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     */
+    public void addAI() {
+        // Find first open player slot to fill, which determines position
+        short playerNum = -1;
+        for (short i = 0; i < takenPlayerSlots.length; i++) {
+            if (!takenPlayerSlots[i]) {
+                playerNum = i;
+                takenPlayerSlots[i] = true;
+                System.out.println("Player slot " + i + " taken");
+                break;
+            }
+        }
+
+        // Initialize Player
+        AIPlayer p = new Hal("Hal", "Hal", playerNum);
+
+        if (p.x > BOARD_SIZE || p.y > BOARD_SIZE)
+            throw new IllegalArgumentException("Player does not fit on board: " + p);
+
+        for (int i = 0; i < p.width; i++) {
+            for (int j = 0; j < p.height; j++) {
+                board[p.x + i][p.y + j] = (short) (PLAYER_SPOT_TAKEN + playerNum);
+            }
+        }
+
+        players.add(p);
+        ai.add(p);
+    }
+
+    public boolean removeAI(Player p) {
+        takenPlayerSlots[p.getPlayerNum()] = false;
+
+        players.remove(p);
+        return ai.remove(p);
     }
 
 }
