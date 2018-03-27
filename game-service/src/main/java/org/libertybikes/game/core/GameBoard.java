@@ -4,7 +4,9 @@
 package org.libertybikes.game.core;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.json.bind.annotation.JsonbTransient;
@@ -22,7 +24,7 @@ public class GameBoard {
     public final Set<Obstacle> obstacles = new HashSet<>();
     public final Set<MovingObstacle> movingObstacles = new HashSet<>();
     public final Set<Player> players = new HashSet<>();
-    private final Set<AIPlayer> ai = new HashSet<>();
+    private final Map<Player, AI> aiMap = new HashMap<>();
     private final boolean[] takenPlayerSlots = new boolean[Player.MAX_PLAYERS];
 
     public GameBoard() {
@@ -143,15 +145,17 @@ public class GameBoard {
     }
 
     public boolean broadcastToAI() {
-        if (ai.isEmpty()) {
+        if (aiMap.isEmpty()) {
             return false;
         }
 
-        for (AIPlayer p : ai) {
+        for (Player p : aiMap.keySet()) {
             try {
-                p.broadCastBoard(board);
+                AI ai = aiMap.get(p);
+                short[][] boardCopy = board.clone();
+                p.direction = (ai.processGameTick(boardCopy));
             } catch (Exception e) {
-                // bad ai
+                System.out.println("Bot Exception: " + e.toString());
             }
         }
 
@@ -174,7 +178,8 @@ public class GameBoard {
         }
 
         // Initialize Player
-        AIPlayer p = new Hal("Hal", "Hal", playerNum);
+        Player p = new Player("Hal", "Hal", playerNum);
+        AI ai = new Hal(p.x, p.y, p.width, p.height, p.direction, playerNum);
 
         if (p.x > BOARD_SIZE || p.y > BOARD_SIZE)
             throw new IllegalArgumentException("Player does not fit on board: " + p);
@@ -186,14 +191,13 @@ public class GameBoard {
         }
 
         players.add(p);
-        ai.add(p);
+        aiMap.put(p, ai);
     }
 
     public boolean removeAI(Player p) {
         takenPlayerSlots[p.getPlayerNum()] = false;
-
         players.remove(p);
-        return ai.remove(p);
+        return aiMap.remove(p) != null ? true : false;
     }
 
 }
