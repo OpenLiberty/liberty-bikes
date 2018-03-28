@@ -2,6 +2,7 @@ import { Component, OnInit, NgZone } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from './../../environments/environment';
 
 import * as $ from 'jquery';
 
@@ -22,13 +23,13 @@ export class LoginComponent implements OnInit {
     this.meta.removeTag('viewport');
     let viewWidth = $(window).width();
     let viewHeight = $(window).height();
-
+    
     this.meta.addTag({name: 'viewport', content: `width=${viewWidth}px, height=${viewHeight}px, initial-scale=1.0`}, true);
   }
 
   async createRound() {
     try {
-      let data = await this.http.post(`http://${document.location.hostname}:8080/round/create`, "", { responseType: 'text'}).toPromise();
+      let data = await this.http.post(`${environment.API_URL_GAME_ROUND}/create`, "", { responseType: 'text'}).toPromise();
       alert(`Created round: ${data}`);
     } catch (error) {
       console.log(error);
@@ -55,7 +56,7 @@ async joinRound(gameBoard: boolean) {
   }
 
   try {
-    let data: any = await this.http.get(`http://${document.location.hostname}:8080/round/${roundID}`).toPromise();
+    let data: any = await this.http.get(`${environment.API_URL_GAME_ROUND}/${roundID}`).toPromise();
     console.log(JSON.stringify(data));
     if (data === null) {
       alert('Game round does not exist!');
@@ -74,7 +75,7 @@ async joinRound(gameBoard: boolean) {
       return;
     }
 
-    let response: any = await this.http.post(`http://${document.location.hostname}:8081/player/create?name=${username}`, "", {
+    let response: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${username}`, "", {
     responseType: 'text'
     }).toPromise();
     console.log(JSON.stringify(response));
@@ -108,7 +109,7 @@ async joinRound(gameBoard: boolean) {
     let router = this.router;
 
     try {
-      let data = await this.http.post(`http://${document.location.hostname}:8080/round/create`, "", { responseType: 'text' }).toPromise();
+      let data = await this.http.post(`${environment.API_URL_GAME_ROUND}/create`, "", { responseType: 'text' }).toPromise();
       console.log(`Created round with id=${data}`);
       sessionStorage.setItem('isSpectator', 'true');
       sessionStorage.setItem('roundId', data);
