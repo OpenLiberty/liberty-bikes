@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { GameService } from '../game/game.service';
 import { Triangle } from '../geom/triangle';
 import { Point } from '../geom/point';
@@ -8,7 +8,7 @@ import { Point } from '../geom/point';
   templateUrl: './controls.component.html',
   styleUrls: ['./controls.component.scss']
 })
-export class ControlsComponent implements OnInit {
+export class ControlsComponent implements OnInit, OnDestroy {
   windowHeight = window.innerHeight;
 
   roundId: string;
@@ -27,6 +27,10 @@ export class ControlsComponent implements OnInit {
   leftPressed: boolean;
   downPressed: boolean;
   rightPressed: boolean;
+
+  private preventScrolling = (evt: TouchEvent) => {
+    evt.preventDefault();
+  };
 
   constructor(private gameService: GameService) {
     gameService.messages.subscribe((msg) => {
@@ -64,6 +68,7 @@ export class ControlsComponent implements OnInit {
   }
 
   initCanvas() {
+    window.addEventListener('touchmove', this.preventScrolling);
     this.canvas = document.getElementById('dpad-canvas') as HTMLCanvasElement;
     this.context = this.canvas.getContext('2d');
 
@@ -74,8 +79,18 @@ export class ControlsComponent implements OnInit {
       evt.preventDefault();
     });
 
+    this.canvas.addEventListener('touchmove', (evt:TouchEvent) => {
+      this.touchMoved(evt);
+
+      // Prevent touch events and mouse events from doubling up.
+      evt.preventDefault();
+    });
+
     this.canvas.addEventListener('touchend', (evt:TouchEvent) => {
       this.touchEnded(evt);
+
+      // Prevent touch events and mouse events from doubling up.
+      evt.preventDefault();
     });
 
     this.canvas.addEventListener('mousedown', (evt: MouseEvent) => {
@@ -220,6 +235,13 @@ export class ControlsComponent implements OnInit {
     }
   }
 
+  touchMoved(evt: TouchEvent) {
+    console.log(evt);
+    if (evt.changedTouches.length > 0) {
+      this.canvasPressed(evt.changedTouches[0].pageX, evt.changedTouches[0].pageY);
+    }
+  }
+
   touchEnded(evt: TouchEvent) {
     console.log(evt);
     this.canvasReleased(evt.changedTouches[0].pageX, evt.changedTouches[0].pageY);
@@ -316,5 +338,9 @@ export class ControlsComponent implements OnInit {
 
   moveRight() {
     this.gameService.send({ direction: 'RIGHT' });
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('touchmove', this.preventScrolling);
   }
 }
