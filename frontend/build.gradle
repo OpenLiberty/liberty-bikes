@@ -53,7 +53,16 @@ task npmUpdate {
 task buildStandaloneClient(type: NpmTask, dependsOn: npmInstall) {
     group 'build client'
     description = 'Compile client side folder for development'
-    args = ['run', 'build']
+    if("prod".equals(System.getProperty("env_mode"))) {
+        println "### prod environment ###"
+        file("${rootDir}/frontend/prebuild/src/environments/environment.prod.ts").eachLine { String line ->
+            println line
+        }
+        println "########################"
+        args = ['run', 'prod']
+    } else {
+        args = ['run', 'build']
+    }
 }
 
 task copyFrontend(type: Copy) {
