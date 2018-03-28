@@ -5,6 +5,8 @@ import { LoginComponent } from './login/login.component';
 import { GameComponent } from './game/game.component';
 import { ControlsComponent } from './controls/controls.component';
 
+import { environment } from './../environments/environment';
+
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'game', component: GameComponent },
