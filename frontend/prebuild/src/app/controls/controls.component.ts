@@ -9,6 +9,8 @@ import { Point } from '../geom/point';
   styleUrls: ['./controls.component.scss']
 })
 export class ControlsComponent implements OnInit {
+  windowHeight = window.innerHeight;
+
   roundId: string;
   serverHost: string;
   serverPort: string;
@@ -115,6 +117,7 @@ export class ControlsComponent implements OnInit {
   }
 
   draw() {
+    this.windowHeight = window.innerHeight;
     const ctx = this.context;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.strokeStyle = 'white';
