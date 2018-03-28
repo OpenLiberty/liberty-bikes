@@ -2,10 +2,10 @@
   <h1>Liberty Bikes</h1>
 </div>
 <div id="game-buttons" class="navbar">
-  <button type="button" class="btn btn-success" (click)="startGame()">Start Game</button>
-  <button type="button" class="btn btn-info" (click)="requeue()">Requeue</button>
+  <button type="button" (click)="startGame()">Start Game</button>
+  <button type="button" (click)="requeue()">Requeue</button>
 </div>
-<div id="controller">
+<div id="controller" [style.height.px]="windowHeight">
   <canvas id="dpad-canvas" width="800" height="800"></canvas>
 </div>
 

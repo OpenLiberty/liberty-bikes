@@ -1,4 +1,4 @@
-$titlebar: 50px;
+$titlebar: 60px;
 $navbar-border: 1px solid #ccc;
 
 body {
@@ -7,19 +7,14 @@ body {
 }
 
 :host {
-  display: grid;
-  grid-template-rows: $titlebar $titlebar 1fr;
-  grid-template-columns: 1fr;
-/*   display: flex;
-  flex-direction: column; */
-
-  height: 100vh;
-
-  background-color: white;
+  position: fixed;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 
 .navbar {
-  background-color: #eee;
+  background-color: rgba(0, 0, 0, 0.2);
 
   height: $titlebar;
 
@@ -29,61 +24,64 @@ body {
   padding: 0px 5px;
 }
 
-.navbar h1 {
-  margin: 0px;
+#titlebar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+
+  justify-content: center;
 }
 
-#titlebar {
-  justify-content: center;
+#titlebar h1 {
+  margin-top: 20px;
+  color: #fff;
+  font-size: 1.5em;
+  font-weight: 300;
+  font-variant: small-caps;
+  text-transform: uppercase;
+  letter-spacing: .7em;
+  padding-left: .7em;
+  text-align: center;
 }
 
 #controller {
-  grid-area: 3 / 1;
   display: grid;
-  justify-content: center;
   grid-template: 100vmin / 100vmin;
+  justify-content: center;
+  align-content: center;
+}
+
+#game-buttons {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+
+  padding: 0px 5px;
+}
+
+#game-buttons button {
+  padding: 0px 5px;
+  width: calc(50% - 5px);
+  background-color: rgba(0, 0, 20, 0.2);
+
+  text-transform: lowercase;
+  font-variant: small-caps;
+  letter-spacing: .1em;
+
+  border-color: #bbb;
 }
 
 #dpad-canvas {
   display: block;
-  width: 100%;
+  width: calc(100% - 10px);
   height: 100%;
 
-  background-image: url('../../assets/images/dpad.png');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-#game-buttons {
-  grid-area: 2 / 1;
-  border-bottom: $navbar-border;
-  padding: 0px 5px;
+  margin: 0 auto;
 }
 
 @media screen and (orientation: landscape) {
-  :host {
-    grid-template-rows: $titlebar 1fr;
-  }
-
-  #titlebar {
-    display: none;
-    position: absolute;
-  }
 
   #controller {
-    grid-area: 2 / 1;
-    grid-template: calc(100vmin - #{($titlebar) + 100px}) / calc(100vmin - #{($titlebar) + 100px});
-
+    grid-template: calc(100vmin - #{($titlebar) * 2}) / calc(100vmin - #{($titlebar) * 2});
   }
-
-  #game-buttons {
-    grid-area: 1 / 1;
-  }
-}
-
-#game-buttons .btn {
-  width: calc(50% - 2.5px);
-  height: 40px;
-  font-size: 0.8em;
 }
