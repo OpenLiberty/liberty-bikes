@@ -236,8 +236,6 @@ export class ControlsComponent implements OnInit, OnDestroy {
     ctx.lineTo(rightArrow.point3.x, rightArrow.point3.y);
     ctx.closePath();
     ctx.stroke();
-
-    window.requestAnimationFrame(() => this.draw());
   }
 
   touchStarted(evt: TouchEvent) {
@@ -302,6 +300,8 @@ export class ControlsComponent implements OnInit, OnDestroy {
     } else {
       this.rightPressed = false;
     }
+
+    window.requestAnimationFrame(() => this.draw());
   }
 
   canvasReleased(x: number, y: number) {
@@ -325,6 +325,8 @@ export class ControlsComponent implements OnInit, OnDestroy {
     if (this.rightTriangle.containsPoint(location)) {
       this.rightPressed = false;
     }
+
+    window.requestAnimationFrame(() => this.draw());
   }
 
   // Game actions
