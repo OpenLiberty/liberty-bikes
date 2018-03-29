@@ -42,7 +42,7 @@ export class GameComponent implements OnInit {
       }
       if (json.players) {
         for (let player of json.players) {
-          if (player.isAlive) {
+          if (player.alive) {
             this.drawPlayer(player);
           }
         }

@@ -9,6 +9,8 @@ import java.util.Set;
 
 import javax.json.bind.annotation.JsonbTransient;
 
+import org.libertybikes.game.bot.Hal;
+
 public class GameBoard {
 
     public static final int BOARD_SIZE = 121;
@@ -70,7 +72,7 @@ public class GameBoard {
         // Initialize Player
         Player p = new Player(playerId, playerName, playerNum);
 
-        if (p.x > BOARD_SIZE || p.y > BOARD_SIZE)
+        if (p.x + p.width > BOARD_SIZE || p.y + p.height > BOARD_SIZE)
             throw new IllegalArgumentException("Player does not fit on board: " + p);
 
         for (int i = 0; i < p.width; i++) {
@@ -137,6 +139,50 @@ public class GameBoard {
         }
 
         return true;
+    }
+
+    public void broadcastToAI() {
+        for (Player p : players) {
+            short[][] boardCopy = board.clone();
+            p.processAIMove(boardCopy);
+        }
+    }
+
+    /**
+     *
+     */
+    public void addAI() {
+        // Find first open player slot to fill, which determines position
+        short playerNum = -1;
+        for (short i = 0; i < takenPlayerSlots.length; i++) {
+            if (!takenPlayerSlots[i]) {
+                playerNum = i;
+                takenPlayerSlots[i] = true;
+                System.out.println("Player slot " + i + " taken");
+                break;
+            }
+        }
+
+        // Initialize Player
+        Player p = new Player("Hal-" + playerNum, "Hal-" + playerNum, playerNum);
+        AI ai = new Hal(p.x, p.y, p.width, p.height, p.direction, playerNum);
+
+        if (p.x + p.width > BOARD_SIZE || p.y + p.height > BOARD_SIZE)
+            throw new IllegalArgumentException("Player does not fit on board: " + p);
+
+        for (int i = 0; i < p.width; i++) {
+            for (int j = 0; j < p.height; j++) {
+                board[p.x + i][p.y + j] = (short) (PLAYER_SPOT_TAKEN + playerNum);
+            }
+        }
+
+        players.add(p);
+        p.addAI(ai);
+    }
+
+    public boolean removeAI(Player p) {
+        takenPlayerSlots[p.getPlayerNum()] = false;
+        return players.remove(p);
     }
 
 }

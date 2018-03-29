@@ -69,10 +69,23 @@ public class GameRound implements Runnable {
     public GameRound(String id) {
         this.id = id;
         nextRoundId = getRandomId();
-        board.addObstacle(new MovingObstacle(10, 5, 60, 60, 0, -1, 5));
-        board.addObstacle(new MovingObstacle(10, 5, 60, 65, 0, 1));
-        board.addObstacle(new MovingObstacle(5, 5, GameBoard.BOARD_SIZE / 2, GameBoard.BOARD_SIZE / 3, -1, -1, 1));
-        board.addObstacle(new MovingObstacle(5, 5, GameBoard.BOARD_SIZE / 2, GameBoard.BOARD_SIZE / 3 * 2, 1, 1));
+
+        board.addObstacle(new MovingObstacle(5, 5, GameBoard.BOARD_SIZE / 2 - 10, GameBoard.BOARD_SIZE / 3, -1, -1));
+        board.addObstacle(new MovingObstacle(5, 5, GameBoard.BOARD_SIZE / 2 + 10, (GameBoard.BOARD_SIZE / 3 * 2) - 5, 1, 1));
+
+        // Creating some walls
+        // TopLeft
+        board.addObstacle(new Obstacle(15, 1, GameBoard.BOARD_SIZE / 8, GameBoard.BOARD_SIZE / 8));
+        board.addObstacle(new Obstacle(1, 14, GameBoard.BOARD_SIZE / 8, GameBoard.BOARD_SIZE / 8 + 1));
+        // TopRight
+        board.addObstacle(new Obstacle(15, 1, ((GameBoard.BOARD_SIZE / 8) * 7) - 14, GameBoard.BOARD_SIZE / 8));
+        board.addObstacle(new Obstacle(1, 14, (GameBoard.BOARD_SIZE / 8) * 7, GameBoard.BOARD_SIZE / 8 + 1));
+        // BottomLeft
+        board.addObstacle(new Obstacle(15, 1, GameBoard.BOARD_SIZE / 8, (GameBoard.BOARD_SIZE / 8) * 7));
+        board.addObstacle(new Obstacle(1, 14, GameBoard.BOARD_SIZE / 8, ((GameBoard.BOARD_SIZE / 8) * 7) - 14));
+        // BottomRight
+        board.addObstacle(new Obstacle(15, 1, ((GameBoard.BOARD_SIZE / 8) * 7) - 14, (GameBoard.BOARD_SIZE / 8) * 7));
+        board.addObstacle(new Obstacle(1, 14, (GameBoard.BOARD_SIZE / 8) * 7, ((GameBoard.BOARD_SIZE / 8) * 7) - 14));
     }
 
     public GameBoard getBoard() {
@@ -106,6 +119,20 @@ public class GameRound implements Runnable {
         } else {
             System.out.println("Player " + playerId + " already exists.");
         }
+        broadcastPlayerList();
+        broadcastGameBoard();
+    }
+
+    public void addAI() {
+        if (gameState != State.OPEN) {
+            return;
+        }
+
+        if (getPlayers().size() + 1 >= Player.MAX_PLAYERS) {
+            gameState = State.FULL;
+        }
+
+        board.addAI();
         broadcastPlayerList();
         broadcastGameBoard();
     }
@@ -205,6 +232,8 @@ public class GameRound implements Runnable {
             return;
         }
 
+        board.broadcastToAI();
+
         boolean boardUpdated = board.moveObjects();
 
         boolean death = false;
@@ -212,7 +241,7 @@ public class GameRound implements Runnable {
         boolean playerStatusChange = false;
         boolean playersMoved = false;
         for (Player p : getPlayers()) {
-            if (p.isAlive) {
+            if (p.isAlive()) {
                 if (p.movePlayer(board.board)) {
                     playersMoved = true;
                 } else {
@@ -266,7 +295,7 @@ public class GameRound implements Runnable {
         int alivePlayers = 0;
         Player alive = null;
         for (Player cur : getPlayers()) {
-            if (cur.isAlive) {
+            if (cur.isAlive()) {
                 alivePlayers++;
                 alive = cur;
             }
@@ -284,6 +313,10 @@ public class GameRound implements Runnable {
     public void startGame() {
         if (gameState != State.OPEN && gameState != State.FULL)
             return;
+
+        while (gameState == State.OPEN) {
+            addAI();
+        }
 
         // Issue a countdown to all of the clients
         gameState = State.STARTING;

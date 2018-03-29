@@ -9,7 +9,7 @@ import java.util.Queue;
 import javax.json.bind.annotation.JsonbPropertyOrder;
 import javax.json.bind.annotation.JsonbTransient;
 
-@JsonbPropertyOrder({ "id", "name", "color", "status", "isAlive", "x", "y", "width", "height", "oldX", "oldY", "trailPosX", "trailPosY", "trailPosX2", "trailPosY2" })
+@JsonbPropertyOrder({ "id", "name", "color", "status", "alive", "x", "y", "width", "height", "oldX", "oldY", "trailPosX", "trailPosY", "trailPosX2", "trailPosY2" })
 public class Player {
 
     public static enum STATUS {
@@ -51,14 +51,16 @@ public class Player {
     public int oldY, y;
     public final int width = 3;
     public final int height = 3;
-    public boolean isAlive = true;
+    private boolean isAlive = true;
     public int trailPosX, trailPosY, trailPosX2, trailPosY2;
     private STATUS playerStatus = STATUS.Connected;
 
-    private final short playerNum;
-    private DIRECTION direction;
+    protected final short playerNum;
+    protected DIRECTION direction;
     private DIRECTION lastDirection = null;
     private DIRECTION desiredNextDirection = null;
+
+    private AI ai = null;
 
     //FIFO Stack size 3
     private Queue<TrailPosition> trail = new LinkedList<TrailPosition>();
@@ -110,7 +112,7 @@ public class Player {
      *
      * @return True if the player is still alive after moving forward one space. False otherwise.
      */
-    public boolean movePlayer(short[][] s) {
+    public final boolean movePlayer(short[][] s) {
 
         oldX = x;
         oldY = y;
@@ -126,28 +128,28 @@ public class Player {
             case UP:
                 if (y - 1 < 0 || checkCollision(s, x, y - 1)) {
                     setStatus(STATUS.Dead);
-                    return isAlive;
+                    return isAlive();
                 }
                 moveUp(s);
                 break;
             case DOWN:
                 if (y + height + 1 >= GameBoard.BOARD_SIZE || checkCollision(s, x, y + 1)) {
                     setStatus(STATUS.Dead);
-                    return isAlive;
+                    return isAlive();
                 }
                 moveDown(s);
                 break;
             case RIGHT:
                 if (x + width + 1 >= GameBoard.BOARD_SIZE || checkCollision(s, x + 1, y)) {
                     setStatus(STATUS.Dead);
-                    return isAlive;
+                    return isAlive();
                 }
                 moveRight(s);
                 break;
             case LEFT:
                 if (x - 1 < 0 || checkCollision(s, x - 1, y)) {
                     setStatus(STATUS.Dead);
-                    return isAlive;
+                    return isAlive();
                 }
                 moveLeft(s);
                 break;
@@ -174,7 +176,7 @@ public class Player {
 
         lastDirection = direction;
 
-        return isAlive;
+        return isAlive();
     }
 
     private boolean checkCollision(short[][] board, int x, int y) {
@@ -226,7 +228,7 @@ public class Player {
         setStatus(STATUS.Disconnected);
     }
 
-    public void setStatus(STATUS newState) {
+    public final void setStatus(STATUS newState) {
         if (newState == STATUS.Dead || newState == STATUS.Disconnected)
             this.isAlive = false;
         if (newState == STATUS.Dead && this.playerStatus == STATUS.Winner)
@@ -241,5 +243,23 @@ public class Player {
     @JsonbTransient
     public int getPlayerNum() {
         return this.playerNum;
+    }
+
+    public boolean isAlive() {
+        return isAlive;
+    }
+
+    public void processAIMove(short[][] board) {
+        if (ai == null)
+            return;
+        try {
+            direction = ai.processGameTick(board);
+        } catch (Exception e) {
+            System.out.println("Bot Exception: " + e.toString());
+        }
+    }
+
+    public void addAI(AI ai) {
+        this.ai = ai;
     }
 }
