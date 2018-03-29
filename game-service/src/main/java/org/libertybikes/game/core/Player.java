@@ -60,6 +60,8 @@ public class Player {
     private DIRECTION lastDirection = null;
     private DIRECTION desiredNextDirection = null;
 
+    private AI ai = null;
+
     //FIFO Stack size 3
     private Queue<TrailPosition> trail = new LinkedList<TrailPosition>();
 
@@ -245,5 +247,19 @@ public class Player {
 
     public boolean isAlive() {
         return isAlive;
+    }
+
+    public void processAIMove(short[][] board) {
+        if (ai == null)
+            return;
+        try {
+            direction = ai.processGameTick(board);
+        } catch (Exception e) {
+            System.out.println("Bot Exception: " + e.toString());
+        }
+    }
+
+    public void addAI(AI ai) {
+        this.ai = ai;
     }
 }

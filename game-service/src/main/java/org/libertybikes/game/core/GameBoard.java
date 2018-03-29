@@ -4,9 +4,7 @@
 package org.libertybikes.game.core;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.json.bind.annotation.JsonbTransient;
@@ -24,7 +22,6 @@ public class GameBoard {
     public final Set<Obstacle> obstacles = new HashSet<>();
     public final Set<MovingObstacle> movingObstacles = new HashSet<>();
     public final Set<Player> players = new HashSet<>();
-    private final Map<Player, AI> aiMap = new HashMap<>();
     private final boolean[] takenPlayerSlots = new boolean[Player.MAX_PLAYERS];
 
     public GameBoard() {
@@ -75,7 +72,7 @@ public class GameBoard {
         // Initialize Player
         Player p = new Player(playerId, playerName, playerNum);
 
-        if (p.x > BOARD_SIZE || p.y > BOARD_SIZE)
+        if (p.x + p.width > BOARD_SIZE || p.y + p.height > BOARD_SIZE)
             throw new IllegalArgumentException("Player does not fit on board: " + p);
 
         for (int i = 0; i < p.width; i++) {
@@ -144,22 +141,11 @@ public class GameBoard {
         return true;
     }
 
-    public boolean broadcastToAI() {
-        if (aiMap.isEmpty()) {
-            return false;
+    public void broadcastToAI() {
+        for (Player p : players) {
+            short[][] boardCopy = board.clone();
+            p.processAIMove(boardCopy);
         }
-
-        for (Player p : aiMap.keySet()) {
-            try {
-                AI ai = aiMap.get(p);
-                short[][] boardCopy = board.clone();
-                p.direction = (ai.processGameTick(boardCopy));
-            } catch (Exception e) {
-                System.out.println("Bot Exception: " + e.toString());
-            }
-        }
-
-        return true;
     }
 
     /**
@@ -178,10 +164,10 @@ public class GameBoard {
         }
 
         // Initialize Player
-        Player p = new Player("Hal", "Hal", playerNum);
+        Player p = new Player("Hal-" + playerNum, "Hal-" + playerNum, playerNum);
         AI ai = new Hal(p.x, p.y, p.width, p.height, p.direction, playerNum);
 
-        if (p.x > BOARD_SIZE || p.y > BOARD_SIZE)
+        if (p.x + p.width > BOARD_SIZE || p.y + p.height > BOARD_SIZE)
             throw new IllegalArgumentException("Player does not fit on board: " + p);
 
         for (int i = 0; i < p.width; i++) {
@@ -191,13 +177,12 @@ public class GameBoard {
         }
 
         players.add(p);
-        aiMap.put(p, ai);
+        p.addAI(ai);
     }
 
     public boolean removeAI(Player p) {
         takenPlayerSlots[p.getPlayerNum()] = false;
-        players.remove(p);
-        return aiMap.remove(p) != null ? true : false;
+        return players.remove(p);
     }
 
 }

@@ -12,22 +12,22 @@ public class Hal extends AIPlayer {
 
     private int ticksTillRandomMove = 20;
     private int ticksTillMove = 4;
+    private int ticksSinceDirChange = 0;
     private int numOfRandomMoves = 0;
     static Random ran = new Random();
     // Collision detection distance
     private final static int CD = 1;
     // Border detection distance
-    private final static int BD = 5;
+    private final static int BD = 4;
 
-    private DIRECTION direction;
-    private DIRECTION lastDirection = null;
+    private DIRECTION direction, lastDirection, lastLastDirection;
 
     private int x, y;
     private boolean hasMoved = false;
 
     public Hal(int startX, int startY, int width, int height, DIRECTION startDirection, short takenSpotNumber) {
         super(startX, startY, width, height, startDirection, takenSpotNumber);
-        direction = startDirection;
+        lastLastDirection = lastDirection = direction = startDirection;
         x = startX;
         y = startY;
     }
@@ -35,7 +35,7 @@ public class Hal extends AIPlayer {
     @Override
     public DIRECTION processGameTick(short[][] board) {
         if (hasMoved) {
-            switch (direction) {
+            switch (lastDirection) {
                 case DOWN:
                     y++;
                     break;
@@ -53,7 +53,7 @@ public class Hal extends AIPlayer {
 
         hasMoved = true;
 
-        if (--ticksTillRandomMove < 1 && numOfRandomMoves < 10) {
+        if (--ticksTillRandomMove < 1 && numOfRandomMoves < 5) {
             direction = setDirection(DIRECTION.values()[ran.nextInt(4)]);
             ticksTillRandomMove = 35;
             numOfRandomMoves++;
@@ -64,19 +64,19 @@ public class Hal extends AIPlayer {
                 return direction;
             }
 
-            ticksTillMove = 2;
+            ticksTillMove = 1;
 
             switch (direction) {
                 case DOWN:
                     if (ran.nextBoolean()) {
-                        if (y + BD > GameBoard.BOARD_SIZE || checkCollision(board, x, y + CD)) {
+                        if (y + height + BD > GameBoard.BOARD_SIZE || checkCollision(board, x, y + CD)) {
                             if (checkCollision(board, x + CD, y + CD)) {
                                 direction = DIRECTION.LEFT;
                             }
                             direction = DIRECTION.RIGHT;
                         }
                     } else {
-                        if (y + BD > GameBoard.BOARD_SIZE || checkCollision(board, x, y + CD)) {
+                        if (y + height + BD > GameBoard.BOARD_SIZE || checkCollision(board, x, y + CD)) {
                             if (checkCollision(board, x - CD, y + CD)) {
                                 direction = DIRECTION.RIGHT;
                             }
@@ -103,14 +103,14 @@ public class Hal extends AIPlayer {
                     break;
                 case RIGHT:
                     if (ran.nextBoolean()) {
-                        if (x + BD > GameBoard.BOARD_SIZE || checkCollision(board, x + CD, y)) {
+                        if (x + width + BD > GameBoard.BOARD_SIZE || checkCollision(board, x + CD, y)) {
                             if (checkCollision(board, x + CD, y - CD)) {
                                 direction = DIRECTION.DOWN;
                             }
                             direction = DIRECTION.UP;
                         }
                     } else {
-                        if (x + BD > GameBoard.BOARD_SIZE || checkCollision(board, x + CD, y)) {
+                        if (x + width + BD > GameBoard.BOARD_SIZE || checkCollision(board, x + CD, y)) {
                             if (checkCollision(board, x + CD, y + CD)) {
                                 direction = DIRECTION.UP;
                             }
@@ -140,7 +140,7 @@ public class Hal extends AIPlayer {
 
         switch (direction) {
             case DOWN:
-                if (y + BD > GameBoard.BOARD_SIZE || checkCollision(board, x, y + CD)) {
+                if (y + height + BD > GameBoard.BOARD_SIZE || checkCollision(board, x, y + CD)) {
                     setDirection(DIRECTION.UP);
                 }
                 break;
@@ -150,7 +150,7 @@ public class Hal extends AIPlayer {
                 }
                 break;
             case RIGHT:
-                if (x + BD > GameBoard.BOARD_SIZE || checkCollision(board, x + CD, y)) {
+                if (x + width + BD > GameBoard.BOARD_SIZE || checkCollision(board, x + CD, y)) {
                     setDirection(DIRECTION.LEFT);
                 }
                 break;
@@ -161,7 +161,37 @@ public class Hal extends AIPlayer {
                 break;
         }
 
-        lastDirection = direction;
+        if (lastDirection != direction) {
+            ticksSinceDirChange++;
+        } else {
+            ticksSinceDirChange = 0;
+        }
+
+        lastLastDirection = lastLastDirection != lastDirection ? lastDirection : lastLastDirection;
+        lastDirection = lastDirection != direction ? direction : lastDirection;
+
+        switch (direction) {
+            case DOWN:
+                if (lastLastDirection == DIRECTION.UP && ticksSinceDirChange < 2)
+                    direction = DIRECTION.UP;
+                break;
+            case LEFT:
+                if (lastLastDirection == DIRECTION.RIGHT && ticksSinceDirChange < 2)
+                    direction = DIRECTION.RIGHT;
+                break;
+            case RIGHT:
+                if (lastLastDirection == DIRECTION.LEFT && ticksSinceDirChange < 2)
+                    direction = DIRECTION.LEFT;
+                break;
+            case UP:
+                if (lastLastDirection == DIRECTION.DOWN && ticksSinceDirChange < 2)
+                    direction = DIRECTION.DOWN;
+                break;
+            default:
+                break;
+
+        }
+
         return direction;
     }
 
