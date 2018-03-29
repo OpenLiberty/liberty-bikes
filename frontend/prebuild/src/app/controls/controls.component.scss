@@ -80,8 +80,24 @@ body {
 }
 
 @media screen and (orientation: landscape) {
+  :host {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #titlebar {
+    position: relative;
+    grid-area: 1 / 2;
+  }
+
+  #game-buttons {
+    position: relative;
+    grid-area: 2 / 2;
+  }
 
   #controller {
+    grid-area: 1 / 1 / span 2 / span 1;
     grid-template: calc(100vmin - #{($titlebar) * 2}) / calc(100vmin - #{($titlebar) * 2});
   }
 }
