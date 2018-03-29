@@ -30,7 +30,12 @@ export class ControlsComponent implements OnInit, OnDestroy {
 
   private preventScrolling = (evt: TouchEvent) => {
     evt.preventDefault();
-  };
+  }
+
+  private pageWasResized = (evt: DeviceOrientationEvent) => {
+    this.windowHeight = window.innerHeight;
+    window.scrollTo(0, 0);
+  }
 
   constructor(private gameService: GameService) {
     gameService.messages.subscribe((msg) => {
@@ -65,6 +70,11 @@ export class ControlsComponent implements OnInit, OnDestroy {
         this.moveRight();
       }
     };
+
+    // Make sure the view is at the top of the page so touch event coordinates line up
+    window.scrollTo(0, 0);
+    window.addEventListener('orientationchange', this.pageWasResized);
+    window.addEventListener('resize', this.pageWasResized);
   }
 
   initCanvas() {
@@ -132,7 +142,9 @@ export class ControlsComponent implements OnInit, OnDestroy {
   }
 
   draw() {
-    this.windowHeight = window.innerHeight;
+    if (window.scrollY != 0) {
+      window.scrollTo(0, 0);
+    }
     const ctx = this.context;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.strokeStyle = 'white';
@@ -342,5 +354,7 @@ export class ControlsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     window.removeEventListener('touchmove', this.preventScrolling);
+    window.removeEventListener('orientationchange', this.pageWasResized);
+    window.removeEventListener('resize', this.pageWasResized);
   }
 }
