@@ -6,7 +6,8 @@ package org.libertybikes.game.core;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
@@ -97,8 +98,21 @@ public class JsonDataTest {
 
     @Test
     public void testPlayerList() {
-        PlayerList list = new OutboundMessage.PlayerList(Collections.singleton(new Player("123", "Bob", (short) 1)));
-        assertEquals("{\"playerlist\":[{\"id\":\"123\",\"name\":\"Bob\",\"color\":\"#FF0000\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":110,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":110,\"trailPosX\":10,\"trailPosY\":111,\"trailPosX2\":10,\"trailPosY2\":111}]}",
+        Set<Player> players = new HashSet<>();
+        players.add(new Player("123", "Bob", (short) 0));
+        PlayerList list = new OutboundMessage.PlayerList(players);
+        String bob = "{\"id\":\"123\",\"name\":\"Bob\",\"color\":\"#DF740C\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":9,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":9,\"trailPosX\":10,\"trailPosY\":10,\"trailPosX2\":10,\"trailPosY2\":10}";
+        String bot1 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#FF0000\",\"status\":\"Connected\",\"alive\":true,\"x\":110,\"y\":9,\"width\":3,\"height\":3,\"oldX\":110,\"oldY\":9,\"trailPosX\":111,\"trailPosY\":10,\"trailPosX2\":111,\"trailPosY2\":10}";
+        String bot2 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#6FC3DF\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":110,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":110,\"trailPosX\":10,\"trailPosY\":111,\"trailPosX2\":10,\"trailPosY2\":111}";
+        String bot3 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#FFE64D\",\"status\":\"Connected\",\"alive\":true,\"x\":110,\"y\":110,\"width\":3,\"height\":3,\"oldX\":110,\"oldY\":110,\"trailPosX\":111,\"trailPosY\":111,\"trailPosX2\":111,\"trailPosY2\":111}";
+        System.out.println("@AGG " + jsonb.toJson(list));
+        assertEquals("{\"playerlist\":[" + bob + "," + bot1 + "," + bot2 + "," + bot3 + "]}",
+                     jsonb.toJson(list));
+
+        String chuck = "{\"id\":\"456\",\"name\":\"Chuck\",\"color\":\"#6FC3DF\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":110,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":110,\"trailPosX\":10,\"trailPosY\":111,\"trailPosX2\":10,\"trailPosY2\":111}";
+        players.add(new Player("456", "Chuck", (short) 2));
+        list = new OutboundMessage.PlayerList(players);
+        assertEquals("{\"playerlist\":[" + bob + "," + bot1 + "," + chuck + "," + bot3 + "]}",
                      jsonb.toJson(list));
     }
 
