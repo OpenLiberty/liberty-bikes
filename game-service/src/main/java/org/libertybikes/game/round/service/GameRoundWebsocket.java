@@ -60,7 +60,7 @@ public class GameRoundWebsocket {
         try {
             final InboundMessage msg = jsonb.fromJson(message, InboundMessage.class);
             final GameRound round = gameSvc.getRound(roundId);
-            System.out.println("[onMessage] roundId=" + roundId + "  msg=" + message);
+            // System.out.println("[onMessage] roundId=" + roundId + "  msg=" + message);
 
             if (msg.event != null && GameEvent.GAME_REQUEUE == msg.event) {
                 requeueClient(gameSvc, round, session);
@@ -101,7 +101,7 @@ public class GameRoundWebsocket {
     }
 
     public static void sendTextToClients(Set<Session> clients, String message) {
-        System.out.println("Sending " + clients.size() + " clients the message: " + message);
+        // System.out.println("Sending " + clients.size() + " clients the message: " + message);
         for (Session client : clients)
             sendTextToClient(client, message);
     }
