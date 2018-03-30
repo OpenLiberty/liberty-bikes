@@ -102,7 +102,8 @@ public class GameBoard {
         for (int i = 0; i < BOARD_SIZE; i++) {
             StringBuilder row = new StringBuilder();
             for (int j = 0; j < BOARD_SIZE; j++) {
-                switch (board[i][j]) {
+                switch (board[j][i]) {
+
                     case (SPOT_AVAILABLE): {
                         row.append("-");
                         break;
@@ -116,7 +117,7 @@ public class GameBoard {
                         break;
                     }
                     default: {
-                        row.append(board[i][j]);
+                        row.append(board[j][i]);
                         break;
                     }
                 }
@@ -143,8 +144,10 @@ public class GameBoard {
 
     public void broadcastToAI() {
         for (Player p : players) {
-            short[][] boardCopy = board.clone();
-            p.processAIMove(boardCopy);
+            if (p.isAlive()) {
+                short[][] boardCopy = board.clone();
+                p.processAIMove(boardCopy);
+            }
         }
     }
 
