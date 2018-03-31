@@ -5,7 +5,9 @@ package org.libertybikes.game.core;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.json.bind.annotation.JsonbTransient;
 
@@ -15,6 +17,7 @@ public class GameBoard {
 
     public static final int BOARD_SIZE = 121;
     public static final short SPOT_AVAILABLE = 0, TRAIL_SPOT_TAKEN = -10, OBJECT_SPOT_TAKEN = -8, PLAYER_SPOT_TAKEN = 1;
+    private static final Map<String, Short> preferredPlayerSlots = new ConcurrentHashMap<>();
 
     @JsonbTransient
     public final short[][] board = new short[BOARD_SIZE][BOARD_SIZE];
@@ -58,16 +61,28 @@ public class GameBoard {
 
     public Player addPlayer(String playerId, String playerName) {
 
-        // Find first open player slot to fill, which determines position
         short playerNum = -1;
-        for (short i = 0; i < takenPlayerSlots.length; i++) {
-            if (!takenPlayerSlots[i]) {
-                playerNum = i;
-                takenPlayerSlots[i] = true;
-                System.out.println("Player slot " + i + " taken");
-                break;
+
+        // Try to keep players in the same slots across rounds if possible
+        Short preferredSlot = preferredPlayerSlots.get(playerId);
+        if (preferredSlot != null && !takenPlayerSlots[preferredSlot]) {
+            playerNum = preferredSlot;
+        } else {
+            // Find first open player slot to fill, which determines position
+            for (short i = 0; i < takenPlayerSlots.length; i++) {
+                if (!takenPlayerSlots[i]) {
+                    playerNum = i;
+                    break;
+                }
             }
+            preferredPlayerSlots.put(playerId, playerNum);
         }
+        takenPlayerSlots[playerNum] = true;
+        System.out.println("Player slot " + playerNum + " taken");
+
+        // Don't let the preferred player slot map take up too much memory
+        if (preferredPlayerSlots.size() > 1000)
+            preferredPlayerSlots.clear();
 
         // Initialize Player
         Player p = new Player(playerId, playerName, playerNum);
