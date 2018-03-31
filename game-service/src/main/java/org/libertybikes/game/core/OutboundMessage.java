@@ -47,4 +47,11 @@ public class OutboundMessage {
         }
     }
 
+    public static class Heartbeat {
+        @JsonbProperty("keepAlive")
+        public final boolean keepAlive = true;
+
+        public Heartbeat() {}
+    }
+
 }

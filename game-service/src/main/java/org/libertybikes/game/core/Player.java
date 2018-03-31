@@ -256,6 +256,7 @@ public class Player {
             direction = ai.processGameTick(board);
         } catch (Exception e) {
             System.out.println("Bot Exception: " + e.toString());
+            e.printStackTrace(System.out);
         }
     }
 

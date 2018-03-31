@@ -39,12 +39,12 @@ public class GameRoundWebsocket {
 
     @OnOpen
     public void onOpen(@PathParam("roundId") String roundId, Session session) {
-        System.out.println("Opened a session for game round: " + roundId);
+        log(roundId, "Opened a session");
     }
 
     @OnClose
     public void onClose(@PathParam("roundId") String roundId, Session peer) {
-        System.out.println("Closed a session for game round: " + roundId);
+        log(roundId, "Closed a session");
         try {
             GameRound round = gameSvc.getRound(roundId);
             if (round != null)
@@ -60,34 +60,40 @@ public class GameRoundWebsocket {
         try {
             final InboundMessage msg = jsonb.fromJson(message, InboundMessage.class);
             final GameRound round = gameSvc.getRound(roundId);
+            if (round == null) {
+                log(roundId, "[onMessage] unable to locate roundId=" + roundId);
+                return;
+            }
             // System.out.println("[onMessage] roundId=" + roundId + "  msg=" + message);
 
-            if (msg.event != null && GameEvent.GAME_REQUEUE == msg.event) {
+            if (GameEvent.GAME_REQUEUE == msg.event) {
                 requeueClient(gameSvc, round, session);
-            } else {
-                if (GameEvent.GAME_START == msg.event)
-                    round.startGame();
-                if (msg.direction != null)
-                    round.updatePlayerDirection(session, msg);
-                if (msg.playerJoinedId != null) {
-                    org.libertybikes.restclient.Player playerResponse = playerSvc.getPlayerById(msg.playerJoinedId);
-                    round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard);
-                }
-                if (Boolean.TRUE == msg.isSpectator) {
-                    round.addSpectator(session);
-                }
+            }
+            if (GameEvent.GAME_START == msg.event) {
+                round.startGame();
+            }
+            if (msg.direction != null) {
+                round.updatePlayerDirection(session, msg);
+            }
+            if (msg.playerJoinedId != null) {
+                org.libertybikes.restclient.Player playerResponse = playerSvc.getPlayerById(msg.playerJoinedId);
+                round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard);
+            }
+            if (Boolean.TRUE == msg.isSpectator) {
+                round.addSpectator(session);
             }
         } catch (Exception e) {
+            log(roundId, "ERR: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     public static void requeueClient(GameRoundService gameSvc, GameRound oldRound, Session s) {
-        GameRound nextGame = gameSvc.requeue(oldRound);
+        GameRound nextGame = gameSvc.requeue(oldRound, oldRound.isPlayer(s));
+        if (nextGame == null)
+            return;
         String requeueMsg = jsonb.toJson(new OutboundMessage.RequeueGame(nextGame.id));
         sendTextToClient(s, requeueMsg);
-        if (oldRound.removeClient(s) == 0)
-            gameSvc.deleteRound(oldRound.id);
     }
 
     public static void sendTextToClient(Session client, String message) {
@@ -104,6 +110,10 @@ public class GameRoundWebsocket {
         // System.out.println("Sending " + clients.size() + " clients the message: " + message);
         for (Session client : clients)
             sendTextToClient(client, message);
+    }
+
+    private static void log(String roundId, String msg) {
+        System.out.println("[websocket-" + roundId + "]  " + msg);
     }
 
 }

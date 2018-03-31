@@ -46,6 +46,9 @@ export class ControlsComponent implements OnInit, OnDestroy {
         sessionStorage.setItem('roundId', this.roundId);
         location.reload();
       }
+      if (json.keepAlive) {
+        this.gameService.send({ keepAlive: true });
+      }
     }, (err) => {
       console.log(err);
     });
