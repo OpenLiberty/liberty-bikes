@@ -50,6 +50,9 @@ export class GameComponent implements OnInit {
       if (json.countdown) {
         this.startingCountdown(json.countdown);
       }
+      if (json.keepAlive) {
+        this.gameService.send({ keepAlive: true });
+      }
     }, (err) => {
       console.log(`Error occurred: ${err}`);
     });
@@ -131,8 +134,9 @@ export class GameComponent implements OnInit {
     this.context.fillRect(GameComponent.BOX_SIZE * player.trailPosX2, GameComponent.BOX_SIZE * player.trailPosY2,
                           GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
     this.context.fillStyle = '#e8e5e5';
-    this.context.fillRect(GameComponent.BOX_SIZE * player.x + player.width/4 * GameComponent.BOX_SIZE, GameComponent.BOX_SIZE * player.y + player.height/4 * GameComponent.BOX_SIZE,
-                          GameComponent.BOX_SIZE * (player.width/2), GameComponent.BOX_SIZE * (player.height/2));  
+    this.context.fillRect(GameComponent.BOX_SIZE * player.x + player.width / 4 * GameComponent.BOX_SIZE, 
+                          GameComponent.BOX_SIZE * player.y + player.height / 4 * GameComponent.BOX_SIZE,
+                          GameComponent.BOX_SIZE * (player.width / 2), GameComponent.BOX_SIZE * (player.height / 2));  
   }
 
   drawObstacle(obstacle) {
@@ -174,11 +178,11 @@ export class GameComponent implements OnInit {
   }
   
   startingCountdown(seconds) {
-	const loader = $('#loader-overlay');
-	loader.removeClass('d-none');
-	setTimeout(function() {
-		loader.addClass('d-none');
-	}, (1000 * seconds));
+    const loader = $('#loader-overlay');
+    loader.removeClass('d-none');
+    setTimeout(function() {
+      loader.addClass('d-none');
+    }, (1000 * seconds));
   }
 
 }

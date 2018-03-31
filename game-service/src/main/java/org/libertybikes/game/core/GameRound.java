@@ -3,6 +3,8 @@ package org.libertybikes.game.core;
 import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToClient;
 import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToClients;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -12,7 +14,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import javax.enterprise.concurrent.LastExecution;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
+import javax.enterprise.concurrent.Trigger;
 import javax.enterprise.inject.spi.CDI;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
@@ -32,7 +36,11 @@ import org.libertybikes.restclient.PlayerService;
 public class GameRound implements Runnable {
 
     public static enum State {
-        OPEN, FULL, STARTING, RUNNING, FINISHED
+        OPEN, // not yet started, still room for players
+        FULL, // not started, but no more room for players
+        STARTING, // in the process of game starting countdown
+        RUNNING, // game is in progress and players are still alive
+        FINISHED // game has ended and a winner has been declared
     }
 
     public static final Jsonb jsonb = JsonbBuilder.create();
@@ -48,8 +56,9 @@ public class GameRound implements Runnable {
     public volatile State gameState = State.OPEN;
     private final GameBoard board = new GameBoard();
 
-    private final AtomicBoolean gameRunning = new AtomicBoolean(false);
-    private final AtomicBoolean paused = new AtomicBoolean(false);
+    private final AtomicBoolean gameRunning = new AtomicBoolean();
+    private final AtomicBoolean paused = new AtomicBoolean();
+    private final AtomicBoolean heartbeatStarted = new AtomicBoolean();
     private final Map<Session, Client> clients = new HashMap<>();
 
     private int ticksFromGameEnd = 0;
@@ -102,7 +111,7 @@ public class GameRound implements Runnable {
         // Front end should be preventing a player joining a full game but
         // defensive programming
         if (gameState != State.OPEN) {
-            System.out.println("Cannot add player " + playerId + " to game " + id + " because game has already started.");
+            log("Cannot add player " + playerId + " to game because game has already started.");
             return;
         }
 
@@ -115,12 +124,13 @@ public class GameRound implements Runnable {
             Client c = new Client(s, p);
             c.isPhone = hasGameBoard ? false : true;
             clients.put(s, c);
-            System.out.println("Player " + playerId + " has joined.");
+            log("Player " + playerId + " has joined.");
         } else {
-            System.out.println("Player " + playerId + " already exists.");
+            log("Player " + playerId + " already exists.");
         }
         broadcastPlayerList();
         broadcastGameBoard();
+        beginHeartbeat();
     }
 
     public void addAI() {
@@ -138,15 +148,40 @@ public class GameRound implements Runnable {
     }
 
     public void addSpectator(Session s) {
-        System.out.println("A spectator has joined.");
+        log("A spectator has joined.");
         clients.put(s, new Client(s));
         sendTextToClient(s, jsonb.toJson(new OutboundMessage.PlayerList(getPlayers())));
         sendTextToClient(s, jsonb.toJson(board));
+        beginHeartbeat();
+    }
+
+    private void beginHeartbeat() {
+        // Send a heartbeat to connected clients every 100 seconds in an attempt to keep them connected.
+        // It appears that when running in IBM Cloud, sockets time out after 120 seconds
+        if (!heartbeatStarted.getAndSet(true)) {
+            try {
+                ManagedScheduledExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
+                log("Initiating heartbeat to clients");
+                exec.schedule(() -> {
+                    log("Sending heartbeat to " + clients.size() + " clients");
+                    sendTextToClients(clients.keySet(), jsonb.toJson(new OutboundMessage.Heartbeat()));
+                }, new HeartbeatTrigger(this));
+            } catch (NamingException e) {
+                log("Unable to obtain executor service reference");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @JsonbTransient
+    public boolean isPlayer(Session s) {
+        Client c = clients.get(s);
+        return c != null && c.isPlayer();
     }
 
     private void removePlayer(Player p) {
         p.disconnect();
-        System.out.println(p.name + " disconnected.");
+        log(p.name + " disconnected.");
 
         // Open player slot for new joiners
         if (gameState == State.FULL && getPlayers().size() - 1 < Player.MAX_PLAYERS) {
@@ -178,11 +213,11 @@ public class GameRound implements Runnable {
     @Override
     public void run() {
         gameRunning.set(true);
-        System.out.println("Starting round: " + id);
+        log(">>> Starting round");
         ticksFromGameEnd = 0;
         int numGames = runningGames.incrementAndGet();
         if (numGames > 3)
-            System.out.println("WARNING: There are currently " + numGames + " game instances running.");
+            log("WARNING: There are currently " + numGames + " game instances running.");
         while (gameRunning.get()) {
             delay(GAME_TICK_SPEED);
             gameTick();
@@ -190,7 +225,7 @@ public class GameRound implements Runnable {
                 gameRunning.set(false); // end the game if nobody can move anymore
         }
         runningGames.decrementAndGet();
-        System.out.println("Finished round: " + id);
+        log("<<< Finished round");
         broadcastPlayerList();
 
         long start = System.nanoTime();
@@ -199,7 +234,7 @@ public class GameRound implements Runnable {
         // Wait for 5 seconds, but subtract the amount of time it took to update player stats
         long nanoWait = TimeUnit.SECONDS.toNanos(5) - (System.nanoTime() - start);
         delay(TimeUnit.NANOSECONDS.toMillis(nanoWait));
-        System.out.println("Clients flagged for auto-requeue will be redirected to the next round now");
+        log("Clients flagged for auto-requeue will be redirected to the next round now");
         GameRoundService gameSvc = CDI.current().select(GameRoundService.class).get();
         for (Client c : clients.values())
             if (c.autoRequeue)
@@ -217,10 +252,10 @@ public class GameRound implements Runnable {
         PlayerService playerSvc = CDI.current().select(PlayerService.class, RestClient.LITERAL).get();
         for (Player p : players) {
             if (p.getStatus() == STATUS.Winner) {
-                System.out.println("Player " + p.name + " has won round " + id);
+                log("Player " + p.name + " has won the round");
                 playerSvc.addWin(p.id);
             } else {
-                System.out.println("Player " + p.name + " has participated in round " + id);
+                log("Player " + p.name + " has participated in the round");
                 playerSvc.addLoss(p.id);
             }
         }
@@ -310,8 +345,13 @@ public class GameRound implements Runnable {
         }
     }
 
+    @JsonbTransient
+    public boolean isStarted() {
+        return gameState != State.OPEN && gameState != State.FULL;
+    }
+
     public void startGame() {
-        if (gameState != State.OPEN && gameState != State.FULL)
+        if (isStarted())
             return;
 
         while (gameState == State.OPEN) {
@@ -334,10 +374,40 @@ public class GameRound implements Runnable {
                 ManagedScheduledExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
                 exec.submit(this);
             } catch (NamingException e) {
-                System.out.println("Unable to start game due to: " + e);
+                log("Unable to start game due to: " + e);
                 e.printStackTrace();
             }
         }
         gameState = State.RUNNING;
+    }
+
+    private void log(String msg) {
+        System.out.println("[GameRound-" + id + "]  " + msg);
+    }
+
+    private class HeartbeatTrigger implements Trigger {
+
+        private static final int HEARTBEAT_INTERVAL_SEC = 100;
+        private final GameRound round;
+
+        public HeartbeatTrigger(GameRound round) {
+            this.round = round;
+        }
+
+        @Override
+        public Date getNextRunTime(LastExecution lastExecutionInfo, Date taskScheduledTime) {
+            // If there are any clients still connected to this game, keep sending heartbeats
+            if (round.clients.size() == 0) {
+                log("No clients remaining.  Cancelling heartbeat.");
+                return null;
+            }
+            return Date.from(Instant.now().plusSeconds(HEARTBEAT_INTERVAL_SEC));
+        }
+
+        @Override
+        public boolean skipRun(LastExecution lastExecutionInfo, Date scheduledRunTime) {
+            return round.clients.size() == 0;
+        }
+
     }
 }

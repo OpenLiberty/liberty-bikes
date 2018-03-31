@@ -1,9 +1,12 @@
 package org.libertybikes.game.round.service;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Resource;
+import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -18,7 +21,10 @@ import org.libertybikes.game.core.GameRound;
 @ApplicationScoped
 public class GameRoundService {
 
-    private final Map<String, GameRound> allRounds = new HashMap<>();
+    @Resource
+    ManagedScheduledExecutorService exec;
+
+    private final Map<String, GameRound> allRounds = new ConcurrentHashMap<>();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -32,8 +38,8 @@ public class GameRoundService {
         GameRound p = new GameRound();
         allRounds.put(p.id, p);
         System.out.println("Created round id=" + p.id);
-        if (allRounds.size() > 3)
-            System.out.println("WARNING: Found more than 3 active games in GameRoundService. " +
+        if (allRounds.size() > 5)
+            System.out.println("WARNING: Found " + allRounds.size() + " active games in GameRoundService. " +
                                "They are probably not being cleaned up properly: " + allRounds.keySet());
         return p.id;
     }
@@ -45,15 +51,33 @@ public class GameRoundService {
         return allRounds.get(roundId);
     }
 
-    public GameRound requeue(GameRound oldRound) {
-        GameRound nextRound = new GameRound(oldRound.nextRoundId);
-        GameRound existingRound = allRounds.putIfAbsent(oldRound.nextRoundId, nextRound);
-        return existingRound == null ? nextRound : existingRound;
+    public GameRound requeue(GameRound oldRound, boolean isPlayer) {
+        // Do not allow anyone to skip ahead past a round that has not started yet
+        if (!oldRound.isStarted())
+            return null;
+
+        GameRound newRound = new GameRound(oldRound.nextRoundId);
+        GameRound existingRound = allRounds.putIfAbsent(oldRound.nextRoundId, newRound);
+        GameRound nextRound = existingRound == null ? newRound : existingRound;
+        System.out.println("Created round id=" + nextRound.id);
+
+        // If player tries to requeue and next game is already in progress, requeue ahead to the next game
+        if (isPlayer && nextRound.isStarted())
+            return requeue(nextRound, isPlayer);
+        // If next round is already done, requeue ahead to next game
+        else if (nextRound.gameState == GameRound.State.FINISHED)
+            return requeue(nextRound, isPlayer);
+        else
+            return nextRound;
     }
 
-    public GameRound deleteRound(String roundId) {
-        System.out.println("Deleting round id=" + roundId);
-        return allRounds.remove(roundId);
+    public void deleteRound(String roundId) {
+        System.out.println("Scheduling round id=" + roundId + " for deletion in 5 minutes");
+        // Do not immediately delete rounds in order to give players/spectators time to move along to the next game
+        exec.schedule(() -> {
+            allRounds.remove(roundId);
+            System.out.println("Deleted round id=" + roundId);
+        }, 5, TimeUnit.MINUTES);
     }
 
 }
