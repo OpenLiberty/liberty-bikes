@@ -92,14 +92,14 @@ export class ControlsComponent implements OnInit, OnDestroy {
       evt.preventDefault();
     });
 
-    this.canvas.addEventListener('touchmove', (evt:TouchEvent) => {
+    this.canvas.addEventListener('touchmove', (evt: TouchEvent) => {
       this.touchMoved(evt);
 
       // Prevent touch events and mouse events from doubling up.
       evt.preventDefault();
     });
 
-    this.canvas.addEventListener('touchend', (evt:TouchEvent) => {
+    this.canvas.addEventListener('touchend', (evt: TouchEvent) => {
       this.touchEnded(evt);
 
       // Prevent touch events and mouse events from doubling up.
@@ -145,7 +145,7 @@ export class ControlsComponent implements OnInit, OnDestroy {
   }
 
   draw() {
-    if (window.scrollY != 0) {
+    if (window.scrollY !== 0) {
       window.scrollTo(0, 0);
     }
     const ctx = this.context;

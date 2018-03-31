@@ -1,4 +1,4 @@
-import { Point } from "./point";
+import { Point } from './point';
 
 export class Triangle {
   point1: Point;
@@ -18,7 +18,7 @@ export class Triangle {
     const b2 = this.sign(other, this.point2, this.point3) < 0.0;
     const b3 = this.sign(other, this.point3, this.point1) < 0.0;
 
-    return (b1 == b2) && (b2 == b3);
+    return (b1 === b2) && (b2 === b3);
   }
 
   sign(p1: Point, p2: Point, p3: Point): number {

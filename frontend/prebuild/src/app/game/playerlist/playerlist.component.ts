@@ -3,7 +3,7 @@ import { Player } from '../player/player';
 import { PlayersService } from './players.service';
 
 @Component({
-  selector: 'player-list',
+  selector: 'app-player-list',
   templateUrl: './playerlist.component.html',
   styleUrls: ['./playerlist.component.scss']
 })

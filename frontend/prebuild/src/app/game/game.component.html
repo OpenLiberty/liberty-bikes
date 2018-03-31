@@ -4,18 +4,18 @@
     <h2>code: <span id="game-code"></span></h2>
   </div>
 </div>
-	
+
 <div id="loader-overlay" class="loader-overlay d-none" data-ng-hide="vm.hideLoader">
 	<div class="spin-loader" data-ng-class="{'shrink': vm.shrinkOnHide, 'expand': !vm.shrinkOnHide}"></div>
 </div>
-	
+
 <div id="game-container">
   <div id="game-board">
     <canvas width="600" height="600" id="gameCanvas"></canvas>
   </div>
 </div>
 <div id="players">
-  <player-list></player-list>
+  <app-player-list></app-player-list>
 </div>
 
 <div id="leaderboard">

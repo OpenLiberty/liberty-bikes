@@ -42,10 +42,10 @@ export class LoginComponent implements OnInit {
 
   async quickJoin() {
     // First get an unstarted round ID
-	  let roundID = await this.http.get(`${environment.API_URL_GAME_ROUND}/available`, { responseType: 'text' }).toPromise();
+    let roundID = await this.http.get(`${environment.API_URL_GAME_ROUND}/available`, { responseType: 'text' }).toPromise();
 
-	// Then join the round
-	this.joinRoundById(roundID);
+  // Then join the round
+  this.joinRoundById(roundID);
   }
 
   async joinRound() {
@@ -60,8 +60,8 @@ async joinRoundById(roundID: string) {
   roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
   let gameBoard = true;
   if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-	  // give a controller-only view on mobile devices
-	  gameBoard = false;
+    // give a controller-only view on mobile devices
+    gameBoard = false;
   }
   console.log(`Is this a mobile device? ${!gameBoard}`);
 
@@ -128,7 +128,7 @@ async joinRoundById(roundID: string) {
     let router = this.router;
 
     try {
-      let party: any = await this.http.post(`${environment.API_URL_PARTY}/create`, "", { responseType: 'json' }).toPromise();
+      let party: any = await this.http.post(`${environment.API_URL_PARTY}/create`, '', { responseType: 'json' }).toPromise();
       sessionStorage.setItem('isSpectator', 'true');
       sessionStorage.setItem('partyId', party.id);
       sessionStorage.setItem('roundId', party.currentRound.id);
