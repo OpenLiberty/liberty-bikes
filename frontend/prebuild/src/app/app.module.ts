@@ -12,6 +12,8 @@ import { GameComponent } from './game/game.component';
 import { ControlsComponent } from './controls/controls.component';
 import { PlayerListComponent } from './game/playerlist/playerlist.component';
 import { PlayerComponent } from './game/player/player.component';
+import { LeaderboardComponent } from './game/leaderboard/leaderboard.component';
+import { RankingComponent } from './game/leaderboard/ranking/ranking.component';
 
 @NgModule({
   imports: [
@@ -27,6 +29,8 @@ import { PlayerComponent } from './game/player/player.component';
     ControlsComponent,
     PlayerListComponent,
     PlayerComponent,
+    LeaderboardComponent,
+    RankingComponent,
   ],
   providers: [ ],
   bootstrap: [ AppComponent ]

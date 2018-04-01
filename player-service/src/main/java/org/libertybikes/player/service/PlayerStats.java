@@ -7,7 +7,7 @@ public class PlayerStats {
     public int numWins;
 
     public double winLossRatio() {
-        return numWins / totalGames;
+        return totalGames == 0 ? 0 : numWins / totalGames;
     }
 
 }

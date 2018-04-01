@@ -23,11 +23,18 @@ public class Player {
     }
 
     public static int compareByWins(Player a, Player b) {
-        return b.stats.numWins - a.stats.numWins;
+        return Integer.compare(b.stats.numWins, a.stats.numWins);
     }
 
-    public static double compareByWinRatio(Player a, Player b) {
-        return b.stats.winLossRatio() - a.stats.winLossRatio();
+    public static int compareByWinRatio(Player a, Player b) {
+        return Double.compare(b.stats.winLossRatio(), a.stats.winLossRatio());
+    }
+
+    public static int compareOverall(Player a, Player b) {
+        int wins = compareByWins(a, b);
+        if (wins != 0)
+            return wins;
+        return compareByWinRatio(a, b);
     }
 
 }
