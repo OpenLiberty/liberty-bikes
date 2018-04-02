@@ -40,15 +40,17 @@ public class GameRoundWebsocket {
     @OnOpen
     public void onOpen(@PathParam("roundId") String roundId, Session session) {
         log(roundId, "Opened a session");
+        checkIdleTimeout(session, roundId);
     }
 
     @OnClose
-    public void onClose(@PathParam("roundId") String roundId, Session peer) {
+    public void onClose(@PathParam("roundId") String roundId, Session session) {
+        checkIdleTimeout(session, roundId);
         log(roundId, "Closed a session");
         try {
             GameRound round = gameSvc.getRound(roundId);
             if (round != null)
-                if (round.removeClient(peer) == 0)
+                if (round.removeClient(session) == 0)
                     gameSvc.deleteRound(roundId);
         } catch (Exception e) {
             e.printStackTrace();
@@ -57,6 +59,7 @@ public class GameRoundWebsocket {
 
     @OnMessage
     public void onMessage(@PathParam("roundId") final String roundId, String message, Session session) {
+        checkIdleTimeout(session, roundId);
         try {
             final InboundMessage msg = jsonb.fromJson(message, InboundMessage.class);
             final GameRound round = gameSvc.getRound(roundId);
@@ -114,6 +117,17 @@ public class GameRoundWebsocket {
 
     private static void log(String roundId, String msg) {
         System.out.println("[websocket-" + roundId + "]  " + msg);
+    }
+
+    // TODO: remove this method once we find out if session timeout is being altered on cloud env
+    private static void checkIdleTimeout(Session session, String roundId) {
+        // See if we can catch a reason why sessions timeout in cloud env
+        if (session.getMaxIdleTimeout() > 0) {
+            log(roundId, "WARNING: Session idle timeout is: " + session.getMaxIdleTimeout());
+        }
+        if (session.getContainer().getDefaultMaxSessionIdleTimeout() > 0) {
+            log(roundId, "WARNING: Default session idle timeout is: " + session.getContainer().getDefaultMaxSessionIdleTimeout());
+        }
     }
 
 }
