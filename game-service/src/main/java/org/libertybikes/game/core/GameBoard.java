@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.json.bind.annotation.JsonbTransient;
 
 import org.libertybikes.game.bot.Hal;
+import org.libertybikes.game.bot.Walle;
 
 public class GameBoard {
 
@@ -182,8 +183,16 @@ public class GameBoard {
         }
 
         // Initialize Player
-        Player p = new Player("Hal-" + playerNum, "Hal-" + playerNum, playerNum);
-        AI ai = new Hal(p.x, p.y, p.width, p.height, p.direction, playerNum);
+        Player p;
+        AI ai;
+
+        if (Math.random() < .5) {
+            p = new Player("Hal-" + playerNum, "Hal-" + playerNum, playerNum);
+            ai = new Hal(p.x, p.y, p.width, p.height, p.direction, playerNum);
+        } else {
+            p = new Player("WALLE-" + playerNum, "WALLE-" + playerNum, playerNum);
+            ai = new Walle(p.x, p.y, p.width, p.height, p.direction, playerNum);
+        }
 
         if (p.x + p.width > BOARD_SIZE || p.y + p.height > BOARD_SIZE)
             throw new IllegalArgumentException("Player does not fit on board: " + p);
