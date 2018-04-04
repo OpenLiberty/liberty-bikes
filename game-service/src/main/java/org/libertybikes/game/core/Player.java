@@ -3,6 +3,7 @@
  */
 package org.libertybikes.game.core;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -156,27 +157,39 @@ public class Player {
         }
 
         trail.add(new TrailPosition(x + 1, y + 1));
-
+        boolean first = true;
         if (trail.size() > 2) {
-            TrailPosition trailP = trail.remove();
-            trailPosX = trailP.x;
-            trailPosY = trailP.y;
-            s[trailPosX][trailPosY] = GameBoard.TRAIL_SPOT_TAKEN;
-            s[trailPosX2][trailPosY2] = GameBoard.TRAIL_SPOT_TAKEN;
-            if (lastDirection != direction) {
-                TrailPosition trailP2 = trail.remove();
-                trailPosX2 = trailP2.x;
-                trailPosY2 = trailP2.y;
-                s[trailPosX2][trailPosY2] = (short) (GameBoard.PLAYER_SPOT_TAKEN + playerNum);
-            } else {
-                trailPosX2 = trailPosX;
-                trailPosY2 = trailPosY;
+            Iterator<TrailPosition> it = trail.iterator();
+            while (it.hasNext()) {
+                TrailPosition tp = it.next();
+                if (!withinOneSquare(tp)) {
+                    if (first) {
+                        s[tp.x][tp.y] = GameBoard.TRAIL_SPOT_TAKEN;
+                        trailPosX = tp.x;
+                        trailPosY = tp.y;
+                        it.remove();
+                        first = false;
+                    } else {
+                        s[tp.x][tp.y] = GameBoard.TRAIL_SPOT_TAKEN;
+                        trailPosX2 = tp.x;
+                        trailPosY2 = tp.y;
+                        it.remove();
+                        break;
+                    }
+                }
             }
         }
 
         lastDirection = direction;
 
         return isAlive();
+    }
+
+    private boolean withinOneSquare(TrailPosition trail) {
+        if (Math.abs(trail.x - (x + 1)) <= 1 && Math.abs(trail.y - (y + 1)) <= 1) {
+            return true;
+        }
+        return false;
     }
 
     private boolean checkCollision(short[][] board, int x, int y) {
