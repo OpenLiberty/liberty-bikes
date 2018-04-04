@@ -30,7 +30,7 @@ export class LoginComponent implements OnInit {
   async createRound() {
     try {
       let data = await this.http.post(`${environment.API_URL_GAME_ROUND}/create`, "", { responseType: 'text'}).toPromise();
-      alert(`Created round: ${data}`);
+      $('#roundid').val(`${data}`)
     } catch (error) {
       console.log(error);
     }
