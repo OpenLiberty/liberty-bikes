@@ -7,7 +7,6 @@ public class MovingObstacle extends Obstacle {
 
     public int xDir, yDir, oldX, oldY, moveDelay, currentDelay = 0;
     public boolean hasMoved = false;
-    private boolean willCollideX, willCollideY = false;
 
     public MovingObstacle(int w, int h, int x, int y) {
         super(w, h, x, y);
@@ -26,30 +25,36 @@ public class MovingObstacle extends Obstacle {
     }
 
     public void checkCollision(short[][] board) {
-        willCollideX = false;
-        willCollideY = false;
+        boolean checkCorner = true;
 
         if (xDir != 0) {
             if (xDir > 0) {
                 if (x + width + 1 >= GameBoard.BOARD_SIZE || hasCollision(board, DIRECTION.RIGHT)) {
-                    willCollideX = true;
+                    xDir = xDir * -1;
+                    checkCorner = false;
                 }
             } else {
                 if (x - 1 < 0 || hasCollision(board, DIRECTION.LEFT)) {
-                    willCollideX = true;
+                    xDir = xDir * -1;
+                    checkCorner = false;
                 }
             }
         }
         if (yDir != 0) {
             if (yDir > 0) {
                 if (y + height + 1 >= GameBoard.BOARD_SIZE || hasCollision(board, DIRECTION.DOWN)) {
-                    willCollideY = true;
+                    yDir = yDir * -1;
+                    checkCorner = false;
                 }
             } else {
                 if (y - 1 < 0 || hasCollision(board, DIRECTION.UP)) {
-                    willCollideY = true;
+                    yDir = yDir * -1;
+                    checkCorner = false;
                 }
             }
+        }
+        if (checkCorner) {
+            checkCornerCollision(board);
         }
     }
 
@@ -66,77 +71,44 @@ public class MovingObstacle extends Obstacle {
         oldX = x;
         oldY = y;
 
-        if (xDir != 0) {
-            if (xDir > 0) {
-                // move right only if we can
-                if (!willCollideX) {
-                    moveRight(board);
-                    // bounce left if we can't
-                } else if (!hasCollision(board, DIRECTION.LEFT)) {
-                    moveLeft(board);
-                    xDir = xDir * -1;
-                }
-            } else {
-                if (!willCollideX) {
-                    moveLeft(board);
-                } else if (!hasCollision(board, DIRECTION.RIGHT)) {
-                    moveRight(board);
-                    xDir = xDir * -1;
-                }
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                board[x + i][y + j] = GameBoard.SPOT_AVAILABLE;
             }
         }
-
-        if (yDir != 0) {
-            if (yDir > 0) {
-                if (!willCollideY) {
-                    moveDown(board);
-                } else if (!hasCollision(board, DIRECTION.UP)) {
-                    moveUp(board);
-                    yDir = yDir * -1;
-                }
-            } else {
-                if (!willCollideY) {
-                    moveUp(board);
-                } else if (!hasCollision(board, DIRECTION.DOWN)) {
-                    moveDown(board);
-                    yDir = yDir * -1;
-                }
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                board[x + i + xDir][y + j + yDir] = GameBoard.OBJECT_SPOT_TAKEN;
             }
         }
+        x += xDir;
+        y += yDir;
+
     }
 
-    private void moveRight(short[][] board) {
-        for (int i = 0; i < height; i++) {
-            // clear previous position
-            board[x][y + i] = GameBoard.SPOT_AVAILABLE;
-            // take new position
-            board[x + width][y + i] = GameBoard.OBJECT_SPOT_TAKEN;
+    private void checkCornerCollision(short[][] board) {
+        if (xDir == 0 || yDir == 0) {
+            return;
         }
-        x++;
-    }
+        if (xDir > 0) {
+            if (yDir > 0 && board[x + width][y + height] == GameBoard.OBJECT_SPOT_TAKEN) {
+                xDir = xDir * -1;
+                yDir = yDir * -1;
+            } else if (yDir < 0 && board[x + width][y - 1] == GameBoard.OBJECT_SPOT_TAKEN) {
+                xDir = xDir * -1;
+                yDir = yDir * -1;
+            }
 
-    private void moveLeft(short[][] board) {
-        for (int i = 0; i < height; i++) {
-            board[x - 1][y + i] = GameBoard.OBJECT_SPOT_TAKEN;
-            board[x + width - 1][y + i] = GameBoard.SPOT_AVAILABLE;
-        }
-        x--;
-    }
+        } else {
+            if (yDir > 0 && board[x - 1][y + height] == GameBoard.OBJECT_SPOT_TAKEN) {
+                xDir = xDir * -1;
+                yDir = yDir * -1;
+            } else if (yDir < 0 && board[x - 1][y - 1] == GameBoard.OBJECT_SPOT_TAKEN) {
+                xDir = xDir * -1;
+                yDir = yDir * -1;
+            }
 
-    private void moveUp(short[][] board) {
-        for (int i = 0; i < width; i++) {
-            board[x + i][y - 1] = GameBoard.OBJECT_SPOT_TAKEN;
-            board[x + i][y + height - 1] = GameBoard.SPOT_AVAILABLE;
         }
-        y--;
-    }
-
-    private void moveDown(short[][] board) {
-        for (int i = 0; i < width; i++) {
-            board[x + i][y] = GameBoard.SPOT_AVAILABLE;
-            board[x + i][y + height] = GameBoard.OBJECT_SPOT_TAKEN;
-        }
-        y++;
     }
 
     // loops through the spots we want to move to and see if they are already taken by
