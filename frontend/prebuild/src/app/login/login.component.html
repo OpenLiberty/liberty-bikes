@@ -3,18 +3,24 @@
     <div id="login-title">
       <h1>Liberty Bikes</h1>
     </div>
-    <div id="login-form">
+    <div class="login-form">
       <div class="form-item">
         <label>Username</label>
         <input type="text" id="username" name="username" autofocus>
       </div>
+    </div>
+    <div class="button-bar">
+      <button type="button" (click)="quickJoin()">Quick Join</button>
+    </div>
+    <div></div>
+    <div class="login-form">
       <div class="form-item">
         <label>Code</label>
         <input type="text" id="roundid" name="roundid" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       </div>
     </div>
-    <div id="button-bar">
-      <button type="button" (click)="joinRound()">Login</button>
+    <div class="button-bar">
+      <button type="button" (click)="joinRound()">Join Round</button>
       <button type="button" (click)="createRound()">Create Round</button>
       <button id="hostButton" type="button" (click)="hostRound()" data-loading-text="Connecting..." autocomplete="off">Host Round</button>
     </div>

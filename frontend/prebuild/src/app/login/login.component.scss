@@ -42,7 +42,7 @@
   padding-bottom: 50px;
 }
 
-#login-form {
+.login-form {
   width: 100%;
   margin-bottom: 15px;
 }
@@ -85,7 +85,7 @@
   text-transform: uppercase;
 }
 
-#button-bar {
+.button-bar {
   display: flex;
   flex-flow: column;
   width: 100%;
@@ -93,7 +93,7 @@
   padding-right: 10px;
 }
 
-#button-bar button {
+.button-bar button {
   width: 100%;
   margin-top: 6px;
   margin-bottom: 6px;

@@ -399,6 +399,9 @@ public class GameRound implements Runnable {
             // If there are any clients still connected to this game, keep sending heartbeats
             if (round.clients.size() == 0) {
                 log("No clients remaining.  Cancelling heartbeat.");
+                // Ensure that game state is closed off so that no other players can quick join while a round is marked for deletion
+                if (gameState == State.OPEN)
+                    gameState = State.FINISHED;
                 return null;
             }
             return Date.from(Instant.now().plusSeconds(HEARTBEAT_INTERVAL_SEC));

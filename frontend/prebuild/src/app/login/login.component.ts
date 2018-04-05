@@ -36,11 +36,23 @@ export class LoginComponent implements OnInit {
     }
 
   }
+  
+  async quickJoin() {
+    // First get an unstarted round ID
+	  let roundID = await this.http.post(`${environment.API_URL_GAME_ROUND}/available`, "", { responseType: 'text' }).toPromise();
+	  
+	// Then join the round
+	this.joinRoundById(roundID);
+  }
+  
+  async joinRound() {
+	  let roundID: string = $('#roundid').val();
+      this.joinRoundById(roundID);
+  }
 
-async joinRound() {
+async joinRoundById(roundID: string) {
   let ngZone = this.ngZone;
   let router = this.router;
-  let roundID: string = $('#roundid').val();
   let username: string = $('#username').val();
   roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
   let gameBoard = true;
