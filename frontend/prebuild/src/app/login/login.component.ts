@@ -37,12 +37,19 @@ export class LoginComponent implements OnInit {
 
   }
 
-async joinRound(gameBoard: boolean) {
+async joinRound() {
   let ngZone = this.ngZone;
   let router = this.router;
   let roundID: string = $('#roundid').val();
   let username: string = $('#username').val();
   roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
+  let gameBoard = true;
+  if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+	  // give a controller-only view on mobile devices
+	  gameBoard = false;
+  }
+  console.log(`Is this a mobile device? ${!gameBoard}`);
+  
   // TODO: Validate form input in a more elegant way than alert()
   if (roundID.length !== 4) {
     alert(
@@ -50,8 +57,8 @@ async joinRound(gameBoard: boolean) {
     );
     return;
   }
-  if (username.length < 1) {
-    alert('Username must not be empty');
+  if (username.length < 1 || username.length > 20) {
+    alert('Username must be between 1 and 20 chars');
     return;
   }
 
