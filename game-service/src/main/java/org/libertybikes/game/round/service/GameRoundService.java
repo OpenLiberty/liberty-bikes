@@ -2,6 +2,7 @@ package org.libertybikes.game.round.service;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -16,6 +17,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.libertybikes.game.core.GameRound;
+import org.libertybikes.game.core.GameRound.State;
 
 @Path("/")
 @ApplicationScoped
@@ -42,6 +44,19 @@ public class GameRoundService {
             System.out.println("WARNING: Found " + allRounds.size() + " active games in GameRoundService. " +
                                "They are probably not being cleaned up properly: " + allRounds.keySet());
         return p.id;
+    }
+
+    @POST
+    @Path("/available")
+    public String getAvailableRound() {
+        Optional<GameRound> availableRound = allRounds.values()
+                        .stream()
+                        .filter(r -> r.gameState == GameRound.State.OPEN)
+                        .findFirst();
+        if (availableRound.isPresent())
+            return availableRound.get().id;
+        else
+            return createRound();
     }
 
     @GET
@@ -71,7 +86,10 @@ public class GameRoundService {
             return nextRound;
     }
 
-    public void deleteRound(String roundId) {
+    public void deleteRound(GameRound round) {
+        String roundId = round.id;
+        if (round.gameState == State.OPEN)
+            round.gameState = State.FINISHED;
         System.out.println("Scheduling round id=" + roundId + " for deletion in 5 minutes");
         // Do not immediately delete rounds in order to give players/spectators time to move along to the next game
         exec.schedule(() -> {

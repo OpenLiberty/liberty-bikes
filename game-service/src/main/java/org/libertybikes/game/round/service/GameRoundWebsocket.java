@@ -51,7 +51,7 @@ public class GameRoundWebsocket {
             GameRound round = gameSvc.getRound(roundId);
             if (round != null)
                 if (round.removeClient(session) == 0)
-                    gameSvc.deleteRound(roundId);
+                    gameSvc.deleteRound(round);
         } catch (Exception e) {
             e.printStackTrace();
         }
