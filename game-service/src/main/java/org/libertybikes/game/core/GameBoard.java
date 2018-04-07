@@ -79,7 +79,6 @@ public class GameBoard {
             preferredPlayerSlots.put(playerId, playerNum);
         }
         takenPlayerSlots[playerNum] = true;
-        System.out.println("Player slot " + playerNum + " taken");
 
         // Don't let the preferred player slot map take up too much memory
         if (preferredPlayerSlots.size() > 1000)

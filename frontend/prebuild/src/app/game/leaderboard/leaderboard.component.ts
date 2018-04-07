@@ -28,7 +28,7 @@ export class LeaderboardComponent implements OnInit {
       let i = 1;
       for (let ranking of json) {
         console.log(`Got rank ${JSON.stringify(ranking)}`);
-        rankingsArr.push(new Ranking(i++, ranking.name, ranking.stats.numWins, ranking.stats.totalGames));
+        rankingsArr.push(new Ranking(i++, ranking.name, ranking.stats.numWins, ranking.stats.totalGames, ranking.stats.rating));
       }
       this.ngZone.run(() => {
         this.rankings = rankingsArr;

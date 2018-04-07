@@ -29,12 +29,8 @@ public class PlayerService {
         Random r = new Random();
         for (int i = 0; i < 10; i++) {
             String id = createPlayer("SamplePlayer-" + i);
-            int wins = r.nextInt(3);
-            int losses = r.nextInt(3);
-            for (int w = 0; w < wins; w++)
-                addWin(id);
-            for (int l = 0; l < losses; l++)
-                addLoss(id);
+            for (int j = 0; j < 3; j++)
+                recordGame(id, r.nextInt(4) + 1);
         }
     }
 
@@ -64,26 +60,27 @@ public class PlayerService {
     }
 
     @POST
-    @Path("/{playerId}/win")
-    public void addWin(@PathParam("playerId") String id) {
-        Player p = getPlayerById(id);
-        if (p == null)
-            return;
-        p.stats.numWins++;
-        p.stats.totalGames++;
-        db.put(p);
-        System.out.println("Player " + id + " has won " + p.stats.numWins + " games and played in " + p.stats.totalGames + " games.");
-    }
-
-    @POST
-    @Path("/{playerId}/loss")
-    public void addLoss(@PathParam("playerId") String id) {
+    @Path("/{playerId}/recordGame")
+    public void recordGame(@PathParam("playerId") String id, @QueryParam("place") int place) {
         Player p = getPlayerById(id);
         if (p == null)
             return;
         p.stats.totalGames++;
+        switch (place) {
+            case 1:
+                p.stats.numWins++;
+                p.stats.rating += 28;
+                break;
+            case 2:
+                p.stats.rating += 14;
+                break;
+            case 3:
+                p.stats.rating -= 5;
+                break;
+            default:
+                p.stats.rating -= 12;
+        }
         db.put(p);
-        System.out.println("Player " + id + " has won " + p.stats.numWins + " games and played in " + p.stats.totalGames + " games.");
+        System.out.println(p);
     }
-
 }

@@ -6,8 +6,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
@@ -22,11 +22,7 @@ public interface PlayerService {
     public Player getPlayerById(@PathParam("playerId") String id);
 
     @POST
-    @Path("/{playerId}/win")
-    public Response addWin(@PathParam("playerId") String id);
-
-    @POST
-    @Path("/{playerId}/loss")
-    public Response addLoss(@PathParam("playerId") String id);
+    @Path("/{playerId}/recordGame")
+    public void recordGame(@PathParam("playerId") String id, @QueryParam("place") int place);
 
 }
