@@ -1,0 +1,23 @@
+<div id="title"><h2>Leaderboard</h2></div>
+<table class="leaderboard-container">
+	<thead>
+		<tr>
+			<td>Rank</td>
+			<td>Player Name</td>
+			<td>Wins</td>
+			<td>Games Played</td>
+			<td>Win rate</td>
+			<td>Rating</td>
+		</tr>
+	</thead>
+	<tbody>
+		<tr *ngFor="let ranking of rankings">
+			<td>{{ ranking.rank }}</td>
+			<td>{{ ranking.name }}</td>
+			<td>{{ ranking.numWins }}</td>
+			<td>{{ ranking.totalGames }}</td>
+			<td>{{ ranking.winLossRatio }} %</td>
+			<td>{{ ranking.rating }}</td>
+		</tr>
+	</tbody>
+</table>

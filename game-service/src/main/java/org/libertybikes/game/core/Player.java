@@ -262,8 +262,13 @@ public class Player {
         return isAlive;
     }
 
+    @JsonbTransient
+    public boolean isRealPlayer() {
+        return ai == null;
+    }
+
     public void processAIMove(short[][] board) {
-        if (ai == null)
+        if (isRealPlayer())
             return;
         try {
             direction = ai.processGameTick(board);

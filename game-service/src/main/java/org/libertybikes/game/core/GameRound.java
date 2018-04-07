@@ -4,7 +4,9 @@ import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToC
 import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToClients;
 
 import java.time.Instant;
+import java.util.ArrayDeque;
 import java.util.Date;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -60,6 +62,7 @@ public class GameRound implements Runnable {
     private final AtomicBoolean paused = new AtomicBoolean();
     private final AtomicBoolean heartbeatStarted = new AtomicBoolean();
     private final Map<Session, Client> clients = new HashMap<>();
+    private final Deque<Player> playerRanks = new ArrayDeque<>();
 
     private int ticksFromGameEnd = 0;
 
@@ -250,14 +253,12 @@ public class GameRound implements Runnable {
             return; // Don't update player stats for single-player games
 
         PlayerService playerSvc = CDI.current().select(PlayerService.class, RestClient.LITERAL).get();
-        for (Player p : players) {
-            if (p.getStatus() == STATUS.Winner) {
-                log("Player " + p.name + " has won the round");
-                playerSvc.addWin(p.id);
-            } else {
-                log("Player " + p.name + " has participated in the round");
-                playerSvc.addLoss(p.id);
-            }
+        int rank = 1;
+        for (Player p : playerRanks) {
+            log("Player " + p.name + " came in place " + rank);
+            if (p.isRealPlayer())
+                playerSvc.recordGame(p.id, rank);
+            rank++;
         }
     }
 
@@ -281,6 +282,7 @@ public class GameRound implements Runnable {
                     playersMoved = true;
                 } else {
                     death = true;
+                    playerRanks.push(p);
                 }
             }
         }
@@ -337,6 +339,7 @@ public class GameRound implements Runnable {
         }
         if (alivePlayers == 1) {
             alive.setStatus(STATUS.Winner);
+            playerRanks.push(alive);
             gameState = State.FINISHED;
         }
 

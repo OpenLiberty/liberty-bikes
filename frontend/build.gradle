@@ -73,6 +73,10 @@ task copyFrontend(type: Copy) {
 	into "${rootDir}/frontend/src/main/webapp"
 }
 
+npm_start {
+	dependsOn 'libertyStop'
+}
+
 liberty {
 	server {
 		name = 'frontendServer'

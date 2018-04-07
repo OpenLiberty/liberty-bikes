@@ -30,7 +30,7 @@ public class PlayerDB {
     public Collection<Player> topPlayers(int numPlayers) {
         return allPlayers.values()
                         .stream()
-                        .sorted(Player::compareByWins)
+                        .sorted(Player::compareOverall)
                         .limit(numPlayers)
                         .collect(Collectors.toList());
     }

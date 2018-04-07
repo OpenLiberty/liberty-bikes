@@ -1,6 +1,7 @@
 package org.libertybikes.player.service;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,9 +21,21 @@ public class RankingService {
     PlayerDB db;
 
     @GET
+    @Path("/top")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<Player> topPlayers() {
-        return db.topPlayers(5);
+    public Collection<Player> topFivePlayers() {
+        return topNPlayers(5);
+    }
+
+    @GET
+    @Path("/top/{numPlayers}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<Player> topNPlayers(@PathParam("numPlayers") Integer numPlayers) {
+        if (numPlayers < 0)
+            return Collections.emptySet();
+        if (numPlayers > 100)
+            numPlayers = 100;
+        return db.topPlayers(numPlayers);
     }
 
     @GET
