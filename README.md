@@ -1,8 +1,8 @@
 # project-tron
 
-Publicly hosted on IBM Cloud here: [http://projecttron.mybluemix.net/](http://projecttron.mybluemix.net/)
+Publicly hosted on IBM Cloud here: [http://libertybikes.mybluemix.net/](http://libertybikes.mybluemix.net/)
 
-Bluemix toolchain automatically deploys the current `project-tron/project-tron:master` branch
+Bluemix toolchain automatically deploys the current `liberty-bikes/liberty-bikes:master` branch
 
 ## Local development
 
