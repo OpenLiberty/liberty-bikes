@@ -15,7 +15,16 @@ public class PlayerDB {
     // TODO back this by a DB instead of in-mem
     private final Map<String, Player> allPlayers = new HashMap<>();
 
-    public void put(Player p) {
+    /**
+     * Inserts a new player into the database.
+     * 
+     * @return Returns true if the player was created. False if a player with the same ID already existed
+     */
+    public boolean create(Player p) {
+        return allPlayers.putIfAbsent(p.id, p) == null;
+    }
+
+    public void update(Player p) {
         allPlayers.put(p.id, p);
     }
 

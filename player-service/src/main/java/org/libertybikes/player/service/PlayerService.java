@@ -28,7 +28,7 @@ public class PlayerService {
         // TODO use MP-Config to only run this for local dev mode
         Random r = new Random();
         for (int i = 0; i < 10; i++) {
-            String id = createPlayer("SamplePlayer-" + i);
+            String id = createPlayer("SamplePlayer-" + i, null);
             for (int j = 0; j < 3; j++)
                 recordGame(id, r.nextInt(4) + 1);
         }
@@ -42,10 +42,12 @@ public class PlayerService {
 
     @POST
     @Path("/create")
-    public String createPlayer(@QueryParam("name") String name) {
-        Player p = new Player(name);
-        System.out.println("Created a new player with name=" + name + " and id=" + p.id);
-        db.put(p);
+    public String createPlayer(@QueryParam("name") String name, @QueryParam("id") String id) {
+        Player p = new Player(name, id);
+        if (db.create(p))
+            System.out.println("Created a new player with name=" + name + " and id=" + p.id);
+        else
+            System.out.println("A player already existed with id=" + p.id);
         return p.id;
     }
 
@@ -80,7 +82,7 @@ public class PlayerService {
             default:
                 p.stats.rating -= 12;
         }
-        db.put(p);
+        db.update(p);
         System.out.println(p);
     }
 }
