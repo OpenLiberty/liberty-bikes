@@ -1,12 +1,21 @@
 package org.libertybikes.player.service;
 
-import java.util.UUID;
-
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.annotation.JsonbCreator;
+import javax.json.bind.annotation.JsonbTransient;
 
 public class Player {
+
+    public static enum DOMAIN {
+        BASIC,
+        GMAIL;
+
+        @Override
+        public String toString() {
+            return super.toString() + ':';
+        }
+    }
 
     private static final Jsonb jsonb = JsonbBuilder.create();
 
@@ -17,12 +26,12 @@ public class Player {
     public final PlayerStats stats = new PlayerStats();
 
     public Player(String name) {
-        this(name, UUID.randomUUID().toString());
+        this(name, null);
     }
 
     @JsonbCreator
     public Player(String name, String id) {
-        this.id = id;
+        this.id = id == null ? DOMAIN.BASIC + name : id;
         this.name = name;
     }
 
@@ -46,6 +55,14 @@ public class Player {
         if (wins != 0)
             return wins;
         return compareByWinRatio(a, b);
+    }
+
+    @JsonbTransient
+    public DOMAIN getDomain() {
+        if (id.startsWith(DOMAIN.GMAIL.toString()))
+            return DOMAIN.GMAIL;
+        else
+            return DOMAIN.BASIC;
     }
 
     @Override
