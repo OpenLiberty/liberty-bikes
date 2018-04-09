@@ -8,7 +8,7 @@ import java.util.Random;
 import org.libertybikes.game.core.DIRECTION;
 import org.libertybikes.game.core.GameBoard;
 
-public class Walle extends AIPlayer {
+public class Wally extends AIPlayer {
 
     static Random ran = new Random();
 
@@ -16,7 +16,7 @@ public class Walle extends AIPlayer {
 
     private int locX, locY;
 
-    public Walle(int startX, int startY, int width, int height, DIRECTION startDirection, short takenSpotNumber) {
+    public Wally(int startX, int startY, int width, int height, DIRECTION startDirection, short takenSpotNumber) {
         super(startX, startY, width, height, startDirection, takenSpotNumber);
         lastDirection = direction = startDirection;
         locX = startX;

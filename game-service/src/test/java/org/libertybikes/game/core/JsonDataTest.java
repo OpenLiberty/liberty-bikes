@@ -61,7 +61,7 @@ public class JsonDataTest {
 
     @Test
     public void testGameBoard() {
-        GameBoard board = new GameBoard();
+        GameBoard board = new GameBoard(0);
         assertEquals("{\"movingObstacles\":[],\"obstacles\":[],\"players\":[]}", jsonb.toJson(board));
 
         String obstacleJson = "{\"height\":2,\"width\":1,\"x\":3,\"y\":4}";
@@ -99,18 +99,18 @@ public class JsonDataTest {
     @Test
     public void testPlayerList() {
         Set<Player> players = new HashSet<>();
-        players.add(new Player("123", "Bob", (short) 0));
+        players.add(new Player("123", "Bob", (short) 0, 9, 9));
         PlayerList list = new OutboundMessage.PlayerList(players);
         String bob = "{\"id\":\"123\",\"name\":\"Bob\",\"color\":\"#DF740C\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":9,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":9,\"trailPosX\":10,\"trailPosY\":10,\"trailPosX2\":10,\"trailPosY2\":10}";
-        String bot1 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#FF0000\",\"status\":\"Connected\",\"alive\":true,\"x\":110,\"y\":9,\"width\":3,\"height\":3,\"oldX\":110,\"oldY\":9,\"trailPosX\":111,\"trailPosY\":10,\"trailPosX2\":111,\"trailPosY2\":10}";
-        String bot2 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#6FC3DF\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":110,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":110,\"trailPosX\":10,\"trailPosY\":111,\"trailPosX2\":10,\"trailPosY2\":111}";
-        String bot3 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#FFE64D\",\"status\":\"Connected\",\"alive\":true,\"x\":110,\"y\":110,\"width\":3,\"height\":3,\"oldX\":110,\"oldY\":110,\"trailPosX\":111,\"trailPosY\":111,\"trailPosX2\":111,\"trailPosY2\":111}";
+        String bot1 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#FF0000\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3,\"oldX\":0,\"oldY\":0,\"trailPosX\":1,\"trailPosY\":1,\"trailPosX2\":1,\"trailPosY2\":1}";
+        String bot2 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#6FC3DF\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3,\"oldX\":0,\"oldY\":0,\"trailPosX\":1,\"trailPosY\":1,\"trailPosX2\":1,\"trailPosY2\":1}";
+        String bot3 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#FFE64D\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3,\"oldX\":0,\"oldY\":0,\"trailPosX\":1,\"trailPosY\":1,\"trailPosX2\":1,\"trailPosY2\":1}";
         System.out.println("@AGG " + jsonb.toJson(list));
         assertEquals("{\"playerlist\":[" + bob + "," + bot1 + "," + bot2 + "," + bot3 + "]}",
                      jsonb.toJson(list));
 
         String chuck = "{\"id\":\"456\",\"name\":\"Chuck\",\"color\":\"#6FC3DF\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":110,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":110,\"trailPosX\":10,\"trailPosY\":111,\"trailPosX2\":10,\"trailPosY2\":111}";
-        players.add(new Player("456", "Chuck", (short) 2));
+        players.add(new Player("456", "Chuck", (short) 2, 9, 110));
         list = new OutboundMessage.PlayerList(players);
         assertEquals("{\"playerlist\":[" + bob + "," + bot1 + "," + chuck + "," + bot3 + "]}",
                      jsonb.toJson(list));

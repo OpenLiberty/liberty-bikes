@@ -21,7 +21,7 @@ public class OutboundMessage {
                     playerlist[p.playerNum] = p;
                 for (int i = 0; i < Player.MAX_PLAYERS; i++)
                     if (playerlist[i] == null)
-                        playerlist[i] = new Player("", "Bot Player", (short) i);
+                        playerlist[i] = new Player("", "Bot Player", (short) i, 0, 0);
             } else {
                 // If no players are in the game yet, do not show all bot players
                 playerlist = new Player[0];

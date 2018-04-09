@@ -21,28 +21,7 @@ public class Player {
         Disconnected
     }
 
-    private static enum PlayerStartingData {
-        START_1("#DF740C", 9, 9, DIRECTION.RIGHT),
-        START_2("#FF0000", GameBoard.BOARD_SIZE - 11, 9, DIRECTION.DOWN),
-        START_3("#6FC3DF", 9, GameBoard.BOARD_SIZE - 11, DIRECTION.UP),
-        START_4("#FFE64D", GameBoard.BOARD_SIZE - 11, GameBoard.BOARD_SIZE - 11, DIRECTION.LEFT);
-
-        public final String color;
-        public final int x;
-        public final int y;
-        public final DIRECTION dir;
-
-        PlayerStartingData(String color, int x, int y, DIRECTION dir) {
-            this.color = color;
-            this.x = x;
-            this.y = y;
-            this.dir = dir;
-        }
-    }
-
-    public static final int MAX_PLAYERS = PlayerStartingData.values().length;
-    private static final PlayerStartingData[] startingData = new PlayerStartingData[] { PlayerStartingData.START_1, PlayerStartingData.START_2,
-                                                                                        PlayerStartingData.START_3, PlayerStartingData.START_4 };
+    public static final int MAX_PLAYERS = 4;
 
     // Properties exposed by JSON-B
     public final String name;
@@ -75,17 +54,31 @@ public class Player {
         }
     }
 
-    public Player(String id, String name, short playerNum) {
+    public Player(String id, String name, short playerNum, int x, int y) {
         this.id = id;
         this.name = name;
         this.playerNum = playerNum;
 
         // Initialize starting data
-        PlayerStartingData data = startingData[playerNum];
-        color = data.color;
-        direction = data.dir;
-        oldX = x = data.x;
-        oldY = y = data.y;
+        if (playerNum == 0) {
+            color = "#DF740C";
+            direction = DIRECTION.RIGHT;
+        } else if (playerNum == 1) {
+            color = "#FF0000";
+            direction = DIRECTION.DOWN;
+        } else if (playerNum == 2) {
+            color = "#6FC3DF";
+            direction = DIRECTION.UP;
+        } else if (playerNum == 3) {
+            color = "#FFE64D";
+            direction = DIRECTION.LEFT;
+        } else {
+            //error
+            color = "#FFFFFF";
+            direction = DIRECTION.DOWN;
+        }
+        oldX = this.x = x;
+        oldY = this.y = y;
         trailPosX = trailPosX2 = x + 1;
         trailPosY = trailPosY2 = y + 1;
     }

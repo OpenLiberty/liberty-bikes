@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.json.bind.annotation.JsonbTransient;
 
 import org.libertybikes.game.bot.Hal;
-import org.libertybikes.game.bot.Walle;
+import org.libertybikes.game.bot.Wally;
 
 public class GameBoard {
 
@@ -27,10 +27,26 @@ public class GameBoard {
     public final Set<MovingObstacle> movingObstacles = new HashSet<>();
     public final Set<Player> players = new HashSet<>();
     private final boolean[] takenPlayerSlots = new boolean[Player.MAX_PLAYERS];
+    private GameMap gameMap;
 
     public GameBoard() {
+        this(-1);
+    }
+
+    public GameBoard(int map) {
         for (int i = 0; i < BOARD_SIZE; i++)
             Arrays.fill(board[i], SPOT_AVAILABLE);
+        initializeGameMap(map);
+    }
+
+    private void initializeGameMap(int map) {
+        gameMap = new GameMap(map);
+        for (Obstacle o : gameMap.getObstacles()) {
+            addObstacle(o);
+        }
+        for (MovingObstacle o : gameMap.getMovingObstacles()) {
+            addObstacle(o);
+        }
     }
 
     public boolean verifyObstacle(Obstacle o) {
@@ -85,7 +101,7 @@ public class GameBoard {
             preferredPlayerSlots.clear();
 
         // Initialize Player
-        Player p = new Player(playerId, playerName, playerNum);
+        Player p = new Player(playerId, playerName, playerNum, gameMap.getPlayerPositionX(playerNum), gameMap.getPlayerPositionY(playerNum));
 
         if (p.x + p.width > BOARD_SIZE || p.y + p.height > BOARD_SIZE)
             throw new IllegalArgumentException("Player does not fit on board: " + p);
@@ -186,11 +202,11 @@ public class GameBoard {
         AI ai;
 
         if (Math.random() < .5) {
-            p = new Player("Hal-" + playerNum, "Hal-" + playerNum, playerNum);
+            p = new Player("Hal-" + playerNum, "Hal-" + playerNum, playerNum, gameMap.getPlayerPositionX(playerNum), gameMap.getPlayerPositionY(playerNum));
             ai = new Hal(p.x, p.y, p.width, p.height, p.direction, playerNum);
         } else {
-            p = new Player("WALLE-" + playerNum, "WALLE-" + playerNum, playerNum);
-            ai = new Walle(p.x, p.y, p.width, p.height, p.direction, playerNum);
+            p = new Player("Wally-" + playerNum, "Wally-" + playerNum, playerNum, gameMap.getPlayerPositionX(playerNum), gameMap.getPlayerPositionY(playerNum));
+            ai = new Wally(p.x, p.y, p.width, p.height, p.direction, playerNum);
         }
 
         if (p.x + p.width > BOARD_SIZE || p.y + p.height > BOARD_SIZE)
