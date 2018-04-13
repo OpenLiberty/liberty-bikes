@@ -31,6 +31,8 @@ public class PlayerService {
             String id = createPlayer("SamplePlayer-" + i, null);
             for (int j = 0; j < 3; j++)
                 recordGame(id, r.nextInt(4) + 1);
+            for (int j = 0; j < 10; j++)
+                recordGame(id, 4);
         }
     }
 
