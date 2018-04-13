@@ -1,17 +1,32 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, HostBinding } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { trigger, animate, style, transition, group, query, stagger, state } from '@angular/animations';
 import { environment } from './../../environments/environment';
+import { PaneType } from '../slider/slider.component';
 
 import * as $ from 'jquery';
+import { Player } from '../game/player/player';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'],
+  animations: [
+    trigger('hidden', [
+      state('hidden', style({ display: 'none', opacity: '0', overflow: 'hidden', transform: 'translateX(-100%)' })),
+      state('visible', style({ display: '*', opacity: '*', overflow: '*', transform: '*' })),
+      transition('hidden => visible', animate('500ms ease-in')),
+      transition('visible => hidden', animate('500ms ease-out'))
+    ])
+  ]
 })
 export class LoginComponent implements OnInit {
+  pane: PaneType = 'left';
+  username: string;
+  player = new Player('PLAYER NAME HERE', 'none', '#FFFFFF');
+
   constructor(
     private router: Router,
     private ngZone: NgZone,
@@ -23,18 +38,18 @@ export class LoginComponent implements OnInit {
     this.meta.removeTag('viewport');
     let viewWidth = $(window).width();
     let viewHeight = $(window).height();
-    
+
     this.meta.addTag({name: 'viewport', content: `width=${viewWidth}px, height=${viewHeight}px, initial-scale=1.0`}, true);
   }
 
   async quickJoin() {
     // First get an unstarted round ID
 	  let roundID = await this.http.get(`${environment.API_URL_GAME_ROUND}/available`, { responseType: 'text' }).toPromise();
-	  
+
 	// Then join the round
 	this.joinRoundById(roundID);
   }
-  
+
   async joinRound() {
 	  let partyID: string = $('#partyid').val();
     let roundID: any = await this.http.get(`${environment.API_URL_PARTY}/${partyID}/round`, { responseType: 'text' }).toPromise();
@@ -53,7 +68,7 @@ async joinRoundById(roundID: string) {
 	  gameBoard = false;
   }
   console.log(`Is this a mobile device? ${!gameBoard}`);
-  
+
   // TODO: Validate form input in a more elegant way than alert()
   if (roundID.length !== 4) {
     alert(
@@ -61,10 +76,7 @@ async joinRoundById(roundID: string) {
     );
     return;
   }
-  if (username.length < 1 || username.length > 20) {
-    alert('Username must be between 1 and 20 chars');
-    return;
-  }
+
 
   try {
     let data: any = await this.http.get(`${environment.API_URL_GAME_ROUND}/${roundID}`).toPromise();
@@ -129,6 +141,53 @@ async joinRoundById(roundID: string) {
       });
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  showGuestLogin() {
+    this.pane = 'center';
+  }
+
+  loginAsGuest(username: string) {
+    console.log(`Username input: "${username}"`);
+    if (username.length < 1 || username.length > 20) {
+      alert('Username must be between 1 and 20 chars');
+      return;
+    }
+    this.player.name = username;
+    sessionStorage.setItem('username', username);
+    this.pane = 'right';
+  }
+
+  logout() {
+    this.pane = 'left';
+  }
+
+  slide() {
+    switch (this.pane) {
+      case 'left':
+        this.pane = 'center';
+        break;
+      case 'center':
+        this.pane = 'right';
+        break;
+      case 'right':
+        this.pane = 'left';
+        break;
+    }
+  }
+
+  slideBack() {
+    switch (this.pane) {
+      case 'left':
+        this.pane = 'right';
+        break;
+      case 'center':
+        this.pane = 'left';
+        break;
+      case 'right':
+        this.pane = 'center';
+        break;
     }
   }
 }

@@ -16,12 +16,17 @@ export class Player {
 
     return this._color;
   }
-  
+
   get statusImage() {
-	  var status = this.status.toLowerCase();
-	  if(status === 'connected')
-		  status = 'alive';
-	  
+    var status = this.status.toLowerCase();
+    if (status === 'none') {
+      return '';
+    }
+
+	  if (status === 'connected') {
+      status = 'alive';
+    }
+
 	  return `/assets/images/status_${status}.png`;
   }
 

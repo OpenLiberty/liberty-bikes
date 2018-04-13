@@ -3,26 +3,41 @@
     <div id="login-title">
       <h1>Liberty Bikes</h1>
     </div>
-    <div class="login-form">
-      <div class="form-item">
-        <label>Username</label>
-        <input type="text" id="username" name="username" autofocus>
+    <div>
+      <app-slider [activePane]="pane">
+        <div leftPane>
+            <div class="form-group">
+              <div class="form-item">
+                <button type="button" (click)="showGuestLogin()">Play as Guest</button>
+                <button type="button" (click)="hostRound()">Host Round</button>
+              </div>
+          </div>
+        </div>
+        <div centerPane>
+          <div class="form-group">
+            <div class="form-item">
+              <label>Username</label>
+              <input type="text" id="username" name="username" [(ngModel)]="username" />
+            </div>
+              <button type="button" (click)="loginAsGuest(username)">Sign In</button>
+          </div>
+        </div>
+        <div rightPane>
+          <div class="form-group">
+            <player [ngStyle]="player.style" [player]="player"></player>
+            <div class="form-item">
+              <label>Code</label>
+              <input type="text" id="roundid" name="roundid" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            </div>
+            <button type="button" (click)="joinRound()">Join Round</button>
+            <button type="button" (click)="logout()">Log Out</button>
+          </div>
+        </div>
+      </app-slider>
+      <div class="form-group">
+        <button type="button" (click)="slide()">Debug Forward</button>
+        <button type="button" (click)="slideBack()">Debug Backward</button>
       </div>
-    </div>
-    <div class="button-bar">
-      <button type="button" (click)="quickJoin()">Quick Join</button>
-    </div>
-    <hr/>
-    <div class="login-form">
-      <div class="form-item">
-        <label>Code</label>
-        <input type="text" id="partyid" name="roundid" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-      </div>
-    </div>
-    <div class="button-bar">
-      <button type="button" (click)="joinRound()">Join Game</button>
-      <hr/>
-      <button id="hostButton" type="button" (click)="hostRound()" data-loading-text="Connecting..." autocomplete="off">Host Games</button>
     </div>
   </div>
 </div>

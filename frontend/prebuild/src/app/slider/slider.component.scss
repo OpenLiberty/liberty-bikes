@@ -1,0 +1,15 @@
+:host {
+  display: block;
+  overflow: hidden;
+}
+
+.parent {
+  height: 100%;
+  width: 300%;
+
+  display: flex;
+
+  div {
+    flex: 1;
+  }
+}
