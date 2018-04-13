@@ -27,27 +27,19 @@ export class LoginComponent implements OnInit {
     this.meta.addTag({name: 'viewport', content: `width=${viewWidth}px, height=${viewHeight}px, initial-scale=1.0`}, true);
   }
 
-  async createRound() {
-    try {
-      let data = await this.http.post(`${environment.API_URL_GAME_ROUND}/create`, "", { responseType: 'text'}).toPromise();
-      $('#roundid').val(`${data}`)
-    } catch (error) {
-      console.log(error);
-    }
-
-  }
-  
   async quickJoin() {
     // First get an unstarted round ID
-	  let roundID = await this.http.post(`${environment.API_URL_GAME_ROUND}/available`, "", { responseType: 'text' }).toPromise();
+	  let roundID = await this.http.get(`${environment.API_URL_GAME_ROUND}/available`, { responseType: 'text' }).toPromise();
 	  
 	// Then join the round
 	this.joinRoundById(roundID);
   }
   
   async joinRound() {
-	  let roundID: string = $('#roundid').val();
-      this.joinRoundById(roundID);
+	  let partyID: string = $('#partyid').val();
+    let roundID: any = await this.http.get(`${environment.API_URL_PARTY}/${partyID}/round`, { responseType: 'text' }).toPromise();
+    console.log(`Got roundID=${roundID} for partyID=${partyID}`);
+    this.joinRoundById(roundID);
   }
 
 async joinRoundById(roundID: string) {
@@ -128,10 +120,10 @@ async joinRoundById(roundID: string) {
     let router = this.router;
 
     try {
-      let data = await this.http.post(`${environment.API_URL_GAME_ROUND}/create`, "", { responseType: 'text' }).toPromise();
-      console.log(`Created round with id=${data}`);
+      let party: any = await this.http.post(`${environment.API_URL_PARTY}/create`, "", { responseType: 'json' }).toPromise();
       sessionStorage.setItem('isSpectator', 'true');
-      sessionStorage.setItem('roundId', data);
+      sessionStorage.setItem('partyId', party.id);
+      sessionStorage.setItem('roundId', party.currentRound.id);
       ngZone.run(() => {
         router.navigate(['/game']);
       });

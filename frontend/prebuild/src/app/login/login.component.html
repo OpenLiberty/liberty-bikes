@@ -12,17 +12,17 @@
     <div class="button-bar">
       <button type="button" (click)="quickJoin()">Quick Join</button>
     </div>
-    <div></div>
+    <hr/>
     <div class="login-form">
       <div class="form-item">
         <label>Code</label>
-        <input type="text" id="roundid" name="roundid" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <input type="text" id="partyid" name="roundid" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       </div>
     </div>
     <div class="button-bar">
-      <button type="button" (click)="joinRound()">Join Round</button>
-      <button type="button" (click)="createRound()">Create Round</button>
-      <button id="hostButton" type="button" (click)="hostRound()" data-loading-text="Connecting..." autocomplete="off">Host Round</button>
+      <button type="button" (click)="joinRound()">Join Game</button>
+      <hr/>
+      <button id="hostButton" type="button" (click)="hostRound()" data-loading-text="Connecting..." autocomplete="off">Host Games</button>
     </div>
   </div>
 </div>
