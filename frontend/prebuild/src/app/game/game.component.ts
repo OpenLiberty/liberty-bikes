@@ -64,7 +64,7 @@ export class GameComponent implements OnInit {
     if (sessionStorage.getItem('isSpectator') === 'true') {
       console.log('is a spectator... showing game id');
       // Set the Round ID and make visible
-      $('#game-code').html(this.roundId);
+      $('#game-code').html(sessionStorage.getItem('partyId'));
       const gameId = $('#game-code-display');
       gameId.removeClass('d-none');
       gameId.addClass('d-inline-block');

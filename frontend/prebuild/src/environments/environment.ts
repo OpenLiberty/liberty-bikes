@@ -6,6 +6,7 @@
 export const environment = {
   production: false,
   API_URL_AUTH: `${document.location.hostname}:8082`,
+  API_URL_PARTY: `http://${document.location.hostname}:8080/party`,
   API_URL_GAME_ROUND: `http://${document.location.hostname}:8080/round`,
   API_URL_GAME_WS: `ws://${document.location.hostname}:8080/round/ws`,
   API_URL_PLAYERS: `http://${document.location.hostname}:8081/player`,

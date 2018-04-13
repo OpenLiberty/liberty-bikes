@@ -14,12 +14,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.libertybikes.game.core.GameRound;
 import org.libertybikes.game.core.GameRound.State;
 
-@Path("/")
+@Path("/round")
 @ApplicationScoped
 public class GameRoundService {
 
@@ -47,6 +48,19 @@ public class GameRoundService {
     }
 
     @POST
+    @Path("/create")
+    public GameRound createRoundById(@QueryParam("gameId") String gameId) {
+        GameRound newRound = new GameRound(gameId);
+        GameRound existingRound = allRounds.putIfAbsent(gameId, newRound);
+        GameRound round = existingRound == null ? newRound : existingRound;
+        System.out.println("Created round id=" + round.id);
+        if (allRounds.size() > 5)
+            System.out.println("WARNING: Found " + allRounds.size() + " active games in GameRoundService. " +
+                               "They are probably not being cleaned up properly: " + allRounds.keySet());
+        return round;
+    }
+
+    @GET
     @Path("/available")
     public String getAvailableRound() {
         Optional<GameRound> availableRound = allRounds.values()
@@ -71,10 +85,7 @@ public class GameRoundService {
         if (!oldRound.isStarted())
             return null;
 
-        GameRound newRound = new GameRound(oldRound.nextRoundId);
-        GameRound existingRound = allRounds.putIfAbsent(oldRound.nextRoundId, newRound);
-        GameRound nextRound = existingRound == null ? newRound : existingRound;
-        System.out.println("Created round id=" + nextRound.id);
+        GameRound nextRound = createRoundById(oldRound.nextRoundId);
 
         // If player tries to requeue and next game is already in progress, requeue ahead to the next game
         if (isPlayer && nextRound.isStarted())

@@ -8,12 +8,14 @@ import java.util.ArrayDeque;
 import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.enterprise.concurrent.LastExecution;
@@ -63,6 +65,7 @@ public class GameRound implements Runnable {
     private final AtomicBoolean heartbeatStarted = new AtomicBoolean();
     private final Map<Session, Client> clients = new HashMap<>();
     private final Deque<Player> playerRanks = new ArrayDeque<>();
+    private final Set<LifecycleCallback> lifecycleCallbacks = new HashSet<>();
 
     private int ticksFromGameEnd = 0;
 
@@ -140,6 +143,10 @@ public class GameRound implements Runnable {
         sendTextToClient(s, jsonb.toJson(new OutboundMessage.PlayerList(getPlayers())));
         sendTextToClient(s, jsonb.toJson(board));
         beginHeartbeat();
+    }
+
+    public void addCallback(LifecycleCallback callback) {
+        lifecycleCallbacks.add(callback);
     }
 
     private void beginHeartbeat() {
@@ -351,6 +358,8 @@ public class GameRound implements Runnable {
         sendTextToClients(clients.keySet(), jsonb.toJson(new OutboundMessage.StartingCountdown(STARTING_COUNTDOWN)));
         delay(TimeUnit.SECONDS.toMillis(STARTING_COUNTDOWN));
 
+        lifecycleCallbacks.forEach(c -> c.get());
+
         paused.set(false);
         for (Player p : getPlayers())
             if (STATUS.Connected == p.getStatus())
@@ -371,6 +380,8 @@ public class GameRound implements Runnable {
     private void log(String msg) {
         System.out.println("[GameRound-" + id + "]  " + msg);
     }
+
+    public interface LifecycleCallback extends Supplier<Void> {}
 
     private class HeartbeatTrigger implements Trigger {
 

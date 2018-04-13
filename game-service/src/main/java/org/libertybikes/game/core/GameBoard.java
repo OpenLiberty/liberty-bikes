@@ -182,9 +182,6 @@ public class GameBoard {
         }
     }
 
-    /**
-     *
-     */
     public void addAI() {
         // Find first open player slot to fill, which determines position
         short playerNum = -1;
@@ -192,7 +189,6 @@ public class GameBoard {
             if (!takenPlayerSlots[i]) {
                 playerNum = i;
                 takenPlayerSlots[i] = true;
-                System.out.println("Player slot " + i + " taken");
                 break;
             }
         }
