@@ -159,16 +159,21 @@ export class LoginComponent implements OnInit {
   }
 
   loginAsGuest(username: string) {
+	username = username.trim();
     console.log(`Username input: "${username}"`);
-    if (username.length < 1 || username.length > 20) {
-      alert('Username must be between 1 and 20 chars');
-      return;
+    
+    let usernameError = this.validateUsername(username);
+    if(usernameError !== null) {
+    	alert(usernameError);
+    	return;
     }
+    
     this.player.name = username;
     this.username = username;
     sessionStorage.setItem('username', username);
     this.pane = 'right';
   }
+  
   async loginThroughGoogle() {
     let jwt = localStorage.getItem("jwt");
     let user: any = await this.http.get(`${environment.API_URL_PLAYERS}/getJWTInfo`, { responseType: 'json', headers: new HttpHeaders({
@@ -190,7 +195,18 @@ export class LoginComponent implements OnInit {
       }).toPromise();
     }    
     this.pane = 'right';
+  }
   
+  validateUsername(username: string) {
+    if (username.length < 1 || username.length > 20) {
+      return 'Username must be between 1 and 20 chars';
+    }
+    let usernameRegex: RegExp = /^[a-zA-Z0-9 -]{1,20}$/;
+    if (null == username.match(usernameRegex)) {
+      return 'Username must consist of characters A-Z, a-z, 0-9, \' \', and \'-\'';
+    }
+    // Username is valid
+    return null;
   }
 
   logout() {
