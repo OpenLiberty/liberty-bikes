@@ -25,7 +25,6 @@ export class SliderComponent {
   @Input() activePane: PaneType = 'left';
 
   isActivePane(pane: PaneType) {
-    console.log(`checking if ${pane} is active: ${this.activePane === pane}`);
     return this.activePane === pane ? 'active' : 'inactive';
   }
 }

@@ -55,7 +55,7 @@
             <h2 class="section-header" style="margin-bottom: 0">or</h2>
             <div class="form-item">
               <label>Party Code</label>
-              <input type="text" id="roundid" name="roundid" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" id="roundid" name="roundid" [(ngModel)]="party" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
             <div class="form-item">
               <button type="button" (click)="joinRound()">Join Party</button>

@@ -17,6 +17,7 @@ import { Player } from '../game/player/player';
 export class LoginComponent implements OnInit {
   pane: PaneType = sessionStorage.getItem('username') === null ? 'left' : 'right';
   username: string;
+  party: string;
   player = new Player('PLAYER NAME HERE', 'none', '#FFFFFF');
 
   constructor(
@@ -36,7 +37,6 @@ export class LoginComponent implements OnInit {
     if (sessionStorage.getItem('username') !== null) {
       this.username = sessionStorage.getItem('username');
       this.player.name = this.username;
-      // this.pane = 'right';
     }
   }
 
@@ -49,16 +49,14 @@ export class LoginComponent implements OnInit {
   }
 
   async joinRound() {
-	  let partyID: string = $('#partyid').val();
-    let roundID: any = await this.http.get(`${environment.API_URL_PARTY}/${partyID}/round`, { responseType: 'text' }).toPromise();
-    console.log(`Got roundID=${roundID} for partyID=${partyID}`);
+    let roundID: any = await this.http.get(`${environment.API_URL_PARTY}/${this.party}/round`, { responseType: 'text' }).toPromise();
+    console.log(`Got roundID=${roundID} for partyID=${this.party}`);
     this.joinRoundById(roundID);
   }
 
 async joinRoundById(roundID: string) {
   let ngZone = this.ngZone;
   let router = this.router;
-  let username: string = $('#username').val();
   roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
   let gameBoard = true;
   if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
@@ -96,7 +94,7 @@ async joinRoundById(roundID: string) {
       return;
     }
 
-    let response: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${username}`, "", {
+    let response: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${this.username}`, "", {
     responseType: 'text'
     }).toPromise();
     console.log(JSON.stringify(response));
@@ -105,7 +103,7 @@ async joinRoundById(roundID: string) {
 
     // TEMP: to prevent a race condition, putting this code inside of the player create callback to ensure that
     //       userId is set in the session storage before proceeding to the game board
-    sessionStorage.setItem('username', username);
+    sessionStorage.setItem('username', this.username);
     sessionStorage.setItem('isSpectator', 'false');
     sessionStorage.setItem('roundId', roundID);
     if (gameBoard === true) {
