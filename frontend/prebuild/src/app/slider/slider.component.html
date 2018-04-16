@@ -1,0 +1,5 @@
+<div class="parent" [@slide]="activePane">
+  <div class="left-pane" [@fade]="isActivePane('left')"><ng-content select="[leftPane]"></ng-content></div>
+  <div class="center-pane" [@fade]="isActivePane('center')"><ng-content select="[centerPane]"></ng-content></div>
+  <div class="right-pane" [@fade]="isActivePane('right')"><ng-content select="[rightPane]"></ng-content></div>
+</div>

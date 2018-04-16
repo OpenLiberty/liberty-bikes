@@ -3,26 +3,74 @@
     <div id="login-title">
       <h1>Liberty Bikes</h1>
     </div>
-    <div class="login-form">
-      <div class="form-item">
-        <label>Username</label>
-        <input type="text" id="username" name="username" autofocus>
-      </div>
+
+    <div id="login-icon">
+      <img id="icon" src="../../assets/images/icon.png" width="100" alt="" />
     </div>
-    <div class="button-bar">
-      <button type="button" (click)="quickJoin()">Quick Join</button>
-    </div>
-    <hr/>
-    <div class="login-form">
-      <div class="form-item">
-        <label>Code</label>
-        <input type="text" id="partyid" name="roundid" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-      </div>
-    </div>
-    <div class="button-bar">
-      <button type="button" (click)="joinRound()">Join Game</button>
-      <hr/>
-      <button id="hostButton" type="button" (click)="hostRound()" data-loading-text="Connecting..." autocomplete="off">Host Games</button>
+
+    <div>
+      <app-slider [activePane]="pane">
+        <div leftPane>
+          <div class="form-group">
+            <div class="form-item">
+              <button type="button" (click)="showGuestLogin()">Play</button>
+            </div>
+            <h2 class="section-header">or</h2>
+            <div class="form-item">
+              <button type="button" (click)="hostRound()">Host Round</button>
+            </div>
+          </div>
+        </div>
+
+
+        <div centerPane>
+          <div class="form-group">
+            <div class="form-item">
+              <label>Username</label>
+              <input type="text" id="username" name="username" [(ngModel)]="username" />
+            </div>
+            <div class="form-item">
+              <button type="button" (click)="loginAsGuest(username)">Sign In</button>
+            </div>
+            <div class="form-item">
+                <button type="button" (click)="cancelLogin()">Cancel</button>
+              </div>
+          </div>
+        </div>
+
+        <div rightPane>
+          <div class="form-group">
+            <div class="form-item" id="player-card">
+              <label>Player</label>
+              <player [ngStyle]="player.style" [player]="player"></player>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-item">
+              <button type="button" (click)="logout()">Log Out</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-item">
+              <button type="button" (click)="quickJoin()">Play Now</button>
+            </div>
+
+            <h2 class="section-header" style="margin-bottom: 0">or</h2>
+            <div class="form-item">
+              <label>Party Code</label>
+              <input type="text" id="roundid" name="roundid" [(ngModel)]="party" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            </div>
+            <div class="form-item">
+              <button type="button" (click)="joinRound()">Join Party</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="form-item">
+              <button type="button" (click)="hostRound()">Host Party</button>
+            </div>
+          </div>
+        </div>
+      </app-slider>
     </div>
   </div>
 </div>

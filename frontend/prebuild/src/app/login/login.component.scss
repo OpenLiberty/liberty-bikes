@@ -25,7 +25,7 @@
   text-align: center;
   letter-spacing: .7em;
   line-height: 1.5em;
-  padding-left: .7em;
+  padding-left: .8em;
 }
 
 #login-content {
@@ -39,20 +39,39 @@
 
 #login-title {
   margin-top: 10px;
-  padding-bottom: 50px;
+  padding-bottom: 10px;
 }
 
-.login-form {
+#login-icon {
+  padding-bottom: 40px;
+}
+
+#icon {
+  image-rendering: crisp-edges;
+}
+
+#player-card {
+  height: 60px;
+}
+
+.form-group {
   width: 100%;
-  margin-bottom: 15px;
+  margin-bottom: 30px;
+
+  display: flex;
+  flex-flow: column;
+  width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .form-item {
   width: 100%;
-  padding: 10px;
+  margin-bottom: 10px;
 }
 
 .form-item label {
+  width: 100%;
   margin-bottom: -4px;
   padding-bottom: 0px;
   font-size: 0.8em;
@@ -85,18 +104,8 @@
   text-transform: uppercase;
 }
 
-.button-bar {
-  display: flex;
-  flex-flow: column;
+button {
   width: 100%;
-  padding-left: 10px;
-  padding-right: 10px;
-}
-
-.button-bar button {
-  width: 100%;
-  margin-top: 6px;
-  margin-bottom: 6px;
   padding-top: 6px;
   padding-bottom: 6px;
   background-color: rgba(0, 0, 20, 0.2);
@@ -107,11 +116,17 @@
   border-color: #bbb;
 }
 
-#footer {
-  margin-top: 20px;
-  font-size: 0.8em;
+.section-header {
+  width: 100%;
+  margin-bottom: 15px;
+
+  font-size: 1.4em;
   font-variant: small-caps;
+  font-weight: 300;
   text-transform: lowercase;
+  text-align: center;
+
+  color: white;
 }
 
 @media screen and (min-width: 550px) {
@@ -155,9 +170,5 @@
 
   :host {
     min-height: 100%;
-  }
-
-  #footer {
-    width: 100%;
   }
 }
