@@ -11,6 +11,7 @@ import { trigger, state, style, transition, animate, query, group } from '@angul
       state('left', style({ transform: 'translateX(0)' })),
       state('center', style({ transform: 'translateX(-33.333%)' })),
       state('right', style({ transform: 'translateX(-66.666%)' })),
+      transition('void => *', animate(0)),
       transition('* => *', animate(300))
     ]),
     trigger('fade', [

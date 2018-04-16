@@ -12,18 +12,10 @@ import { Player } from '../game/player/player';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
-  animations: [
-    trigger('hidden', [
-      state('hidden', style({ display: 'none', opacity: '0', overflow: 'hidden', transform: 'translateX(-100%)' })),
-      state('visible', style({ display: '*', opacity: '*', overflow: '*', transform: '*' })),
-      transition('hidden => visible', animate('500ms ease-in')),
-      transition('visible => hidden', animate('500ms ease-out'))
-    ])
-  ]
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
-  pane: PaneType = 'left';
+  pane: PaneType = sessionStorage.getItem('username') === null ? 'left' : 'right';
   username: string;
   player = new Player('PLAYER NAME HERE', 'none', '#FFFFFF');
 
@@ -39,7 +31,13 @@ export class LoginComponent implements OnInit {
     let viewWidth = $(window).width();
     let viewHeight = $(window).height();
 
-    this.meta.addTag({name: 'viewport', content: `width=${viewWidth}px, height=${viewHeight}px, initial-scale=1.0`}, true);
+    this.meta.addTag({name: 'viewport', content: `width=${viewWidth}, height=${viewHeight}, initial-scale=1.0`}, true);
+
+    if (sessionStorage.getItem('username') !== null) {
+      this.username = sessionStorage.getItem('username');
+      this.player.name = this.username;
+      // this.pane = 'right';
+    }
   }
 
   async quickJoin() {
@@ -161,6 +159,7 @@ async joinRoundById(roundID: string) {
 
   logout() {
     this.pane = 'left';
+    sessionStorage.removeItem('username');
   }
 
   slide() {
