@@ -160,31 +160,7 @@ async joinRoundById(roundID: string) {
     sessionStorage.removeItem('username');
   }
 
-  slide() {
-    switch (this.pane) {
-      case 'left':
-        this.pane = 'center';
-        break;
-      case 'center':
-        this.pane = 'right';
-        break;
-      case 'right':
-        this.pane = 'left';
-        break;
-    }
-  }
-
-  slideBack() {
-    switch (this.pane) {
-      case 'left':
-        this.pane = 'right';
-        break;
-      case 'center':
-        this.pane = 'left';
-        break;
-      case 'right':
-        this.pane = 'center';
-        break;
-    }
+  cancelLogin() {
+    this.pane = 'left';
   }
 }
