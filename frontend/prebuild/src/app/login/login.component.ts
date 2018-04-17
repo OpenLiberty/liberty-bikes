@@ -5,8 +5,6 @@ import { HttpClient } from '@angular/common/http';
 import { trigger, animate, style, transition, group, query, stagger, state } from '@angular/animations';
 import { environment } from './../../environments/environment';
 import { PaneType } from '../slider/slider.component';
-
-import * as $ from 'jquery';
 import { Player } from '../game/player/player';
 
 @Component({
@@ -29,8 +27,8 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     this.meta.removeTag('viewport');
-    let viewWidth = $(window).width();
-    let viewHeight = $(window).height();
+    let viewWidth = window.innerWidth;
+    let viewHeight = window.innerHeight;
 
     this.meta.addTag({name: 'viewport', content: `width=${viewWidth}, height=${viewHeight}, initial-scale=1.0`}, true);
 

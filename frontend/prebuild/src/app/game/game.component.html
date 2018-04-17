@@ -1,14 +1,14 @@
 <div id="titlebar" class="navbar">
   <h1>Liberty Bikes</h1>
-  <div id="game-code-display" class="d-none">
-    <h2>code: <span id="game-code"></span></h2>
+  <div id="game-code-display" *ngIf="showPartyId">
+    <h2>code: <span id="game-code">{{partyId}}</span></h2>
   </div>
 </div>
-	
-<div id="loader-overlay" class="loader-overlay d-none" data-ng-hide="vm.hideLoader">
-	<div class="spin-loader" data-ng-class="{'shrink': vm.shrinkOnHide, 'expand': !vm.shrinkOnHide}"></div>
+
+<div id="loader-overlay" class="loader-overlay" *ngIf="showLoader">
+	<div class="spin-loader"></div>
 </div>
-	
+
 <div id="game-container">
   <div id="game-board">
     <canvas width="600" height="600" id="gameCanvas"></canvas>

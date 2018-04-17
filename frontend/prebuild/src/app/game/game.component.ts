@@ -1,5 +1,3 @@
-import * as $ from 'jquery';
-
 import { Component, OnInit } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { GameService } from './game.service';
@@ -15,6 +13,11 @@ export class GameComponent implements OnInit {
   roundId: string;
   serverHost: string;
   serverPort: string;
+
+  partyId: string;
+  showPartyId = false;
+
+  showLoader = false;
 
   output: HTMLElement;
   idDisplay: HTMLElement;
@@ -64,10 +67,8 @@ export class GameComponent implements OnInit {
     if (sessionStorage.getItem('isSpectator') === 'true') {
       console.log('is a spectator... showing game id');
       // Set the Round ID and make visible
-      $('#game-code').html(sessionStorage.getItem('partyId'));
-      const gameId = $('#game-code-display');
-      gameId.removeClass('d-none');
-      gameId.addClass('d-inline-block');
+      this.partyId = sessionStorage.getItem('partyId');
+      this.showPartyId = true;
       this.gameService.send({'spectatorjoined': true});
     } else {
       this.gameService.send({'playerjoined': sessionStorage.getItem('userId'), 'hasGameBoard' : 'true'});
@@ -105,7 +106,7 @@ export class GameComponent implements OnInit {
   requeue() {
     this.gameService.send({ message: 'GAME_REQUEUE' });
   }
-  
+
   moveUp() {
     this.gameService.send({ direction: 'UP' });
   }
@@ -134,9 +135,9 @@ export class GameComponent implements OnInit {
     this.context.fillRect(GameComponent.BOX_SIZE * player.trailPosX2, GameComponent.BOX_SIZE * player.trailPosY2,
                           GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
     this.context.fillStyle = '#e8e5e5';
-    this.context.fillRect(GameComponent.BOX_SIZE * player.x + player.width / 4 * GameComponent.BOX_SIZE, 
+    this.context.fillRect(GameComponent.BOX_SIZE * player.x + player.width / 4 * GameComponent.BOX_SIZE,
                           GameComponent.BOX_SIZE * player.y + player.height / 4 * GameComponent.BOX_SIZE,
-                          GameComponent.BOX_SIZE * (player.width / 2), GameComponent.BOX_SIZE * (player.height / 2));  
+                          GameComponent.BOX_SIZE * (player.width / 2), GameComponent.BOX_SIZE * (player.height / 2));
   }
 
   drawObstacle(obstacle) {
@@ -155,13 +156,6 @@ export class GameComponent implements OnInit {
                           GameComponent.BOX_SIZE * obstacle.width, GameComponent.BOX_SIZE * obstacle.height);
   }
 
-  writeToScreen(message: string) {
-    const pre = document.createElement('p');
-    pre.style.wordWrap = 'break-word';
-    pre.innerHTML = message;
-    this.output.appendChild(pre);
-  }
-
   getStatus(status) {
     if (status === 'Connected') {
       return '<span class=\'badge badge-pill badge-primary\'>Connected</span>';
@@ -176,12 +170,11 @@ export class GameComponent implements OnInit {
       return '<span class=\'badge badge-pill badge-secondary\'>Disconnected</span>';
     }
   }
-  
+
   startingCountdown(seconds) {
-    const loader = $('#loader-overlay');
-    loader.removeClass('d-none');
-    setTimeout(function() {
-      loader.addClass('d-none');
+    this.showLoader = true;
+    setTimeout(() => {
+      this.showLoader = false;
     }, (1000 * seconds));
   }
 
