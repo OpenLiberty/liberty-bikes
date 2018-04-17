@@ -28,7 +28,6 @@
     "autoprefixer": "^7.2.6",
     "bootstrap": "^4.0.0",
     "core-js": "^2.4.1",
-    "jquery": "^3.3.1",
     "node-sass": "^4.7.2",
     "npm": "^5.7.1",
     "rxjs": "^5.5.6",
