@@ -2,7 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { Player } from './player';
 
 @Component({
-  selector: 'player',
+  selector: 'app-player',
   templateUrl: './player.component.html',
   styleUrls: ['./player.component.scss']
 })

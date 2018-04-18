@@ -45,7 +45,7 @@ export class SocketService {
   get socket(): Subject<MessageEvent> {
     console.log(`retrieving socket: ${this.subject}`);
     if (!this.initialized) {
-      console.warn("Socket not initialized yet");
+      console.warn('Socket not initialized yet');
     }
     return this.subject;
   }
@@ -55,7 +55,7 @@ export class SocketService {
     const ws = new WebSocket(url);
 
     ws.onopen = () => {
-      console.log('Socket open, sending buffered messages')
+      console.log('Socket open, sending buffered messages');
       this.open = true;
       while (this.messageBuffer.length > 0) {
         this.subject.next(this.messageBuffer.shift() as any);

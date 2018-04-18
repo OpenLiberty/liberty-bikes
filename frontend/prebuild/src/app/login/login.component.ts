@@ -5,8 +5,6 @@ import { HttpClient } from '@angular/common/http';
 import { trigger, animate, style, transition, group, query, stagger, state } from '@angular/animations';
 import { environment } from './../../environments/environment';
 import { PaneType } from '../slider/slider.component';
-
-import * as $ from 'jquery';
 import { Player } from '../game/player/player';
 
 @Component({
@@ -29,8 +27,8 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     this.meta.removeTag('viewport');
-    let viewWidth = $(window).width();
-    let viewHeight = $(window).height();
+    let viewWidth = window.innerWidth;
+    let viewHeight = window.innerHeight;
 
     this.meta.addTag({name: 'viewport', content: `width=${viewWidth}, height=${viewHeight}, initial-scale=1.0`}, true);
 
@@ -42,10 +40,10 @@ export class LoginComponent implements OnInit {
 
   async quickJoin() {
     // First get an unstarted round ID
-	  let roundID = await this.http.get(`${environment.API_URL_GAME_ROUND}/available`, { responseType: 'text' }).toPromise();
+    let roundID = await this.http.get(`${environment.API_URL_GAME_ROUND}/available`, { responseType: 'text' }).toPromise();
 
-	// Then join the round
-	this.joinRoundById(roundID);
+    // Then join the round
+    this.joinRoundById(roundID);
   }
 
   async joinRound() {
@@ -54,72 +52,69 @@ export class LoginComponent implements OnInit {
     this.joinRoundById(roundID);
   }
 
-async joinRoundById(roundID: string) {
-  let ngZone = this.ngZone;
-  let router = this.router;
-  roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
-  let gameBoard = true;
-  if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-	  // give a controller-only view on mobile devices
-	  gameBoard = false;
+  async joinRoundById(roundID: string) {
+    let ngZone = this.ngZone;
+    let router = this.router;
+    roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
+    let gameBoard = true;
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+      // give a controller-only view on mobile devices
+      gameBoard = false;
+    }
+    console.log(`Is this a mobile device? ${!gameBoard}`);
+
+    // TODO: Validate form input in a more elegant way than alert()
+    if (roundID.length !== 4) {
+      alert(roundID + ' is not a valid round ID, because it must be 4 letters long');
+      return;
+    }
+
+    try {
+      let data: any = await this.http.get(`${environment.API_URL_GAME_ROUND}/${roundID}`).toPromise();
+      console.log(JSON.stringify(data));
+      if (data === null) {
+        alert('Game round does not exist!');
+        return;
+      }
+      if (data.gameState === 'FULL') {
+        alert('Game round is Full!');
+        return;
+      }
+      if (data.gameState === 'RUNNING') {
+        alert('Game round has already started!');
+        return;
+      }
+      if (data.gameState === 'FINISHED') {
+        alert('Game round has already finished!');
+        return;
+      }
+
+      let response: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${this.username}`, '', {
+        responseType: 'text'
+      }).toPromise();
+      console.log(JSON.stringify(response));
+      console.log(`Created a new player with ID=${response}`);
+      sessionStorage.setItem('userId', response);
+
+      // TEMP: to prevent a race condition, putting this code inside of the player create callback to ensure that
+      //       userId is set in the session storage before proceeding to the game board
+      sessionStorage.setItem('username', this.username);
+      sessionStorage.setItem('isSpectator', 'false');
+      sessionStorage.setItem('roundId', roundID);
+      if (gameBoard === true) {
+        ngZone.run(() => {
+          router.navigate(['/game']);
+        });
+      } else {
+        ngZone.run(() => {
+          router.navigate(['/play']);
+        });
+      }
+
+    } catch (error) {
+      console.log(error);
+    }
   }
-  console.log(`Is this a mobile device? ${!gameBoard}`);
-
-  // TODO: Validate form input in a more elegant way than alert()
-  if (roundID.length !== 4) {
-    alert(
-      roundID + ' is not a valid round ID, because it must be 4 letters long'
-    );
-    return;
-  }
-
-
-  try {
-    let data: any = await this.http.get(`${environment.API_URL_GAME_ROUND}/${roundID}`).toPromise();
-    console.log(JSON.stringify(data));
-    if (data === null) {
-      alert('Game round does not exist!');
-      return;
-    }
-    if (data.gameState === 'FULL') {
-      alert('Game round is Full!');
-      return;
-    }
-    if (data.gameState === 'RUNNING') {
-      alert('Game round has already started!');
-      return;
-    }
-    if (data.gameState === 'FINISHED') {
-      alert('Game round has already finished!');
-      return;
-    }
-
-    let response: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${this.username}`, "", {
-    responseType: 'text'
-    }).toPromise();
-    console.log(JSON.stringify(response));
-    console.log(`Created a new player with ID=${response}`);
-    sessionStorage.setItem('userId', response);
-
-    // TEMP: to prevent a race condition, putting this code inside of the player create callback to ensure that
-    //       userId is set in the session storage before proceeding to the game board
-    sessionStorage.setItem('username', this.username);
-    sessionStorage.setItem('isSpectator', 'false');
-    sessionStorage.setItem('roundId', roundID);
-    if (gameBoard === true) {
-      ngZone.run(() => {
-        router.navigate(['/game']);
-      });
-    } else {
-      ngZone.run(() => {
-        router.navigate(['/play']);
-      });
-    }
-
-  } catch (error) {
-    console.log(error);
-  }
-}
 
   async hostRound() {
     // TODO: update the button on click to indicate a waiting state in case
@@ -128,7 +123,7 @@ async joinRoundById(roundID: string) {
     let router = this.router;
 
     try {
-      let party: any = await this.http.post(`${environment.API_URL_PARTY}/create`, "", { responseType: 'json' }).toPromise();
+      let party: any = await this.http.post(`${environment.API_URL_PARTY}/create`, '', { responseType: 'json' }).toPromise();
       sessionStorage.setItem('isSpectator', 'true');
       sessionStorage.setItem('partyId', party.id);
       sessionStorage.setItem('roundId', party.currentRound.id);
