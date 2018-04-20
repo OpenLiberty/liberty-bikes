@@ -2,9 +2,6 @@
     <featureManager>
         <feature>microProfile-1.2</feature>
         <feature>appSecurity-2.0</feature>
-        <feature>socialLogin-1.0</feature>
-        <feature>servlet-4.0</feature>
-        <feature>jsonb-1.0</feature>
     </featureManager>
 
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
@@ -18,36 +15,14 @@
          trustStoreRef="validationKeystore"  />  
     <keyStore
          id="validationKeystore"
-         password="Passw0rd"
+         password="secret"
          type="jks"
          location="${server.config.dir}resources/security/validationKeystore.jks" /> 
 
-    <keyStore id="defaultKeyStore" password="Liberty" />
+     <keyStore id="defaultKeyStore" password="Liberty" />
     <quickStartSecurity userName="admin" userPassword="admin"/>
     	
-    	<googleLogin clientId="555751036911-3jhglsli8kr30h3d7qmuuldlqrk7r4f6.apps.googleusercontent.com" clientSecret="QkbOSVJCUSu436quyDHmSzbr" />
-    	
-    	
-    	<variable name="jwt.issuer" value="https://localhost:8482/auth-service/token"/>
-        <!-- This JWT builder is used to build a JWT for an authenticated user. -->
-        <jwtBuilder id="jwtUserBuilder" issuer="${jwt.issuer}" expiry="24h" keyAlias="default" jti="true" audiences="bigmatch"/>
-    	
-    	<!-- 
-    	<mpJwt 
-     id="myMpJwt"
-     jwksUri="https://www.googleapis.com/oauth2/v3/certs"
-     issuer="https://accounts.google.com"
-     audiences="555751036911-3jhglsli8kr30h3d7qmuuldlqrk7r4f6.apps.googleusercontent.com">
-</mpJwt>
--->
-    	<!-- 
-    	<application type="war" id="test" name="test" location="${server.config.dir}/dropins/auth-service.war.xml">
-  <application-bnd>
-    <security-role name="blarg">
-       <special-subject type="ALL_AUTHENTICATED_USERS" />
-    </security-role>
-  </application-bnd>
-</application>
--->
+    <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}resources/security/validationKeystore.jks"/>
+
 	<logging traceSpecification="*=info:com.ibm.ws.security.*=all:com.ibm.websphere.security.wim.*=all:Authentication=all:com.ibm.ws.container.service.security.internal.*=all" />
 </server>

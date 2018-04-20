@@ -17,7 +17,7 @@ public class PlayerDB {
 
     /**
      * Inserts a new player into the database.
-     * 
+     *
      * @return Returns true if the player was created. False if a player with the same ID already existed
      */
     public boolean create(Player p) {
@@ -54,6 +54,10 @@ public class PlayerDB {
                         .filter(otherPlayer -> otherPlayer.stats.numWins > wins)
                         .count();
         return numPlayersAhead + 1;
+    }
+
+    public boolean exists(String id) {
+        return allPlayers.containsKey(id);
     }
 
 }

@@ -1,9 +1,11 @@
 package org.libertybikes.player.service;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -14,6 +16,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.libertybikes.player.data.PlayerDB;
 
 @Path("/player")
@@ -22,6 +26,19 @@ public class PlayerService {
 
     @Inject
     PlayerDB db;
+
+    @Resource(lookup = "jwtKeyStore")
+    protected String keyStore;
+
+    @Inject
+    @ConfigProperty(name = "jwtKeyStorePassword", defaultValue = "secret2")
+    String keyStorePW;
+    @Inject
+    @ConfigProperty(name = "jwtKeyStoreAlias", defaultValue = "rebike")
+    String keyStoreAlias;
+
+    @Inject
+    private JsonWebToken callerPrincipal;
 
     @PostConstruct
     public void initPlayers() {
@@ -86,5 +103,24 @@ public class PlayerService {
         }
         db.update(p);
         System.out.println(p);
+    }
+
+    @GET
+    @Path("/getJWTInfo")
+    @Produces("application/json")
+    public HashMap<String, String> getJWTInfo() {
+
+        HashMap<String, String> map = new HashMap<String, String>();
+
+        String id = callerPrincipal.getClaim("id");
+        if (db.exists(id)) {
+            map.put("exists", "true");
+            map.put("username", db.get(id).name);
+
+        } else {
+            map.put("exists", "false");
+        }
+        map.put("id", id);
+        return map;
     }
 }

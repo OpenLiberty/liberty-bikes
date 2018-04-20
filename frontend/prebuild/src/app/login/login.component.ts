@@ -1,7 +1,7 @@
 import { Component, OnInit, NgZone, HostBinding } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
-import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { Router, ActivatedRoute } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { trigger, animate, style, transition, group, query, stagger, state } from '@angular/animations';
 import { environment } from './../../environments/environment';
 import { PaneType } from '../slider/slider.component';
@@ -22,26 +22,40 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private ngZone: NgZone,
     private meta: Meta,
-    private http: HttpClient
+    private http: HttpClient,
+    private route: ActivatedRoute
   ) {}
 
+
   ngOnInit() {
+  
     this.meta.removeTag('viewport');
     let viewWidth = window.innerWidth;
     let viewHeight = window.innerHeight;
 
     this.meta.addTag({name: 'viewport', content: `width=${viewWidth}, height=${viewHeight}, initial-scale=1.0`}, true);
-
+    
+    this.route.params.subscribe( params => 
+    {
+      localStorage.setItem("jwt", params['jwt']);
+    });
+    if (localStorage.getItem('jwt') !== null && localStorage.getItem('jwt') !== 'undefined') {
+      this.loginThroughGoogle();
+    }
+    
     if (sessionStorage.getItem('username') !== null) {
       this.username = sessionStorage.getItem('username');
       this.player.name = this.username;
     }
   }
+  
+  loginGoogle() {
+       window.location.href = `http://${environment.API_URL_AUTH}/auth-service/GoogleAuth`;
+  }
 
   async quickJoin() {
     // First get an unstarted round ID
     let roundID = await this.http.get(`${environment.API_URL_GAME_ROUND}/available`, { responseType: 'text' }).toPromise();
-
     // Then join the round
     this.joinRoundById(roundID);
   }
@@ -89,16 +103,20 @@ export class LoginComponent implements OnInit {
         return;
       }
 
-      let response: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${this.username}`, '', {
+      let id = sessionStorage.getItem('userId');
+      let response: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${this.username}&id=${id}`, '', {
         responseType: 'text'
-      }).toPromise();
+      }).toPromise();      
+
       console.log(JSON.stringify(response));
-      console.log(`Created a new player with ID=${response}`);
-      sessionStorage.setItem('userId', response);
+      
 
       // TEMP: to prevent a race condition, putting this code inside of the player create callback to ensure that
       //       userId is set in the session storage before proceeding to the game board
-      sessionStorage.setItem('username', this.username);
+      if (id === null) {
+        sessionStorage.setItem('userId', response);
+        sessionStorage.setItem('username', this.username);
+      }      
       sessionStorage.setItem('isSpectator', 'false');
       sessionStorage.setItem('roundId', roundID);
       if (gameBoard === true) {
@@ -121,9 +139,10 @@ export class LoginComponent implements OnInit {
     // this post request takes a noticeable amount of time
     let ngZone = this.ngZone;
     let router = this.router;
-
     try {
-      let party: any = await this.http.post(`${environment.API_URL_PARTY}/create`, '', { responseType: 'json' }).toPromise();
+        let party: any = await this.http.post(`${environment.API_URL_PARTY}/create`, '', { responseType: 'json' }).toPromise();
+        
+      console.log(`Created round with id=${party}`);
       sessionStorage.setItem('isSpectator', 'true');
       sessionStorage.setItem('partyId', party.id);
       sessionStorage.setItem('roundId', party.currentRound.id);
@@ -146,13 +165,38 @@ export class LoginComponent implements OnInit {
       return;
     }
     this.player.name = username;
+    this.username = username;
     sessionStorage.setItem('username', username);
     this.pane = 'right';
+  }
+  async loginThroughGoogle() {
+    let jwt = localStorage.getItem("jwt");
+    let user: any = await this.http.get(`${environment.API_URL_PLAYERS}/getJWTInfo`, { responseType: 'json', headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + `${jwt}`
+    }) }).toPromise(); 
+    if (user.exists === 'true') {
+      sessionStorage.setItem('username', user.username);
+      sessionStorage.setItem('userId', user.id);
+	  this.player.name = user.username;
+    } else {
+      var username = prompt("Choose a username:", "");
+      this.player.name = username;
+      sessionStorage.setItem('username', username);
+      sessionStorage.setItem('userId', user.id);
+      //register a new user
+      let response: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${username}&id=${user.id}`, '', {
+        responseType: 'text'
+      }).toPromise();
+    }    
+    this.pane = 'right';
+  
   }
 
   logout() {
     this.pane = 'left';
     sessionStorage.removeItem('username');
+    sessionStorage.removeItem('userId');
   }
 
   cancelLogin() {
