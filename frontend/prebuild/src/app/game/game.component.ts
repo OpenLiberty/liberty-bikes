@@ -35,6 +35,7 @@ export class GameComponent implements OnInit, OnDestroy {
 
   players: Player[];
   obstacles: Obstacle[];
+  trailsShape: Shape;
 
   constructor(private meta: Meta,
 		      private router: Router,
@@ -84,10 +85,14 @@ export class GameComponent implements OnInit, OnDestroy {
 
           playerShape.x = playerInfo.x * GameComponent.BOX_SIZE;
           playerShape.y = playerInfo.y * GameComponent.BOX_SIZE;
+
+          if (playerInfo.id === "") {
+            playerShape.visible = false;
+          }
           newPlayer.shape = playerShape;
           this.stage.addChild(newPlayer.shape);
 
-          console.log(`Adding new player (${newPlayer.name}, ${newPlayer.color}) at (${playerInfo.x}, ${playerInfo.y})`);
+          console.log(`Adding new player (${newPlayer.name}, ${newPlayer.color}) at (${playerInfo.x}, ${playerInfo.y}) isVisible: ${playerShape.isVisible}`);
 
           this.players.push(newPlayer);
         }
@@ -102,11 +107,17 @@ export class GameComponent implements OnInit, OnDestroy {
           if (player.alive) {
             console.log(`Moving player ${i} (${player.name}) to (${player.x}, ${player.y})`);
             console.log(this.players);
-            this.players[i].shape.x = player.x * GameComponent.BOX_SIZE;
-            this.players[i].shape.y = player.y * GameComponent.BOX_SIZE;
+            const shape = this.players[i].shape;
 
-            this.context.fillRect(GameComponent.BOX_SIZE * player.trailPosX, GameComponent.BOX_SIZE * player.trailPosY, GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
-            this.context.fillRect(GameComponent.BOX_SIZE * player.trailPosX2, GameComponent.BOX_SIZE * player.trailPosY2, GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
+            if (!shape.visible) {
+              shape.visible = true;
+            }
+            shape.x = player.x * GameComponent.BOX_SIZE;
+            shape.y = player.y * GameComponent.BOX_SIZE;
+
+            this.trailsShape.graphics.beginFill(this.players[i].color).rect(GameComponent.BOX_SIZE * player.x + player.width / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
+              GameComponent.BOX_SIZE * player.y + player.height / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
+              GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
           }
         });
 
@@ -145,6 +156,13 @@ export class GameComponent implements OnInit, OnDestroy {
     this.canvas = document.getElementById('gameCanvas');
     this.context = this.canvas.getContext('2d');
     this.stage = new Stage(this.canvas);
+
+    this.trailsShape = new Shape();
+    this.trailsShape.x = 0;
+    this.trailsShape.y = 0;
+
+    this.stage.addChild(this.trailsShape);
+    this.stage.update();
 
     window.onkeydown = (e: KeyboardEvent): any => {
       const key = e.keyCode ? e.keyCode : e.which;
