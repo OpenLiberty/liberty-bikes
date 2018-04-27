@@ -5,6 +5,9 @@ import { GameService } from './game.service';
 import { LoginComponent } from '../login/login.component';
 import * as EventSource from 'eventsource';
 import { environment } from './../../environments/environment';
+import { Player } from '../entity/player';
+import { Obstacle } from '../entity/obstacle';
+import { Shape, Stage } from 'createjs-module';
 
 @Component({
   selector: 'app-game',
@@ -28,11 +31,15 @@ export class GameComponent implements OnInit, OnDestroy {
 
   canvas: any;
   context: CanvasRenderingContext2D;
-  
-  constructor(private meta: Meta, 
+  stage: Stage;
+
+  players: Player[];
+  obstacles: Obstacle[];
+
+  constructor(private meta: Meta,
 		      private router: Router,
 		      private ngZone: NgZone,
-		      private gameService: GameService, 
+		      private gameService: GameService,
   ) {
     gameService.messages.subscribe((msg) => {
       const json = msg as any;
@@ -45,16 +52,65 @@ export class GameComponent implements OnInit, OnDestroy {
         }
       }
       if (json.movingObstacles) {
+        console.log('moving obstacles');
         for (let obstacle of json.movingObstacles) {
           this.drawMovingObstacle(obstacle);
         }
       }
-      if (json.players) {
-        for (let player of json.players) {
-          if (player.alive) {
-            this.drawPlayer(player);
-          }
+      if (json.playerlist) {
+        console.log('playerlist message');
+        console.log(json.playerlist);
+
+        if (this.players != null) {
+          this.players.forEach(player => {
+            if (player.shape != null) {
+              this.stage.removeChild(player.shape);
+            }
+          });
         }
+
+        this.players = new Array<Player>();
+        for (let playerInfo of json.playerlist) {
+          const newPlayer = new Player();
+          newPlayer.name = playerInfo.name;
+          newPlayer.color = playerInfo.color;
+          newPlayer.status = playerInfo.status;
+
+          const playerShape = new Shape();
+          playerShape.graphics.beginFill(newPlayer.color).rect(0, 0, playerInfo.width * GameComponent.BOX_SIZE, playerInfo.height * GameComponent.BOX_SIZE);
+          playerShape.graphics.beginFill('#e8e5e5').rect(playerInfo.width / 4 * GameComponent.BOX_SIZE,
+                                playerInfo.height / 4 * GameComponent.BOX_SIZE,
+                                GameComponent.BOX_SIZE * (playerInfo.width / 2), GameComponent.BOX_SIZE * (playerInfo.height / 2));
+
+          playerShape.x = playerInfo.x * GameComponent.BOX_SIZE;
+          playerShape.y = playerInfo.y * GameComponent.BOX_SIZE;
+          newPlayer.shape = playerShape;
+          this.stage.addChild(newPlayer.shape);
+
+          console.log(`Adding new player (${newPlayer.name}, ${newPlayer.color}) at (${playerInfo.x}, ${playerInfo.y})`);
+
+          this.players.push(newPlayer);
+        }
+
+        this.stage.update();
+
+      }
+      if (json.players) {
+        json.players.forEach((player, i) => {
+          console.log(`handling player ${i}`);
+          console.log(player);
+          if (player.alive) {
+            console.log(`Moving player ${i} (${player.name}) to (${player.x}, ${player.y})`);
+            console.log(this.players);
+            this.players[i].shape.x = player.x * GameComponent.BOX_SIZE;
+            this.players[i].shape.y = player.y * GameComponent.BOX_SIZE;
+
+            this.context.fillRect(GameComponent.BOX_SIZE * player.trailPosX, GameComponent.BOX_SIZE * player.trailPosY, GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
+            this.context.fillRect(GameComponent.BOX_SIZE * player.trailPosX2, GameComponent.BOX_SIZE * player.trailPosY2, GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
+          }
+        });
+
+        this.stage.update();
       }
       if (json.countdown) {
         this.startingCountdown(json.countdown);
@@ -88,6 +144,7 @@ export class GameComponent implements OnInit, OnDestroy {
 
     this.canvas = document.getElementById('gameCanvas');
     this.context = this.canvas.getContext('2d');
+    this.stage = new Stage(this.canvas);
 
     window.onkeydown = (e: KeyboardEvent): any => {
       const key = e.keyCode ? e.keyCode : e.which;
@@ -103,7 +160,7 @@ export class GameComponent implements OnInit, OnDestroy {
       }
     };
   }
-  
+
   ngOnDestroy() {
     sessionStorage.removeItem('roundId');
   }
@@ -157,7 +214,7 @@ export class GameComponent implements OnInit, OnDestroy {
   moveRight() {
     this.gameService.send({ direction: 'RIGHT' });
   }
-  
+
   processRequeue(newRoundId) {
     this.roundId = newRoundId;
     sessionStorage.setItem('roundId', this.roundId);
