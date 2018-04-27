@@ -17,6 +17,7 @@ import { Shape, Stage } from 'createjs-module';
 })
 export class GameComponent implements OnInit, OnDestroy {
   static readonly BOX_SIZE = 5;
+  static readonly OBSTACLE_COLOR = '#808080';
 
   roundId: string;
   serverHost: string;
@@ -36,6 +37,7 @@ export class GameComponent implements OnInit, OnDestroy {
   players: Player[];
   obstacles: Obstacle[];
   trailsShape: Shape;
+  obstaclesShape: Shape;
 
   constructor(private meta: Meta,
 		      private router: Router,
@@ -49,7 +51,12 @@ export class GameComponent implements OnInit, OnDestroy {
       }
       if (json.obstacles) {
         for (let obstacle of json.obstacles) {
-          this.drawObstacle(obstacle);
+          this.obstaclesShape.graphics.beginFill(GameComponent.OBSTACLE_COLOR).rect(
+            obstacle.x * GameComponent.BOX_SIZE,
+            obstacle.y * GameComponent.BOX_SIZE,
+            obstacle.width * GameComponent.BOX_SIZE,
+            obstacle.height * GameComponent.BOX_SIZE
+          );
         }
       }
       if (json.movingObstacles) {
@@ -162,6 +169,13 @@ export class GameComponent implements OnInit, OnDestroy {
     this.trailsShape.y = 0;
 
     this.stage.addChild(this.trailsShape);
+
+    this.obstaclesShape = new Shape();
+    this.obstaclesShape.x = 0;
+    this.obstaclesShape.y = 0;
+
+    this.stage.addChild(this.obstaclesShape);
+
     this.stage.update();
 
     window.onkeydown = (e: KeyboardEvent): any => {
