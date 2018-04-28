@@ -12,6 +12,8 @@ import org.libertybikes.game.core.GameRound;
 public class Party {
 
     private static final Random r = new Random();
+    // Chars that will be used to generate party IDs (0-9 A-Z minus most commonly used chars in words)
+    private static final char[] SAFE_CHARS = "346789BCDGHJKMPQRTVWXY".toCharArray();
 
     @Inject
     @JsonbTransient
@@ -39,11 +41,11 @@ public class Party {
         return this.currentRound;
     }
 
-    // Get a string of 4 random uppercase letters (A-Z)
+    // Get a string of 4 random letters
     private static String getRandomPartyID() {
         char[] chars = new char[4];
         for (int i = 0; i < 4; i++)
-            chars[i] = (char) (r.nextInt(26) + 65);
+            chars[i] = SAFE_CHARS[r.nextInt(SAFE_CHARS.length)];
         return new String(chars);
     }
 
