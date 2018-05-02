@@ -1,9 +1,28 @@
 <server>
     <featureManager>
         <feature>microProfile-1.2</feature>
+        <feature>appSecurity-2.0</feature>
     </featureManager>
 
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
                   
     <applicationManager autoExpand="true"/>
+    
+    <sslDefault sslRef="RpSSLConfig" />  
+    <ssl
+         id="RpSSLConfig"
+         keyStoreRef="defaultKeyStore"
+         trustStoreRef="validationKeystore"  />  
+    <keyStore
+         id="validationKeystore"
+         password="secret"
+         type="jks"
+         location="${server.config.dir}resources/security/validationKeystore.jks" /> 
+
+     <keyStore id="defaultKeyStore" password="Liberty" />
+    <quickStartSecurity userName="admin" userPassword="admin"/>
+    	
+    <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}resources/security/validationKeystore.jks"/>
+
+	<logging traceSpecification="*=info:com.ibm.ws.security.*=all:com.ibm.websphere.security.wim.*=all:Authentication=all:com.ibm.ws.container.service.security.internal.*=all" />
 </server>

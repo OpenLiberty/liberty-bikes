@@ -31,7 +31,7 @@ public class Player {
 
     @JsonbCreator
     public Player(String name, String id) {
-        this.id = id == null ? DOMAIN.BASIC + name : id;
+        this.id = (id == null || id.equals("null")) ? DOMAIN.BASIC + name : id;
         this.name = name;
     }
 

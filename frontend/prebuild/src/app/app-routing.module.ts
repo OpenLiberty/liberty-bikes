@@ -9,6 +9,7 @@ import { environment } from './../environments/environment';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
+  { path: 'login/:jwt', component: LoginComponent },
   { path: 'game', component: GameComponent },
   { path: 'play', component: ControlsComponent },
   { path: '', redirectTo: '/login', pathMatch: 'full'}
