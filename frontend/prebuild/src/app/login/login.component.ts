@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone, HostBinding, Injectable, Output } from '@angular/core';
+import { Component, OnInit, NgZone, HostBinding, Injectable } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -18,9 +18,10 @@ export class LoginComponent implements OnInit {
   pane: PaneType = sessionStorage.getItem('username') === null ? 'left' : 'right';
   username: string;
   party: string;
-  @Output() queuePosition: number;
+  queuePosition: number;
   player = new Player('PLAYER NAME HERE', 'none', '#FFFFFF');
   queueCallback: EventSource;
+  isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   constructor(
     private router: Router,
@@ -81,12 +82,9 @@ export class LoginComponent implements OnInit {
     let ngZone = this.ngZone;
     let router = this.router;
     roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
-    let gameBoard = true;
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-      // give a controller-only view on mobile devices
-      gameBoard = false;
-    }
-    console.log(`Is this a mobile device? ${!gameBoard}`);
+    // give a controller-only view on mobile devices
+    let gameBoard = this.isFullDevice;
+    console.log(`Is this a mobile device? ${!this.isFullDevice}`);
 
     // TODO: Validate form input in a more elegant way than alert()
     if (roundID.length !== 4) {
