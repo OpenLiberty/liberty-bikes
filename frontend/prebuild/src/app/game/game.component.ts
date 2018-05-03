@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
+import { Router } from '@angular/router';
 import { Meta } from '@angular/platform-browser';
 import { GameService } from './game.service';
 
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
-  styleUrls: ['./game.component.scss']
+  styleUrls: ['./game.component.scss'],
+  providers: [ GameService ],
 })
-export class GameComponent implements OnInit {
+export class GameComponent implements OnInit, OnDestroy {
   static readonly BOX_SIZE = 5;
 
   roundId: string;
@@ -16,7 +18,6 @@ export class GameComponent implements OnInit {
 
   partyId: string;
   showPartyId = false;
-
   showLoader = false;
 
   output: HTMLElement;
@@ -24,14 +25,16 @@ export class GameComponent implements OnInit {
 
   canvas: any;
   context: CanvasRenderingContext2D;
-
-  constructor(private meta: Meta, private gameService: GameService) {
+  
+  constructor(private meta: Meta, 
+		      private router: Router,
+		      private ngZone: NgZone,
+		      private gameService: GameService, 
+  ) {
     gameService.messages.subscribe((msg) => {
       const json = msg as any;
       if (json.requeue) {
-        this.roundId = json.requeue;
-        sessionStorage.setItem('roundId', this.roundId);
-        location.reload();
+    	    this.processRequeue(json.requeue);
       }
       if (json.obstacles) {
         for (let obstacle of json.obstacles) {
@@ -66,7 +69,7 @@ export class GameComponent implements OnInit {
 
     if (sessionStorage.getItem('isSpectator') === 'true') {
       console.log('is a spectator... showing game id');
-      // Set the Round ID and make visible
+      // Set the Party ID and make visible
       this.partyId = sessionStorage.getItem('partyId');
       this.showPartyId = true;
       this.gameService.send({'spectatorjoined': true});
@@ -97,6 +100,10 @@ export class GameComponent implements OnInit {
       }
     };
   }
+  
+  ngOnDestroy() {
+    sessionStorage.removeItem('roundId');
+  }
 
   // Game actions
   startGame() {
@@ -104,7 +111,14 @@ export class GameComponent implements OnInit {
   }
 
   requeue() {
-    this.gameService.send({ message: 'GAME_REQUEUE' });
+    if (sessionStorage.getItem('isSpectator') === 'true' ||
+      sessionStorage.getItem('partyId') === null) {
+      this.gameService.send({ message: 'GAME_REQUEUE' });
+    } else {
+    	  this.ngZone.run(() => {
+        this.router.navigate(['/login']);
+      });
+    }
   }
 
   moveUp() {
@@ -121,6 +135,12 @@ export class GameComponent implements OnInit {
 
   moveRight() {
     this.gameService.send({ direction: 'RIGHT' });
+  }
+  
+  processRequeue(newRoundId) {
+    this.roundId = newRoundId;
+    sessionStorage.setItem('roundId', this.roundId);
+    location.reload();
   }
 
   // Update display

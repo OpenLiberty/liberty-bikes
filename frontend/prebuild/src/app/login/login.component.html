@@ -64,7 +64,7 @@
               <input type="text" id="roundid" name="roundid" [(ngModel)]="party" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
             <div class="form-item">
-              <button type="button" (click)="joinRound()">Join Party</button>
+              <button type="button" (click)="joinParty()">Join Party</button>
             </div>
           </div>
           <div class="form-group">
@@ -72,6 +72,14 @@
               <button type="button" (click)="hostRound()">Host Party</button>
             </div>
           </div>
+        </div>
+        
+        <div queuePane>
+        	<div class="form-item">
+        		<h2>The party is full! Hang out a bit and you will automatically join the next round</h2>
+        		<hr/>
+        		<h2>You are number {{queuePosition}} in queue</h2>
+        	</div>
         </div>
       </app-slider>
     </div>

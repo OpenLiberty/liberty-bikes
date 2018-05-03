@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.libertybikes.game.core;
 
 import java.util.Set;
@@ -52,6 +49,15 @@ public class OutboundMessage {
         public final boolean keepAlive = true;
 
         public Heartbeat() {}
+    }
+
+    public static class QueuePosition {
+        @JsonbProperty("queuePosition")
+        public final int queuePosition;
+
+        public QueuePosition(int pos) {
+            queuePosition = pos;
+        }
     }
 
 }
