@@ -70,7 +70,7 @@ public class GameRoundService {
     public String getAvailableRound() {
         Optional<GameRound> availableRound = allRounds.values()
                         .stream()
-                        .filter(r -> r.gameState == GameRound.State.OPEN)
+                        .filter(r -> r.isOpen())
                         .findFirst();
         if (availableRound.isPresent())
             return availableRound.get().id;
@@ -104,7 +104,7 @@ public class GameRoundService {
 
     public void deleteRound(GameRound round) {
         String roundId = round.id;
-        if (round.gameState == State.OPEN)
+        if (round.isOpen())
             round.gameState = State.FINISHED;
         System.out.println("Scheduling round id=" + roundId + " for deletion in 5 minutes");
         // Do not immediately delete rounds in order to give players/spectators time to move along to the next game

@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.enterprise.concurrent.LastExecution;
@@ -100,7 +99,7 @@ public class GameRound implements Runnable {
     public void addPlayer(Session s, String playerId, String playerName, Boolean hasGameBoard) {
         // Front end should be preventing a player joining a full game but
         // defensive programming
-        if (gameState != State.OPEN) {
+        if (!isOpen()) {
             log("Cannot add player " + playerId + " to game because game has already started.");
             return;
         }
@@ -124,7 +123,7 @@ public class GameRound implements Runnable {
     }
 
     public void addAI() {
-        if (gameState != State.OPEN) {
+        if (!isOpen()) {
             return;
         }
 
@@ -182,7 +181,7 @@ public class GameRound implements Runnable {
             gameState = State.OPEN;
         }
 
-        if (gameState == State.OPEN) {
+        if (isOpen()) {
             board.removePlayer(p);
         } else if (gameState == State.RUNNING) {
             checkForWinner();
@@ -218,21 +217,7 @@ public class GameRound implements Runnable {
             if (ticksFromGameEnd > DELAY_BETWEEN_ROUNDS)
                 gameRunning.set(false); // end the game if nobody can move anymore
         }
-        runningGames.decrementAndGet();
-        log("<<< Finished round");
-        broadcastPlayerList();
-
-        long start = System.nanoTime();
-        updatePlayerStats();
-
-        // Wait for 5 seconds, but subtract the amount of time it took to update player stats
-        long nanoWait = TimeUnit.SECONDS.toNanos(5) - (System.nanoTime() - start);
-        delay(TimeUnit.NANOSECONDS.toMillis(nanoWait));
-        log("Clients flagged for auto-requeue will be redirected to the next round now");
-        GameRoundService gameSvc = CDI.current().select(GameRoundService.class).get();
-        for (Client c : clients.values())
-            if (c.autoRequeue)
-                GameRoundWebsocket.requeueClient(gameSvc, this, c.session);
+        endGame();
     }
 
     private void updatePlayerStats() {
@@ -344,11 +329,16 @@ public class GameRound implements Runnable {
         return gameState != State.OPEN && gameState != State.FULL;
     }
 
+    @JsonbTransient
+    public boolean isOpen() {
+        return gameState == State.OPEN;
+    }
+
     public void startGame() {
         if (isStarted())
             return;
 
-        while (gameState == State.OPEN) {
+        while (isOpen()) {
             addAI();
         }
 
@@ -357,8 +347,6 @@ public class GameRound implements Runnable {
 
         sendTextToClients(clients.keySet(), jsonb.toJson(new OutboundMessage.StartingCountdown(STARTING_COUNTDOWN)));
         delay(TimeUnit.SECONDS.toMillis(STARTING_COUNTDOWN));
-
-        lifecycleCallbacks.forEach(c -> c.get());
 
         paused.set(false);
         for (Player p : getPlayers())
@@ -377,11 +365,34 @@ public class GameRound implements Runnable {
         gameState = State.RUNNING;
     }
 
+    private void endGame() {
+        runningGames.decrementAndGet();
+        log("<<< Finished round");
+        broadcastPlayerList();
+
+        long start = System.nanoTime();
+        updatePlayerStats();
+        lifecycleCallbacks.forEach(c -> c.gameEnding());
+
+        // Wait for 5 seconds, but subtract the amount of time it took to update player stats
+        long nanoWait = TimeUnit.SECONDS.toNanos(5) - (System.nanoTime() - start);
+        delay(TimeUnit.NANOSECONDS.toMillis(nanoWait));
+        log("Clients flagged for auto-requeue will be redirected to the next round now");
+        GameRoundService gameSvc = CDI.current().select(GameRoundService.class).get();
+        for (Client c : clients.values())
+            if (c.autoRequeue)
+                GameRoundWebsocket.requeueClient(gameSvc, this, c.session);
+    }
+
     private void log(String msg) {
         System.out.println("[GameRound-" + id + "]  " + msg);
     }
 
-    public interface LifecycleCallback extends Supplier<Void> {}
+    public interface LifecycleCallback {
+
+        public void gameEnding();
+
+    }
 
     private class HeartbeatTrigger implements Trigger {
 
@@ -398,8 +409,7 @@ public class GameRound implements Runnable {
             if (round.clients.size() == 0) {
                 log("No clients remaining.  Cancelling heartbeat.");
                 // Ensure that game state is closed off so that no other players can quick join while a round is marked for deletion
-                if (gameState == State.OPEN)
-                    gameState = State.FINISHED;
+                gameState = State.FINISHED;
                 return null;
             }
             return Date.from(Instant.now().plusSeconds(HEARTBEAT_INTERVAL_SEC));

@@ -4,6 +4,6 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 @ApplicationPath("/")
-public class GameRoundApp extends Application {
+public class GameServiceApp extends Application {
 
 }

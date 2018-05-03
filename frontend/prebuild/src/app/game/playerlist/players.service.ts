@@ -11,7 +11,7 @@ export class PlayersService {
 
     this.messages = <Subject<Object>>socketService.socket
     .map((response: MessageEvent): any => {
-      console.log(`Players service handling message: ${response.data}`);
+      //console.log(`Players service handling message: ${response.data}`);
       return JSON.parse(response.data);
     });
   }

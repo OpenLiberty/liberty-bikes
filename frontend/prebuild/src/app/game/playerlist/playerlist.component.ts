@@ -5,20 +5,19 @@ import { PlayersService } from './players.service';
 @Component({
   selector: 'app-player-list',
   templateUrl: './playerlist.component.html',
-  styleUrls: ['./playerlist.component.scss']
+  styleUrls: ['./playerlist.component.scss'],
+  providers: [ PlayersService ],
 })
 export class PlayerListComponent implements OnInit {
   players: Player[] = new Array();
 
   constructor(private playersService: PlayersService, private ngZone: NgZone) {
     playersService.messages.subscribe((msg) => {
-      console.log('Updating player list');
       const json = msg as any;
       if (json.playerlist) {
         const newPlayers = new Array();
-        console.log(`Got ${JSON.stringify(json.playerlist)}`);
+        //console.log(`Got playerlist ${JSON.stringify(json.playerlist)}`);
         for (let player of json.playerlist) {
-          console.log(`Adding player ${player.name}`);
           newPlayers.push(new Player(player.name, player.status, player.color));
         }
         this.ngZone.run(() => {

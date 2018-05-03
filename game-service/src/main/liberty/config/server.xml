@@ -6,6 +6,7 @@
         <feature>jaxrs-2.1</feature>
         <feature>jsonb-1.0</feature>
         <feature>concurrent-1.0</feature>
+        <feature>apiDiscovery-1.0</feature>
     </featureManager>
 
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
@@ -27,10 +28,10 @@
 
     <!-- This configuration allows cross-origin HTTP requests, such
          as those from the front-end component (different port). -->
-    <cors domain="/round"
+    <cors domain="/"
           allowedOrigins="*"
           allowedMethods="GET, DELETE, POST, PUT"
-          allowedHeaders="Accept, Content-Type, Authorization"
+          allowedHeaders="origin, content-type, accept, authorization, cache-control"
           maxAge="3600" />
 
     <logging traceSpecification="*=info:com.ibm.ws.security.*=all:Authentication=all:com.ibm.ws.container.service.security.internal.*=all" />

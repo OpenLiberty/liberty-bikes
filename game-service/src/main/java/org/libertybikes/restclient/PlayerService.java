@@ -13,16 +13,16 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @Dependent
 @RegisterRestClient
-@Path("/player")
+@Path("/")
 public interface PlayerService {
 
     @GET
-    @Path("/{playerId}")
+    @Path("/player/{playerId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Player getPlayerById(@PathParam("playerId") String id);
 
     @POST
-    @Path("/{playerId}/recordGame")
+    @Path("/rank/{playerId}/recordGame")
     public void recordGame(@PathParam("playerId") String id, @QueryParam("place") int place);
 
 }

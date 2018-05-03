@@ -1,7 +1,9 @@
-import { Component, OnInit, NgZone, HostBinding } from '@angular/core';
+import { Component, OnInit, NgZone, HostBinding, Injectable } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import * as EventSource from 'eventsource';
 import { trigger, animate, style, transition, group, query, stagger, state } from '@angular/animations';
 import { environment } from './../../environments/environment';
 import { PaneType } from '../slider/slider.component';
@@ -16,7 +18,10 @@ export class LoginComponent implements OnInit {
   pane: PaneType = sessionStorage.getItem('username') === null ? 'left' : 'right';
   username: string;
   party: string;
+  queuePosition: number;
   player = new Player('PLAYER NAME HERE', 'none', '#FFFFFF');
+  queueCallback: EventSource;
+  isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   constructor(
     private router: Router,
@@ -28,7 +33,6 @@ export class LoginComponent implements OnInit {
 
 
   ngOnInit() {
-  
     this.meta.removeTag('viewport');
     let viewWidth = window.innerWidth;
     let viewHeight = window.innerHeight;
@@ -47,6 +51,13 @@ export class LoginComponent implements OnInit {
       this.username = sessionStorage.getItem('username');
       this.player.name = this.username;
     }
+    
+    if (sessionStorage.getItem('partyId') !== null &&
+    	    sessionStorage.getItem('isSpectator') !== 'true') {
+    	  this.party = sessionStorage.getItem('partyId');
+    	  console.log(`User already associated with party ${this.party}, entering queue`);
+    	  this.enterQueue();
+    }
   }
   
   loginGoogle() {
@@ -60,9 +71,10 @@ export class LoginComponent implements OnInit {
     this.joinRoundById(roundID);
   }
 
-  async joinRound() {
+  async joinParty() {
     let roundID: any = await this.http.get(`${environment.API_URL_PARTY}/${this.party}/round`, { responseType: 'text' }).toPromise();
     console.log(`Got roundID=${roundID} for partyID=${this.party}`);
+    sessionStorage.setItem('partyId', this.party);
     this.joinRoundById(roundID);
   }
 
@@ -70,12 +82,9 @@ export class LoginComponent implements OnInit {
     let ngZone = this.ngZone;
     let router = this.router;
     roundID = roundID.toUpperCase().replace(/[^A-Z]/g, '');
-    let gameBoard = true;
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-      // give a controller-only view on mobile devices
-      gameBoard = false;
-    }
-    console.log(`Is this a mobile device? ${!gameBoard}`);
+    // give a controller-only view on mobile devices
+    let gameBoard = this.isFullDevice;
+    console.log(`Is this a mobile device? ${!this.isFullDevice}`);
 
     // TODO: Validate form input in a more elegant way than alert()
     if (roundID.length !== 4) {
@@ -90,26 +99,23 @@ export class LoginComponent implements OnInit {
         alert('Game round does not exist!');
         return;
       }
-      if (data.gameState === 'FULL') {
-        alert('Game round is Full!');
+      
+      if (data.gameState === 'FULL' ||
+          data.gameState === 'RUNNING' ||
+          data.gameState === 'FINISHED') {
+        if (this.party === null) {
+          alert('Game has already begun!  Try again later.');
+        } else {
+          this.enterQueue();
+        }
         return;
       }
-      if (data.gameState === 'RUNNING') {
-        alert('Game round has already started!');
-        return;
-      }
-      if (data.gameState === 'FINISHED') {
-        alert('Game round has already finished!');
-        return;
-      }
-
+      
       let id = sessionStorage.getItem('userId');
       let response: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${this.username}&id=${id}`, '', {
         responseType: 'text'
       }).toPromise();      
-
-      console.log(JSON.stringify(response));
-      
+      console.log('Created player: ' + JSON.stringify(response));
 
       // TEMP: to prevent a race condition, putting this code inside of the player create callback to ensure that
       //       userId is set in the session storage before proceeding to the game board
@@ -157,18 +163,57 @@ export class LoginComponent implements OnInit {
   showGuestLogin() {
     this.pane = 'center';
   }
+  
+  enterQueue() {
+    console.log(`enering queue for party ${this.party}`);
+    if (this.queueCallback)
+    	  this.queueCallback.close();
+    this.queueCallback = new EventSource(`${environment.API_URL_PARTY}/${this.party}/queue`);
+    this.queueCallback.onmessage = msg => {
+      let queueMsg = JSON.parse(msg.data);
+      if (queueMsg.queuePosition) {
+        this.ngZone.run(() => {
+          this.queuePosition = queueMsg.queuePosition;
+          console.log(`Still waiting in queue at position ${this.queuePosition}`);
+          this.pane = 'queue';
+        });
+      } else if (queueMsg.requeue) {
+        console.log(`ready to join game! Joining round ${queueMsg.requeue}`);
+        this.queueCallback.close();
+        this.joinRoundById(queueMsg.requeue);
+      } else {
+        console.log('Error: unrecognized message ' + msg.data);
+      }
+    }
+    this.queueCallback.onerror = msg => {
+      console.log('Error showing queue position: ' + JSON.stringify(msg.data));
+    }
+  }
+  
+  cancelQueue() {
+	if (this.queueCallback)
+	  try {
+	    this.queueCallback.close();
+	    this.pane = 'right';
+	  } catch (ignore) {
+	  }
+  }
 
   loginAsGuest(username: string) {
     console.log(`Username input: "${username}"`);
-    if (username.length < 1 || username.length > 20) {
-      alert('Username must be between 1 and 20 chars');
+    
+    let usernameError = this.validateUsername(username);
+    if(usernameError !== null) {
+      alert(usernameError);
       return;
     }
-    this.player.name = username;
-    this.username = username;
+    
+    this.player.name = username.trim();
+    this.username = username.trim();
     sessionStorage.setItem('username', username);
     this.pane = 'right';
   }
+  
   async loginThroughGoogle() {
     let jwt = localStorage.getItem("jwt");
     let user: any = await this.http.get(`${environment.API_URL_PLAYERS}/getJWTInfo`, { responseType: 'json', headers: new HttpHeaders({
@@ -190,7 +235,18 @@ export class LoginComponent implements OnInit {
       }).toPromise();
     }    
     this.pane = 'right';
+  }
   
+  validateUsername(username: string) {
+    if (username === undefined || username.trim().length < 1 || username.trim().length > 20) {
+      return 'Username must be between 1 and 20 chars';
+    }
+    let usernameRegex: RegExp = /^[a-zA-Z0-9 -]{1,20}$/;
+    if (null == username.match(usernameRegex)) {
+      return 'Username must consist of characters A-Z, a-z, 0-9, \' \', and \'-\'';
+    }
+    // Username is valid
+    return null;
   }
 
   logout() {
