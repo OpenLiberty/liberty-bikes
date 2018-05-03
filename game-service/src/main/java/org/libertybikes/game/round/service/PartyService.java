@@ -64,8 +64,11 @@ public class PartyService {
     }
 
     public void deleteParty(String partyId) {
-        if (allParties.remove(partyId) != null)
+        Party deleted = allParties.remove(partyId);
+        if (deleted != null) {
+            deleted.close();
             System.out.println("Deleted party " + partyId);
+        }
     }
 
     @GET

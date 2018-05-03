@@ -20,6 +20,7 @@ export class LoginComponent implements OnInit {
   party: string;
   @Output() queuePosition: number;
   player = new Player('PLAYER NAME HERE', 'none', '#FFFFFF');
+  queueCallback: EventSource;
 
   constructor(
     private router: Router,
@@ -111,7 +112,7 @@ export class LoginComponent implements OnInit {
         }
         return;
       }
-
+      
       let id = sessionStorage.getItem('userId');
       let response: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${this.username}&id=${id}`, '', {
         responseType: 'text'
@@ -167,8 +168,10 @@ export class LoginComponent implements OnInit {
   
   enterQueue() {
     console.log(`enering queue for party ${this.party}`);
-    let queueCallback = new EventSource(`${environment.API_URL_PARTY}/${this.party}/queue`);
-    queueCallback.onmessage = msg => {
+    if (this.queueCallback)
+    	  this.queueCallback.close();
+    this.queueCallback = new EventSource(`${environment.API_URL_PARTY}/${this.party}/queue`);
+    this.queueCallback.onmessage = msg => {
       let queueMsg = JSON.parse(msg.data);
       if (queueMsg.queuePosition) {
         this.ngZone.run(() => {
@@ -178,15 +181,24 @@ export class LoginComponent implements OnInit {
         });
       } else if (queueMsg.requeue) {
         console.log(`ready to join game! Joining round ${queueMsg.requeue}`);
-        queueCallback.close();
+        this.queueCallback.close();
         this.joinRoundById(queueMsg.requeue);
       } else {
         console.log('Error: unrecognized message ' + msg.data);
       }
     }
-    queueCallback.onerror = msg => {
+    this.queueCallback.onerror = msg => {
       console.log('Error showing queue position: ' + JSON.stringify(msg.data));
     }
+  }
+  
+  cancelQueue() {
+	if (this.queueCallback)
+	  try {
+	    this.queueCallback.close();
+	    this.pane = 'right';
+	  } catch (ignore) {
+	  }
   }
 
   loginAsGuest(username: string) {

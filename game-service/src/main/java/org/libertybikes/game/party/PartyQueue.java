@@ -47,7 +47,8 @@ public class PartyQueue {
 
     public void close() {
         party.log("Closing party queue");
-        for (QueuedClient client : waitingPlayers)
+        QueuedClient client = null;
+        while ((client = waitingPlayers.pollFirst()) != null)
             client.close();
     }
 
@@ -71,8 +72,8 @@ public class PartyQueue {
                             .mediaType(MediaType.APPLICATION_JSON_TYPE)
                             .data(new OutboundMessage.QueuePosition(queuePosition()))
                             .build();
-            party.log("Notifying queued client " + queueNumber + " who is currently at position " + queuePosition());
             sink.send(event);
+            party.log("Notified queued client " + queueNumber + " who is currently at position " + queuePosition());
         }
 
         public void promoteToGame(String roundId) {
@@ -80,8 +81,8 @@ public class PartyQueue {
                             .mediaType(MediaType.APPLICATION_JSON_TYPE)
                             .data(new OutboundMessage.RequeueGame(roundId))
                             .build();
-            party.log("Promoting queued client " + queueNumber + " into round " + roundId);
             sink.send(event);
+            party.log("Promoted queued client " + queueNumber + " into round " + roundId);
             close();
         }
 
