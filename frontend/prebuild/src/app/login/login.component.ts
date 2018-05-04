@@ -53,10 +53,11 @@ export class LoginComponent implements OnInit {
     }
     
     if (sessionStorage.getItem('partyId') !== null &&
-    	    sessionStorage.getItem('isSpectator') !== 'true') {
-    	  this.party = sessionStorage.getItem('partyId');
-    	  console.log(`User already associated with party ${this.party}, entering queue`);
-    	  this.enterQueue();
+    	sessionStorage.getItem('requeueRequested') === 'true') {
+      sessionStorage.removeItem('requeueRequested');
+      this.party = sessionStorage.getItem('partyId');
+      console.log(`User already associated with party ${this.party}, entering queue`);
+      this.enterQueue();
     }
   }
   
@@ -74,6 +75,10 @@ export class LoginComponent implements OnInit {
   async joinParty() {
     let roundID: any = await this.http.get(`${environment.API_URL_PARTY}/${this.party}/round`, { responseType: 'text' }).toPromise();
     console.log(`Got roundID=${roundID} for partyID=${this.party}`);
+    if(!roundID) {
+      alert(`Party ${this.party} does not exist.`);
+      return;
+    }
     sessionStorage.setItem('partyId', this.party);
     this.joinRoundById(roundID);
   }

@@ -115,7 +115,8 @@ export class GameComponent implements OnInit, OnDestroy {
       sessionStorage.getItem('partyId') === null) {
       this.gameService.send({ message: 'GAME_REQUEUE' });
     } else {
-    	  this.ngZone.run(() => {
+      sessionStorage.setItem('requeueRequested', 'true');
+      this.ngZone.run(() => {
         this.router.navigate(['/login']);
       });
     }
