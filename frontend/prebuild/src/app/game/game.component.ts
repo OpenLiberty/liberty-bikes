@@ -60,13 +60,45 @@ export class GameComponent implements OnInit, OnDestroy {
         }
       }
       if (json.movingObstacles) {
-        console.log('moving obstacles');
-        for (let obstacle of json.movingObstacles) {
-          this.drawMovingObstacle(obstacle);
+        if (this.obstacles == null || this.obstacles.length < json.movingObstacles.length) {
+          if (this.obstacles != null) {
+            this.obstacles.forEach(obstacle => {
+              if (obstacle.shape != null) {
+                this.stage.removeChild(obstacle.shape);
+              }
+            });
+          }
+
+          this.obstacles = new Array<Obstacle>();
+          json.movingObstacles.forEach((obstacle, i) => {
+            const newObstacle = new Obstacle();
+            newObstacle.width = obstacle.width;
+            newObstacle.height = obstacle.height;
+
+            const obShape = new Shape();
+            obShape.graphics.beginFill(GameComponent.OBSTACLE_COLOR).rect(0, 0, newObstacle.width * GameComponent.BOX_SIZE, newObstacle.height * GameComponent.BOX_SIZE);
+            obShape.x = obstacle.x * GameComponent.BOX_SIZE;
+            obShape.y = obstacle.y * GameComponent.BOX_SIZE;
+
+            newObstacle.shape = obShape;
+            this.obstacles.push(newObstacle);
+            this.stage.addChild(newObstacle.shape);
+
+            // this.stage.update();
+
+          });
+        } else {
+          json.movingObstacles.forEach((obstacle, i) => {
+            console.log(obstacle);
+            console.log(this.obstacles[i]);
+            this.obstacles[i].shape.x = obstacle.x * GameComponent.BOX_SIZE;
+            this.obstacles[i].shape.y = obstacle.y * GameComponent.BOX_SIZE;
+          });
         }
+
+        // this.stage.update();
       }
       if (json.playerlist) {
-        console.log('playerlist message');
         console.log(json.playerlist);
 
         if (this.players != null) {
@@ -99,21 +131,15 @@ export class GameComponent implements OnInit, OnDestroy {
           newPlayer.shape = playerShape;
           this.stage.addChild(newPlayer.shape);
 
-          console.log(`Adding new player (${newPlayer.name}, ${newPlayer.color}) at (${playerInfo.x}, ${playerInfo.y}) isVisible: ${playerShape.isVisible}`);
-
           this.players.push(newPlayer);
         }
 
-        this.stage.update();
+        // this.stage.update();
 
       }
       if (json.players) {
         json.players.forEach((player, i) => {
-          console.log(`handling player ${i}`);
-          console.log(player);
           if (player.alive) {
-            console.log(`Moving player ${i} (${player.name}) to (${player.x}, ${player.y})`);
-            console.log(this.players);
             const shape = this.players[i].shape;
 
             if (!shape.visible) {
@@ -128,7 +154,7 @@ export class GameComponent implements OnInit, OnDestroy {
           }
         });
 
-        this.stage.update();
+        // this.stage.update();
       }
       if (json.countdown) {
         this.startingCountdown(json.countdown);
@@ -136,6 +162,8 @@ export class GameComponent implements OnInit, OnDestroy {
       if (json.keepAlive) {
         this.gameService.send({ keepAlive: true });
       }
+
+      this.stage.update();
     }, (err) => {
       console.log(`Error occurred: ${err}`);
     });
