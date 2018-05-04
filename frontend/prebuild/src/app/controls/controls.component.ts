@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, NgZone, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { GameService } from '../game/game.service';
 import { Triangle } from '../geom/triangle';
 import { Point } from '../geom/point';
@@ -6,7 +7,8 @@ import { Point } from '../geom/point';
 @Component({
   selector: 'app-controls',
   templateUrl: './controls.component.html',
-  styleUrls: ['./controls.component.scss']
+  styleUrls: ['./controls.component.scss'],
+  providers: [ GameService ],
 })
 export class ControlsComponent implements OnInit, OnDestroy {
   windowHeight = window.innerHeight;
@@ -37,14 +39,14 @@ export class ControlsComponent implements OnInit, OnDestroy {
     window.scrollTo(0, 0);
   }
 
-  constructor(private gameService: GameService) {
+  constructor(private router: Router,
+		      private ngZone: NgZone,
+		      private gameService: GameService) {
     gameService.messages.subscribe((msg) => {
       const json = msg as any;
       console.log(`received: ${JSON.stringify(json)}`);
       if (json.requeue) {
-        this.roundId = json.requeue;
-        sessionStorage.setItem('roundId', this.roundId);
-        location.reload();
+        this.processRequeue(json.requeue);
       }
       if (json.keepAlive) {
         this.gameService.send({ keepAlive: true });
@@ -142,6 +144,12 @@ export class ControlsComponent implements OnInit, OnDestroy {
     );
 
     window.requestAnimationFrame(() => this.draw());
+  }
+  
+  processRequeue(newRoundId) {
+    this.roundId = newRoundId;
+    sessionStorage.setItem('roundId', this.roundId);
+    location.reload();
   }
 
   draw() {
@@ -338,7 +346,15 @@ export class ControlsComponent implements OnInit, OnDestroy {
   }
 
   requeue() {
-    this.gameService.send({ message: 'GAME_REQUEUE' });
+    if (sessionStorage.getItem('isSpectator') === 'true' ||
+      sessionStorage.getItem('partyId') === null) {
+      this.gameService.send({ message: 'GAME_REQUEUE' });
+    } else {
+      sessionStorage.setItem('requeueRequested', 'true');
+      this.ngZone.run(() => {
+        this.router.navigate(['/login']);
+      });
+    }
   }
 
   moveUp() {
@@ -361,5 +377,6 @@ export class ControlsComponent implements OnInit, OnDestroy {
     window.removeEventListener('touchmove', this.preventScrolling);
     window.removeEventListener('orientationchange', this.pageWasResized);
     window.removeEventListener('resize', this.pageWasResized);
+    sessionStorage.removeItem('roundId');
   }
 }
