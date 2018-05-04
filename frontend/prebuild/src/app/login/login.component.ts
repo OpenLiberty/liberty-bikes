@@ -41,9 +41,9 @@ export class LoginComponent implements OnInit {
     
     this.route.params.subscribe( params => 
     {
-      localStorage.setItem("jwt", params['jwt']);
+      sessionStorage.setItem("jwt", params['jwt']);
     });
-    if (localStorage.getItem('jwt') !== null && localStorage.getItem('jwt') !== 'undefined') {
+    if (sessionStorage.getItem('jwt')) {
       this.loginThroughGoogle();
     }
     
@@ -112,18 +112,6 @@ export class LoginComponent implements OnInit {
         return;
       }
       
-      let id = sessionStorage.getItem('userId');
-      let response: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${this.username}&id=${id}`, '', {
-        responseType: 'text'
-      }).toPromise();      
-      console.log('Created player: ' + JSON.stringify(response));
-
-      // TEMP: to prevent a race condition, putting this code inside of the player create callback to ensure that
-      //       userId is set in the session storage before proceeding to the game board
-      if (id === null) {
-        sessionStorage.setItem('userId', response);
-        sessionStorage.setItem('username', this.username);
-      }      
       sessionStorage.setItem('isSpectator', 'false');
       sessionStorage.setItem('roundId', roundID);
       if (gameBoard === true) {
@@ -200,23 +188,13 @@ export class LoginComponent implements OnInit {
 	  }
   }
 
-  loginAsGuest(username: string) {
-    console.log(`Username input: "${username}"`);
-    
-    let usernameError = this.validateUsername(username);
-    if(usernameError !== null) {
-      alert(usernameError);
-      return;
-    }
-    
-    this.player.name = username.trim();
-    this.username = username.trim();
-    sessionStorage.setItem('username', username);
-    this.pane = 'right';
+  async loginAsGuest(username: string) {
+    if (await this.createUser(username, null))
+      this.pane = 'right';
   }
   
   async loginThroughGoogle() {
-    let jwt = localStorage.getItem("jwt");
+    let jwt = sessionStorage.getItem("jwt");
     let user: any = await this.http.get(`${environment.API_URL_PLAYERS}/getJWTInfo`, { responseType: 'json', headers: new HttpHeaders({
         'Content-Type':  'application/json',
         'Authorization': 'Bearer ' + `${jwt}`
@@ -225,17 +203,35 @@ export class LoginComponent implements OnInit {
       sessionStorage.setItem('username', user.username);
       sessionStorage.setItem('userId', user.id);
 	  this.player.name = user.username;
+	  this.pane = 'right';
     } else {
       var username = prompt("Choose a username:", "");
-      this.player.name = username;
-      sessionStorage.setItem('username', username);
-      sessionStorage.setItem('userId', user.id);
-      //register a new user
-      let response: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${username}&id=${user.id}`, '', {
-        responseType: 'text'
-      }).toPromise();
+      if (await this.createUser(username, user.id)) {
+    	    this.pane = 'right';
+      }
     }    
-    this.pane = 'right';
+  }
+  
+  async createUser(username: string, userid: string) {
+    console.log(`Username input: "${username}"`);
+	    
+    // ensure username is valid before creating
+    let usernameError = this.validateUsername(username);
+    if (usernameError !== null) {
+      alert(usernameError);
+      return false;
+    }
+    username = username.trim();
+    
+    // register a new user
+    let createdUserId: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${username}&id=${userid}`, '', {
+      responseType: 'text'
+    }).toPromise();
+    console.log('Created player: ' + JSON.stringify(createdUserId));
+    this.player.name = username;
+    sessionStorage.setItem('username', username);
+    sessionStorage.setItem('userId', createdUserId);
+    return true;
   }
   
   validateUsername(username: string) {
