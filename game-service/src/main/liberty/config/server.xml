@@ -1,12 +1,15 @@
 <server>
     <featureManager>
-        <feature>microProfile-1.2</feature>
-        <feature>mpRestClient-1.0</feature>
-        <feature>websocket-1.1</feature>
-        <feature>jaxrs-2.1</feature>
-        <feature>jsonb-1.0</feature>
+        <feature>appSecurity-3.0</feature>
+        <feature>cdi-2.0</feature>
         <feature>concurrent-1.0</feature>
-        <feature>apiDiscovery-1.0</feature>
+        <feature>jaxrs-2.1</feature>
+        <feature>jndi-1.0</feature>
+        <feature>jsonb-1.0</feature>
+        <feature>mpConfig-1.2</feature>
+        <feature>mpRestClient-1.0</feature>
+        <feature>mpJwt-1.0</feature>
+        <feature>websocket-1.1</feature>
     </featureManager>
 
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />

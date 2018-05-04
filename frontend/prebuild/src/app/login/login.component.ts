@@ -105,11 +105,12 @@ export class LoginComponent implements OnInit {
         return;
       }
       
-      if (data.gameState === 'FULL' ||
-          data.gameState === 'RUNNING' ||
-          data.gameState === 'FINISHED') {
+      if (data.gameState !== 'OPEN') {
         if (this.party === null) {
-          alert('Game has already begun!  Try again later.');
+        	  if (data.gameState === 'FULL')
+        	    alert('All games are full!  Try again in a few seconds.');
+        	  else
+            alert('Game has already begun!  Try again later.');
         } else {
           this.enterQueue();
         }

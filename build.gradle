@@ -1,13 +1,9 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven {
-            name = 'Sonatype Nexus Snapshots'
-            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.1.1-SNAPSHOT'
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.3'
     }
 }
 
@@ -25,13 +21,9 @@ subprojects {
     buildscript {
         repositories {
             mavenCentral()
-            maven {
-                name = 'Sonatype Nexus Snapshots'
-                url = 'https://oss.sonatype.org/content/repositories/snapshots/'
-            }
         }
         dependencies {
-            classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.1.1-SNAPSHOT'
+            classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.3'
         }
     }
 
@@ -63,7 +55,7 @@ subprojects {
         install {
             // use 1 liberty install for the whole repo
             baseDir = rootProject.buildDir
-            runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2018.3.0.0.zip"
+            runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2018.4.0.0.zip"
         }
     }
 
