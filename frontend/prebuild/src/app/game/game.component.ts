@@ -2,6 +2,9 @@ import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { Meta } from '@angular/platform-browser';
 import { GameService } from './game.service';
+import { LoginComponent } from '../login/login.component';
+import * as EventSource from 'eventsource';
+import { environment } from './../../environments/environment';
 
 @Component({
   selector: 'app-game',
@@ -111,14 +114,31 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   requeue() {
-    if (sessionStorage.getItem('isSpectator') === 'true' ||
-      sessionStorage.getItem('partyId') === null) {
+    let partyId = sessionStorage.getItem('partyId');
+    if (sessionStorage.getItem('isSpectator') === 'true' || partyId === null) {
       this.gameService.send({ message: 'GAME_REQUEUE' });
     } else {
-      sessionStorage.setItem('requeueRequested', 'true');
-      this.ngZone.run(() => {
-        this.router.navigate(['/login']);
-      });
+      let queueCallback = new EventSource(`${environment.API_URL_PARTY}/${partyId}/queue`);
+      queueCallback.onmessage = msg => {
+        let queueMsg = JSON.parse(msg.data);
+        if (queueMsg.queuePosition) {
+          // go to login page, reuse the same EventSource
+          LoginComponent.queueCallback = queueCallback;
+          sessionStorage.setItem('queuePosition', queueMsg.queuePosition);
+          this.ngZone.run(() => {
+            this.router.navigate(['/login']);
+          });
+        } else if (queueMsg.requeue) {
+          console.log(`ready to join game! Joining round ${queueMsg.requeue}`);
+          queueCallback.close();
+          this.processRequeue(queueMsg.requeue);
+        } else {
+          console.log('Error: unrecognized message ' + msg.data);
+        }
+      }
+      queueCallback.onerror = msg => {
+        console.log('Error showing queue position: ' + JSON.stringify(msg.data));
+      }
     }
   }
 
