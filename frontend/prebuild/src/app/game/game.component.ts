@@ -90,17 +90,15 @@ export class GameComponent implements OnInit, OnDestroy {
             });
           } else {
             json.movingObstacles.forEach((obstacle, i) => {
-              console.log(obstacle);
-              console.log(this.obstacles[i]);
               this.obstacles[i].shape.x = obstacle.x * GameComponent.BOX_SIZE;
               this.obstacles[i].shape.y = obstacle.y * GameComponent.BOX_SIZE;
+
+              this.trailsContext.clearRect(obstacle.x * GameComponent.BOX_SIZE, obstacle.y * GameComponent.BOX_SIZE, obstacle.width * GameComponent.BOX_SIZE, obstacle.height * GameComponent.BOX_SIZE);
             });
           }
 
         }
         if (json.playerlist) {
-          console.log(json.playerlist);
-
           if (this.players != null) {
             this.players.forEach(player => {
               if (player.shape != null) {
@@ -129,7 +127,9 @@ export class GameComponent implements OnInit, OnDestroy {
               playerShape.visible = false;
             }
             newPlayer.shape = playerShape;
-            this.stage.addChild(newPlayer.shape);
+            if (newPlayer.status !== 'Dead') {
+              this.stage.addChild(newPlayer.shape);
+            }
 
             this.players.push(newPlayer);
           }
@@ -143,6 +143,7 @@ export class GameComponent implements OnInit, OnDestroy {
               if (!shape.visible) {
                 shape.visible = true;
               }
+
               shape.x = player.x * GameComponent.BOX_SIZE;
               shape.y = player.y * GameComponent.BOX_SIZE;
 
@@ -152,7 +153,25 @@ export class GameComponent implements OnInit, OnDestroy {
                 GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
 
               this.trailsShape.graphics.clear().beginBitmapFill(this.trailsCanvas, 'no-repeat').drawRect(0, 0, 600, 600);
+            } else if (!player.alive && this.players[i].status === 'Alive') {
+              // Stamp down player on trails canvas so it can be erased properly when obstacles roll over it
+              this.trailsContext.fillStyle = player.color;
+              this.trailsContext.fillRect(player.x * GameComponent.BOX_SIZE, player.y * GameComponent.BOX_SIZE, player.width * GameComponent.BOX_SIZE, player.height * GameComponent.BOX_SIZE);
+
+              this.trailsContext.fillStyle = '#e8e5e5';
+              this.trailsContext.fillRect(
+                player.x * GameComponent.BOX_SIZE + player.width / 4 * GameComponent.BOX_SIZE,
+                player.y * GameComponent.BOX_SIZE + player.height / 4 * GameComponent.BOX_SIZE,
+                GameComponent.BOX_SIZE * (player.width / 2), GameComponent.BOX_SIZE * (player.height / 2));
+
+              // Hide from stage
+              this.stage.removeChild(this.players[i].shape);
+
+              // Update trails shape on main canvas
+              this.trailsShape.graphics.clear().beginBitmapFill(this.trailsCanvas, 'no-repeat').drawRect(0, 0, 600, 600);
             }
+
+            this.players[i].status = player.status;
           });
 
         }
