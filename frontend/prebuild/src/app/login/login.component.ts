@@ -7,7 +7,7 @@ import * as EventSource from 'eventsource';
 import { trigger, animate, style, transition, group, query, stagger, state } from '@angular/animations';
 import { environment } from './../../environments/environment';
 import { PaneType } from '../slider/slider.component';
-import { Player } from '../game/player/player';
+import { Player } from '../entity/player';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +19,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   username: string;
   party: string;
   queuePosition: number;
-  player = new Player('PLAYER NAME HERE', 'none', '#FFFFFF');
+  player = new Player();
   static queueCallback: EventSource;
   isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
@@ -38,19 +38,21 @@ export class LoginComponent implements OnInit, OnDestroy {
     let viewHeight = window.innerHeight;
 
     this.meta.addTag({name: 'viewport', content: `width=${viewWidth}, height=${viewHeight}, initial-scale=1.0`}, true);
-    
+
     this.route.params.subscribe( params =>  {
       sessionStorage.setItem("jwt", params['jwt']);
     });
     if (sessionStorage.getItem('jwt')) {
       this.loginThroughGoogle();
     }
-    
+
+    this.player.status = "none";
+
     if (sessionStorage.getItem('username') !== null) {
       this.username = sessionStorage.getItem('username');
       this.player.name = this.username;
     }
-    
+
     // If a player has participated in a game and requeued and the next round is full, they will be redirected back to the login page.
     // Re-use the EventSource initiated on the game page, but change the onMessage() function to match the context of this page
     var queuePosition = sessionStorage.getItem('queuePosition');
@@ -61,11 +63,11 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.showQueue(queuePosition);
     }
   }
-  
+
   ngOnDestroy() {
     this.cancelQueue();
   }
-  
+
   loginGoogle() {
        window.location.href = `http://${environment.API_URL_AUTH}/auth-service/GoogleAuth`;
   }
@@ -109,7 +111,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         alert('Game round does not exist!');
         return;
       }
-      
+
       if (data.gameState !== 'OPEN') {
         if (this.party === null) {
           if (data.gameState === 'FULL')
@@ -121,7 +123,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         }
         return;
       }
-      
       sessionStorage.setItem('isSpectator', 'false');
       sessionStorage.setItem('roundId', roundID);
       if (gameBoard === true) {
@@ -146,7 +147,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     let router = this.router;
     try {
       let party: any = await this.http.post(`${environment.API_URL_PARTY}/create`, '', { responseType: 'json' }).toPromise();
-        
+
       console.log(`Created round with id=${party}`);
       sessionStorage.setItem('isSpectator', 'true');
       sessionStorage.setItem('partyId', party.id);
@@ -162,7 +163,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   showGuestLogin() {
     this.pane = 'center';
   }
-  
+
   setQueueOnMessage() {
     LoginComponent.queueCallback.onmessage = msg => {
       let queueMsg = JSON.parse(msg.data);
@@ -188,7 +189,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       console.log('Error showing queue position: ' + JSON.stringify(msg.data));
     }
   }
-  
+
   showQueue(queuePosition) {
     this.ngZone.run(() => {
       this.queuePosition = queuePosition;
@@ -210,13 +211,13 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (await this.createUser(username, null))
       this.pane = 'right';
   }
-  
+
   async loginThroughGoogle() {
     let jwt = sessionStorage.getItem("jwt");
     let user: any = await this.http.get(`${environment.API_URL_PLAYERS}/getJWTInfo`, { responseType: 'json', headers: new HttpHeaders({
         'Content-Type':  'application/json',
         'Authorization': 'Bearer ' + `${jwt}`
-    }) }).toPromise(); 
+    }) }).toPromise();
     if (user.exists === 'true') {
       sessionStorage.setItem('username', user.username);
       sessionStorage.setItem('userId', user.id);
@@ -227,12 +228,12 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (await this.createUser(username, user.id)) {
     	    this.pane = 'right';
       }
-    }    
+    }
   }
-  
+
   async createUser(username: string, userid: string) {
     console.log(`Username input: "${username}"`);
-	    
+
     // ensure username is valid before creating
     let usernameError = this.validateUsername(username);
     if (usernameError !== null) {
@@ -240,7 +241,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       return false;
     }
     username = username.trim();
-    
+
     // register a new user
     let createdUserId: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${username}&id=${userid}`, '', {
       responseType: 'text'
@@ -251,7 +252,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     sessionStorage.setItem('userId', createdUserId);
     return true;
   }
-  
+
   validateUsername(username: string) {
     if (username === undefined || username.trim().length < 1 || username.trim().length > 20) {
       return 'Username must be between 1 and 20 chars';

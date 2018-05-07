@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.json.bind.Jsonb;
@@ -98,7 +99,7 @@ public class JsonDataTest {
 
     @Test
     public void testPlayerList() {
-        Set<Player> players = new HashSet<>();
+        Set<Player> players = new LinkedHashSet<>();
         players.add(new Player("123", "Bob", (short) 0, 9, 9));
         PlayerList list = new OutboundMessage.PlayerList(players);
         String bob = "{\"id\":\"123\",\"name\":\"Bob\",\"color\":\"#DF740C\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":9,\"width\":3,\"height\":3,\"oldX\":9,\"oldY\":9,\"trailPosX\":10,\"trailPosY\":10,\"trailPosX2\":10,\"trailPosY2\":10}";

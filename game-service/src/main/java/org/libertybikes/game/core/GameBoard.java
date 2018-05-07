@@ -5,6 +5,7 @@ package org.libertybikes.game.core;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,8 +25,8 @@ public class GameBoard {
     public final short[][] board = new short[BOARD_SIZE][BOARD_SIZE];
 
     public final Set<Obstacle> obstacles = new HashSet<>();
-    public final Set<MovingObstacle> movingObstacles = new HashSet<>();
-    public final Set<Player> players = new HashSet<>();
+    public final Set<MovingObstacle> movingObstacles = new LinkedHashSet<>();
+    public final Set<Player> players = new LinkedHashSet<>();
     private final boolean[] takenPlayerSlots = new boolean[Player.MAX_PLAYERS];
     private GameMap gameMap;
 

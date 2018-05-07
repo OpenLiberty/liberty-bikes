@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Player } from './player';
+import { Player } from '../../entity/player';
 
 @Component({
   selector: 'app-player',
@@ -12,6 +12,40 @@ export class PlayerComponent implements OnInit {
   }
 
   ngOnInit() {
+  }
+
+  get style(): any {
+    const style = {
+      'border-left': `5px solid ${this.color}`,
+      'background-color': `${this.backgroundColor(this.color)}`
+    };
+
+    return style;
+  }
+
+  get color(): string {
+    if (this.player.status === 'Dead' || this.player.status === 'Disconnected') {
+      return '#BBBBBB';
+    }
+
+    return this.player.color;
+  }
+
+  get statusImage() {
+    var status = this.player.status.toLowerCase();
+    if (status === 'none') {
+      return '';
+    }
+
+	  if (status === 'connected') {
+      status = 'alive';
+    }
+
+	  return `/assets/images/status_${status}.png`;
+  }
+
+  backgroundColor(color: string): string {
+    return `${color}30`;
   }
 
 }

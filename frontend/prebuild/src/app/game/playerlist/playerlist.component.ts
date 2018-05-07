@@ -1,5 +1,5 @@
 import { Component, OnInit, NgZone } from '@angular/core';
-import { Player } from '../player/player';
+import { Player } from '../../entity/player';
 import { PlayersService } from './players.service';
 
 @Component({
@@ -18,7 +18,11 @@ export class PlayerListComponent implements OnInit {
         const newPlayers = new Array();
         //console.log(`Got playerlist ${JSON.stringify(json.playerlist)}`);
         for (let player of json.playerlist) {
-          newPlayers.push(new Player(player.name, player.status, player.color));
+          const newPlayer = new Player();
+          newPlayer.name = player.name;
+          newPlayer.status = player.status;
+          newPlayer.color = player.color;
+          newPlayers.push(newPlayer);
         }
         this.ngZone.run(() => {
           this.players = newPlayers;
