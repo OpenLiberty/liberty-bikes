@@ -30,142 +30,143 @@ export class GameComponent implements OnInit, OnDestroy {
   output: HTMLElement;
   idDisplay: HTMLElement;
 
-  canvas: any;
+  canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   stage: Stage;
 
   players: Player[];
   obstacles: Obstacle[];
   trailsShape: Shape;
+  trailsCanvas: HTMLCanvasElement;
+  trailsContext: CanvasRenderingContext2D;
   obstaclesShape: Shape;
 
   constructor(private meta: Meta,
-		      private router: Router,
-		      private ngZone: NgZone,
-		      private gameService: GameService,
+    private router: Router,
+    private ngZone: NgZone,
+    private gameService: GameService,
   ) {
-    gameService.messages.subscribe((msg) => {
-      const json = msg as any;
-      if (json.requeue) {
-    	    this.processRequeue(json.requeue);
-      }
-      if (json.obstacles) {
-        for (let obstacle of json.obstacles) {
-          this.obstaclesShape.graphics.beginFill(GameComponent.OBSTACLE_COLOR).rect(
-            obstacle.x * GameComponent.BOX_SIZE,
-            obstacle.y * GameComponent.BOX_SIZE,
-            obstacle.width * GameComponent.BOX_SIZE,
-            obstacle.height * GameComponent.BOX_SIZE
-          );
+    this.ngZone.runOutsideAngular(() => {
+      gameService.messages.subscribe((msg) => {
+        const json = msg as any;
+        if (json.requeue) {
+          this.processRequeue(json.requeue);
         }
-      }
-      if (json.movingObstacles) {
-        if (this.obstacles == null || this.obstacles.length < json.movingObstacles.length) {
-          if (this.obstacles != null) {
-            this.obstacles.forEach(obstacle => {
-              if (obstacle.shape != null) {
-                this.stage.removeChild(obstacle.shape);
+        if (json.obstacles) {
+          for (let obstacle of json.obstacles) {
+            this.obstaclesShape.graphics.beginFill(GameComponent.OBSTACLE_COLOR).rect(
+              obstacle.x * GameComponent.BOX_SIZE,
+              obstacle.y * GameComponent.BOX_SIZE,
+              obstacle.width * GameComponent.BOX_SIZE,
+              obstacle.height * GameComponent.BOX_SIZE
+            );
+          }
+        }
+        if (json.movingObstacles) {
+          if (this.obstacles == null || this.obstacles.length < json.movingObstacles.length) {
+            if (this.obstacles != null) {
+              this.obstacles.forEach(obstacle => {
+                if (obstacle.shape != null) {
+                  this.stage.removeChild(obstacle.shape);
+                }
+              });
+            }
+
+            this.obstacles = new Array<Obstacle>();
+            json.movingObstacles.forEach((obstacle, i) => {
+              const newObstacle = new Obstacle();
+              newObstacle.width = obstacle.width;
+              newObstacle.height = obstacle.height;
+
+              const obShape = new Shape();
+              obShape.graphics.beginFill(GameComponent.OBSTACLE_COLOR).rect(0, 0, newObstacle.width * GameComponent.BOX_SIZE, newObstacle.height * GameComponent.BOX_SIZE);
+              obShape.x = obstacle.x * GameComponent.BOX_SIZE;
+              obShape.y = obstacle.y * GameComponent.BOX_SIZE;
+
+              newObstacle.shape = obShape;
+              this.obstacles.push(newObstacle);
+              this.stage.addChild(newObstacle.shape);
+
+            });
+          } else {
+            json.movingObstacles.forEach((obstacle, i) => {
+              console.log(obstacle);
+              console.log(this.obstacles[i]);
+              this.obstacles[i].shape.x = obstacle.x * GameComponent.BOX_SIZE;
+              this.obstacles[i].shape.y = obstacle.y * GameComponent.BOX_SIZE;
+            });
+          }
+
+        }
+        if (json.playerlist) {
+          console.log(json.playerlist);
+
+          if (this.players != null) {
+            this.players.forEach(player => {
+              if (player.shape != null) {
+                this.stage.removeChild(player.shape);
               }
             });
           }
 
-          this.obstacles = new Array<Obstacle>();
-          json.movingObstacles.forEach((obstacle, i) => {
-            const newObstacle = new Obstacle();
-            newObstacle.width = obstacle.width;
-            newObstacle.height = obstacle.height;
+          this.players = new Array<Player>();
+          for (let playerInfo of json.playerlist) {
+            const newPlayer = new Player();
+            newPlayer.name = playerInfo.name;
+            newPlayer.color = playerInfo.color;
+            newPlayer.status = playerInfo.status;
 
-            const obShape = new Shape();
-            obShape.graphics.beginFill(GameComponent.OBSTACLE_COLOR).rect(0, 0, newObstacle.width * GameComponent.BOX_SIZE, newObstacle.height * GameComponent.BOX_SIZE);
-            obShape.x = obstacle.x * GameComponent.BOX_SIZE;
-            obShape.y = obstacle.y * GameComponent.BOX_SIZE;
+            const playerShape = new Shape();
+            playerShape.graphics.beginFill(newPlayer.color).rect(0, 0, playerInfo.width * GameComponent.BOX_SIZE, playerInfo.height * GameComponent.BOX_SIZE);
+            playerShape.graphics.beginFill('#e8e5e5').rect(playerInfo.width / 4 * GameComponent.BOX_SIZE,
+              playerInfo.height / 4 * GameComponent.BOX_SIZE,
+              GameComponent.BOX_SIZE * (playerInfo.width / 2), GameComponent.BOX_SIZE * (playerInfo.height / 2));
 
-            newObstacle.shape = obShape;
-            this.obstacles.push(newObstacle);
-            this.stage.addChild(newObstacle.shape);
+            playerShape.x = playerInfo.x * GameComponent.BOX_SIZE;
+            playerShape.y = playerInfo.y * GameComponent.BOX_SIZE;
 
-            // this.stage.update();
+            if (playerInfo.id === "") {
+              playerShape.visible = false;
+            }
+            newPlayer.shape = playerShape;
+            this.stage.addChild(newPlayer.shape);
 
-          });
-        } else {
-          json.movingObstacles.forEach((obstacle, i) => {
-            console.log(obstacle);
-            console.log(this.obstacles[i]);
-            this.obstacles[i].shape.x = obstacle.x * GameComponent.BOX_SIZE;
-            this.obstacles[i].shape.y = obstacle.y * GameComponent.BOX_SIZE;
-          });
+            this.players.push(newPlayer);
+          }
+
         }
+        if (json.players) {
+          json.players.forEach((player, i) => {
+            if (player.alive) {
+              const shape = this.players[i].shape;
 
-        // this.stage.update();
-      }
-      if (json.playerlist) {
-        console.log(json.playerlist);
+              if (!shape.visible) {
+                shape.visible = true;
+              }
+              shape.x = player.x * GameComponent.BOX_SIZE;
+              shape.y = player.y * GameComponent.BOX_SIZE;
 
-        if (this.players != null) {
-          this.players.forEach(player => {
-            if (player.shape != null) {
-              this.stage.removeChild(player.shape);
+              this.trailsContext.fillStyle = player.color;
+              this.trailsContext.fillRect(GameComponent.BOX_SIZE * player.x + player.width / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
+                GameComponent.BOX_SIZE * player.y + player.height / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
+                GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
+
+              this.trailsShape.graphics.clear().beginBitmapFill(this.trailsCanvas, 'no-repeat').drawRect(0, 0, 600, 600);
             }
           });
+
+        }
+        if (json.countdown) {
+          this.ngZone.run(() => this.startingCountdown(json.countdown));
+        }
+        if (json.keepAlive) {
+          this.gameService.send({ keepAlive: true });
         }
 
-        this.players = new Array<Player>();
-        for (let playerInfo of json.playerlist) {
-          const newPlayer = new Player();
-          newPlayer.name = playerInfo.name;
-          newPlayer.color = playerInfo.color;
-          newPlayer.status = playerInfo.status;
-
-          const playerShape = new Shape();
-          playerShape.graphics.beginFill(newPlayer.color).rect(0, 0, playerInfo.width * GameComponent.BOX_SIZE, playerInfo.height * GameComponent.BOX_SIZE);
-          playerShape.graphics.beginFill('#e8e5e5').rect(playerInfo.width / 4 * GameComponent.BOX_SIZE,
-                                playerInfo.height / 4 * GameComponent.BOX_SIZE,
-                                GameComponent.BOX_SIZE * (playerInfo.width / 2), GameComponent.BOX_SIZE * (playerInfo.height / 2));
-
-          playerShape.x = playerInfo.x * GameComponent.BOX_SIZE;
-          playerShape.y = playerInfo.y * GameComponent.BOX_SIZE;
-
-          if (playerInfo.id === "") {
-            playerShape.visible = false;
-          }
-          newPlayer.shape = playerShape;
-          this.stage.addChild(newPlayer.shape);
-
-          this.players.push(newPlayer);
-        }
-
-        // this.stage.update();
-
-      }
-      if (json.players) {
-        json.players.forEach((player, i) => {
-          if (player.alive) {
-            const shape = this.players[i].shape;
-
-            if (!shape.visible) {
-              shape.visible = true;
-            }
-            shape.x = player.x * GameComponent.BOX_SIZE;
-            shape.y = player.y * GameComponent.BOX_SIZE;
-
-            this.trailsShape.graphics.beginFill(this.players[i].color).rect(GameComponent.BOX_SIZE * player.x + player.width / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
-              GameComponent.BOX_SIZE * player.y + player.height / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
-              GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
-          }
-        });
-
-        // this.stage.update();
-      }
-      if (json.countdown) {
-        this.startingCountdown(json.countdown);
-      }
-      if (json.keepAlive) {
-        this.gameService.send({ keepAlive: true });
-      }
-
-      this.stage.update();
-    }, (err) => {
-      console.log(`Error occurred: ${err}`);
+        this.stage.update();
+      }, (err) => {
+        console.log(`Error occurred: ${err}`);
+      });
     });
   }
 
@@ -188,7 +189,7 @@ export class GameComponent implements OnInit, OnDestroy {
     this.output = document.getElementById('output');
     this.idDisplay = document.getElementById('gameIdDisplay');
 
-    this.canvas = document.getElementById('gameCanvas');
+    this.canvas = <HTMLCanvasElement> document.getElementById('gameCanvas');
     this.context = this.canvas.getContext('2d');
     this.stage = new Stage(this.canvas);
 
@@ -197,6 +198,11 @@ export class GameComponent implements OnInit, OnDestroy {
     this.trailsShape.y = 0;
 
     this.stage.addChild(this.trailsShape);
+
+    this.trailsCanvas = <HTMLCanvasElement> document.createElement('canvas');
+    this.trailsContext = this.trailsCanvas.getContext('2d');
+    this.trailsCanvas.width = 600;
+    this.trailsCanvas.height = 600;
 
     this.obstaclesShape = new Shape();
     this.obstaclesShape.x = 0;
