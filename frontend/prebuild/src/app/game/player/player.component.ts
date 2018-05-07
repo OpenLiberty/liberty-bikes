@@ -14,16 +14,16 @@ export class PlayerComponent implements OnInit {
   ngOnInit() {
   }
 
-  public get style(): any {
+  get style(): any {
     const style = {
-      'border-left': `5px solid ${this.player.color}`,
-      'background-color': `${this.backgroundColor(this.player.color)}`
+      'border-left': `5px solid ${this.color}`,
+      'background-color': `${this.backgroundColor(this.color)}`
     };
 
     return style;
   }
 
-  public get color(): string {
+  get color(): string {
     if (this.player.status === 'Dead' || this.player.status === 'Disconnected') {
       return '#BBBBBB';
     }
