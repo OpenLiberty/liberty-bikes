@@ -11,18 +11,13 @@ public class OutboundMessage {
         public final Player[] playerlist;
 
         public PlayerList(Set<Player> players) {
-            if (players.size() > 0) {
-                // Send players in proper order, padding out empty slots with "Bot Player"
-                playerlist = new Player[Player.MAX_PLAYERS];
-                for (Player p : players)
-                    playerlist[p.playerNum] = p;
-                for (int i = 0; i < Player.MAX_PLAYERS; i++)
-                    if (playerlist[i] == null)
-                        playerlist[i] = new Player("", "Bot Player", (short) i, 0, 0);
-            } else {
-                // If no players are in the game yet, do not show all bot players
-                playerlist = new Player[0];
-            }
+            // Send players in proper order, padding out empty slots with "Bot Player"
+            playerlist = new Player[Player.MAX_PLAYERS];
+            for (Player p : players)
+                playerlist[p.playerNum] = p;
+            for (int i = 0; i < Player.MAX_PLAYERS; i++)
+                if (playerlist[i] == null)
+                    playerlist[i] = new Player("", "Bot Player", (short) i, 0, 0);
         }
     }
 

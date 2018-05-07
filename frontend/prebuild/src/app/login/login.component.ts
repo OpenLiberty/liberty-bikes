@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone, HostBinding, Injectable } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone, HostBinding, Injectable } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -14,13 +14,13 @@ import { Player } from '../game/player/player';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   pane: PaneType = sessionStorage.getItem('username') === null ? 'left' : 'right';
   username: string;
   party: string;
   queuePosition: number;
   player = new Player('PLAYER NAME HERE', 'none', '#FFFFFF');
-  queueCallback: EventSource;
+  static queueCallback: EventSource;
   isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   constructor(
@@ -39,8 +39,7 @@ export class LoginComponent implements OnInit {
 
     this.meta.addTag({name: 'viewport', content: `width=${viewWidth}, height=${viewHeight}, initial-scale=1.0`}, true);
     
-    this.route.params.subscribe( params => 
-    {
+    this.route.params.subscribe( params =>  {
       sessionStorage.setItem("jwt", params['jwt']);
     });
     if (sessionStorage.getItem('jwt')) {
@@ -52,13 +51,19 @@ export class LoginComponent implements OnInit {
       this.player.name = this.username;
     }
     
-    if (sessionStorage.getItem('partyId') !== null &&
-    	sessionStorage.getItem('requeueRequested') === 'true') {
-      sessionStorage.removeItem('requeueRequested');
-      this.party = sessionStorage.getItem('partyId');
-      console.log(`User already associated with party ${this.party}, entering queue`);
-      this.enterQueue();
+    // If a player has participated in a game and requeued and the next round is full, they will be redirected back to the login page.
+    // Re-use the EventSource initiated on the game page, but change the onMessage() function to match the context of this page
+    var queuePosition = sessionStorage.getItem('queuePosition');
+    if (queuePosition) {
+      sessionStorage.removeItem('queuePosition')
+      console.log(`User already associated with party, entering queue`);
+      this.setQueueOnMessage();
+      this.showQueue(queuePosition);
     }
+  }
+  
+  ngOnDestroy() {
+    this.cancelQueue();
   }
   
   loginGoogle() {
@@ -107,9 +112,9 @@ export class LoginComponent implements OnInit {
       
       if (data.gameState !== 'OPEN') {
         if (this.party === null) {
-        	  if (data.gameState === 'FULL')
-        	    alert('All games are full!  Try again in a few seconds.');
-        	  else
+          if (data.gameState === 'FULL')
+            alert('All games are full!  Try again in a few seconds.');
+          else
             alert('Game has already begun!  Try again later.');
         } else {
           this.enterQueue();
@@ -140,7 +145,7 @@ export class LoginComponent implements OnInit {
     let ngZone = this.ngZone;
     let router = this.router;
     try {
-        let party: any = await this.http.post(`${environment.API_URL_PARTY}/create`, '', { responseType: 'json' }).toPromise();
+      let party: any = await this.http.post(`${environment.API_URL_PARTY}/create`, '', { responseType: 'json' }).toPromise();
         
       console.log(`Created round with id=${party}`);
       sessionStorage.setItem('isSpectator', 'true');
@@ -158,36 +163,44 @@ export class LoginComponent implements OnInit {
     this.pane = 'center';
   }
   
-  enterQueue() {
-    console.log(`enering queue for party ${this.party}`);
-    if (this.queueCallback)
-    	  this.queueCallback.close();
-    this.queueCallback = new EventSource(`${environment.API_URL_PARTY}/${this.party}/queue`);
-    this.queueCallback.onmessage = msg => {
+  setQueueOnMessage() {
+    LoginComponent.queueCallback.onmessage = msg => {
       let queueMsg = JSON.parse(msg.data);
       if (queueMsg.queuePosition) {
-        this.ngZone.run(() => {
-          this.queuePosition = queueMsg.queuePosition;
-          console.log(`Still waiting in queue at position ${this.queuePosition}`);
-          this.pane = 'queue';
-        });
+        this.showQueue(queueMsg.queuePosition);
       } else if (queueMsg.requeue) {
         console.log(`ready to join game! Joining round ${queueMsg.requeue}`);
-        this.queueCallback.close();
+        LoginComponent.queueCallback.close();
         this.joinRoundById(queueMsg.requeue);
       } else {
-        console.log('Error: unrecognized message ' + msg.data);
+        console.log('Error: unrecognized message  ' + msg.data);
       }
     }
-    this.queueCallback.onerror = msg => {
+  }
+
+  enterQueue() {
+    console.log(`enering queue for party ${this.party}`);
+    if (LoginComponent.queueCallback)
+      LoginComponent.queueCallback.close();
+    LoginComponent.queueCallback = new EventSource(`${environment.API_URL_PARTY}/${this.party}/queue`);
+    this.setQueueOnMessage();
+    LoginComponent.queueCallback.onerror = msg => {
       console.log('Error showing queue position: ' + JSON.stringify(msg.data));
     }
   }
   
+  showQueue(queuePosition) {
+    this.ngZone.run(() => {
+      this.queuePosition = queuePosition;
+      console.log(`Still waiting in queue at position ${this.queuePosition}`);
+      this.pane = 'queue';
+    });
+  }
+
   cancelQueue() {
-	if (this.queueCallback)
+	if (LoginComponent.queueCallback)
 	  try {
-	    this.queueCallback.close();
+	    LoginComponent.queueCallback.close();
 	    this.pane = 'right';
 	  } catch (ignore) {
 	  }

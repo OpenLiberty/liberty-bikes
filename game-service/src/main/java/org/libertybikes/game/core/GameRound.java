@@ -371,8 +371,18 @@ public class GameRound implements Runnable {
         broadcastPlayerList();
 
         long start = System.nanoTime();
-        updatePlayerStats();
-        lifecycleCallbacks.forEach(c -> c.gameEnding());
+        try {
+            ManagedScheduledExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
+            exec.submit(() -> {
+                updatePlayerStats();
+            });
+            exec.submit(() -> {
+                lifecycleCallbacks.forEach(c -> c.gameEnding());
+            });
+        } catch (NamingException e) {
+            log("Unable to perform post game processing");
+            e.printStackTrace();
+        }
 
         // Wait for 5 seconds, but subtract the amount of time it took to update player stats
         long nanoWait = TimeUnit.SECONDS.toNanos(5) - (System.nanoTime() - start);
