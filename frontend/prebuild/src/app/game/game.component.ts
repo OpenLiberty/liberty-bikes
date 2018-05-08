@@ -7,7 +7,8 @@ import * as EventSource from 'eventsource';
 import { environment } from './../../environments/environment';
 import { Player } from '../entity/player';
 import { Obstacle } from '../entity/obstacle';
-import { Shape, Stage } from 'createjs-module';
+import { PlayerTooltip } from '../entity/player.tooltip';
+import { Shape, Stage, Text } from 'createjs-module';
 
 @Component({
   selector: 'app-game',
@@ -98,15 +99,15 @@ export class GameComponent implements OnInit, OnDestroy {
           }
 
         }
+        
         if (json.playerlist) {
           if (this.players != null) {
             this.players.forEach(player => {
-              if (player.shape != null) {
-                this.stage.removeChild(player.shape);
-              }
+              this.stage.removeChild(player.shape);
+              this.stage.removeChild(player.tooltip.shape);
+              this.stage.removeChild(player.tooltip.nameText);
             });
           }
-
           this.players = new Array<Player>();
           for (let playerInfo of json.playerlist) {
             const newPlayer = new Player();
@@ -114,21 +115,17 @@ export class GameComponent implements OnInit, OnDestroy {
             newPlayer.color = playerInfo.color;
             newPlayer.status = playerInfo.status;
 
-            const playerShape = new Shape();
-            playerShape.graphics.beginFill(newPlayer.color).rect(0, 0, playerInfo.width * GameComponent.BOX_SIZE, playerInfo.height * GameComponent.BOX_SIZE);
-            playerShape.graphics.beginFill('#e8e5e5').rect(playerInfo.width / 4 * GameComponent.BOX_SIZE,
-              playerInfo.height / 4 * GameComponent.BOX_SIZE,
-              GameComponent.BOX_SIZE * (playerInfo.width / 2), GameComponent.BOX_SIZE * (playerInfo.height / 2));
+            newPlayer.draw(playerInfo.width, playerInfo.height);
+            newPlayer.update(playerInfo.x * GameComponent.BOX_SIZE, playerInfo.y * GameComponent.BOX_SIZE);
 
-            playerShape.x = playerInfo.x * GameComponent.BOX_SIZE;
-            playerShape.y = playerInfo.y * GameComponent.BOX_SIZE;
-
+            // Don't show bot players which have no position initially
             if (playerInfo.id === "") {
-              playerShape.visible = false;
+              newPlayer.visible(false);
             }
-            newPlayer.shape = playerShape;
             if (newPlayer.status !== 'Dead') {
               this.stage.addChild(newPlayer.shape);
+              this.stage.addChild(newPlayer.tooltip.shape);
+              this.stage.addChild(newPlayer.tooltip.nameText);
             }
 
             this.players.push(newPlayer);
@@ -137,23 +134,23 @@ export class GameComponent implements OnInit, OnDestroy {
         }
         if (json.players) {
           json.players.forEach((player, i) => {
+        	    const playerEntity = this.players[i];
             if (player.alive) {
-              const shape = this.players[i].shape;
+              const shape = playerEntity.shape;
 
               if (!shape.visible) {
-                shape.visible = true;
+            	    playerEntity.visible(true);
               }
 
-              shape.x = player.x * GameComponent.BOX_SIZE;
-              shape.y = player.y * GameComponent.BOX_SIZE;
-
+              playerEntity.update(player.x * GameComponent.BOX_SIZE, player.y * GameComponent.BOX_SIZE);
+              
               this.trailsContext.fillStyle = player.color;
               this.trailsContext.fillRect(GameComponent.BOX_SIZE * player.x + player.width / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
                 GameComponent.BOX_SIZE * player.y + player.height / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
                 GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
 
               this.trailsShape.graphics.clear().beginBitmapFill(this.trailsCanvas, 'no-repeat').drawRect(0, 0, 600, 600);
-            } else if (!player.alive && this.players[i].status === 'Alive') {
+            } else if (!player.alive && playerEntity.status === 'Alive') {
               // Stamp down player on trails canvas so it can be erased properly when obstacles roll over it
               this.trailsContext.fillStyle = player.color;
               this.trailsContext.fillRect(player.x * GameComponent.BOX_SIZE, player.y * GameComponent.BOX_SIZE, player.width * GameComponent.BOX_SIZE, player.height * GameComponent.BOX_SIZE);
@@ -165,13 +162,13 @@ export class GameComponent implements OnInit, OnDestroy {
                 GameComponent.BOX_SIZE * (player.width / 2), GameComponent.BOX_SIZE * (player.height / 2));
 
               // Hide from stage
-              this.stage.removeChild(this.players[i].shape);
+              this.stage.removeChild(playerEntity.shape);
 
               // Update trails shape on main canvas
               this.trailsShape.graphics.clear().beginBitmapFill(this.trailsCanvas, 'no-repeat').drawRect(0, 0, 600, 600);
             }
 
-            this.players[i].status = player.status;
+            playerEntity.status = player.status;
           });
 
         }
@@ -188,7 +185,7 @@ export class GameComponent implements OnInit, OnDestroy {
       });
     });
   }
-
+  
   ngOnInit() {
     this.roundId = sessionStorage.getItem('roundId');
 
