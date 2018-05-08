@@ -60,7 +60,6 @@
 
   display: flex;
   flex-flow: column;
-  width: 100%;
   padding-left: 10px;
   padding-right: 10px;
 }
@@ -71,6 +70,7 @@
 }
 
 .form-item label {
+  display: initial;
   width: 100%;
   margin-bottom: -4px;
   padding-bottom: 0px;
@@ -170,6 +170,10 @@ h2 {
     position: absolute;
     background: none;
     top: 0px;
+  }
+
+  .slider {
+    width: 100%;
   }
 
   :host {
