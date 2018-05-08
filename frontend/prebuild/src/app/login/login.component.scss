@@ -60,7 +60,6 @@
 
   display: flex;
   flex-flow: column;
-  width: 100%;
   padding-left: 10px;
   padding-right: 10px;
 }
@@ -170,6 +169,10 @@ h2 {
     position: absolute;
     background: none;
     top: 0px;
+  }
+
+  .slider {
+    width: 100%;
   }
 
   :host {
