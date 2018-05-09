@@ -69,7 +69,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   loginGoogle() {
-       window.location.href = `http://${environment.API_URL_AUTH}/auth-service/GoogleAuth`;
+       window.location.href = `${environment.API_URL_AUTH}/auth-service/GoogleAuth`;
   }
 
   async quickJoin() {
