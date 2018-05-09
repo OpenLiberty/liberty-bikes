@@ -283,54 +283,6 @@ export class GameComponent implements OnInit, OnDestroy {
     location.reload();
   }
 
-  // Update display
-  drawPlayer(player) {
-    this.context.fillStyle = player.color;
-    this.context.clearRect(GameComponent.BOX_SIZE * player.oldX, GameComponent.BOX_SIZE * player.oldY,
-                          GameComponent.BOX_SIZE * player.width, GameComponent.BOX_SIZE * player.height);
-    this.context.fillRect(GameComponent.BOX_SIZE * player.x, GameComponent.BOX_SIZE * player.y,
-                          GameComponent.BOX_SIZE * player.width, GameComponent.BOX_SIZE * player.height);
-    this.context.fillRect(GameComponent.BOX_SIZE * player.trailPosX, GameComponent.BOX_SIZE * player.trailPosY,
-                          GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
-    this.context.fillRect(GameComponent.BOX_SIZE * player.trailPosX2, GameComponent.BOX_SIZE * player.trailPosY2,
-                          GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
-    this.context.fillStyle = '#e8e5e5';
-    this.context.fillRect(GameComponent.BOX_SIZE * player.x + player.width / 4 * GameComponent.BOX_SIZE,
-                          GameComponent.BOX_SIZE * player.y + player.height / 4 * GameComponent.BOX_SIZE,
-                          GameComponent.BOX_SIZE * (player.width / 2), GameComponent.BOX_SIZE * (player.height / 2));
-  }
-
-  drawObstacle(obstacle) {
-    this.context.fillStyle = '#808080'; // obstacles always grey
-    this.context.fillRect(GameComponent.BOX_SIZE * obstacle.x, GameComponent.BOX_SIZE * obstacle.y,
-                          GameComponent.BOX_SIZE * obstacle.width, GameComponent.BOX_SIZE * obstacle.height);
-  }
-
-  drawMovingObstacle(obstacle) {
-    this.context.fillStyle = '#808080'; // obstacles always grey
-    if (obstacle.hasMoved) {
-      this.context.clearRect(GameComponent.BOX_SIZE * obstacle.oldX, GameComponent.BOX_SIZE * obstacle.oldY,
-                          GameComponent.BOX_SIZE * obstacle.width, GameComponent.BOX_SIZE * obstacle.height);
-    }
-    this.context.fillRect(GameComponent.BOX_SIZE * obstacle.x, GameComponent.BOX_SIZE * obstacle.y,
-                          GameComponent.BOX_SIZE * obstacle.width, GameComponent.BOX_SIZE * obstacle.height);
-  }
-
-  getStatus(status) {
-    if (status === 'Connected') {
-      return '<span class=\'badge badge-pill badge-primary\'>Connected</span>';
-    }
-    if (status === 'Alive' || status === 'Winner') {
-      return `<span class='badge badge-pill badge-success'>${status}</span>`;
-    }
-    if (status === 'Dead') {
-      return '<span class=\'badge badge-pill badge-danger\'>Dead</span>';
-    }
-    if (status === 'Disconnected') {
-      return '<span class=\'badge badge-pill badge-secondary\'>Disconnected</span>';
-    }
-  }
-
   startingCountdown(seconds) {
     this.showLoader = true;
     setTimeout(() => {

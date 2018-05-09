@@ -10,7 +10,7 @@ import java.util.Queue;
 import javax.json.bind.annotation.JsonbPropertyOrder;
 import javax.json.bind.annotation.JsonbTransient;
 
-@JsonbPropertyOrder({ "id", "name", "color", "status", "alive", "x", "y", "width", "height", "oldX", "oldY", "trailPosX", "trailPosY", "trailPosX2", "trailPosY2", "direction" })
+@JsonbPropertyOrder({ "id", "name", "color", "status", "alive", "x", "y", "width", "height", "direction" })
 public class Player {
 
     public static enum STATUS {
@@ -27,12 +27,10 @@ public class Player {
     public final String name;
     public final String id;
     public final String color;
-    public int oldX, x;
-    public int oldY, y;
+    public int x, y;
     public final int width = 3;
     public final int height = 3;
     private boolean isAlive = true;
-    public int trailPosX, trailPosY, trailPosX2, trailPosY2;
     private STATUS playerStatus = STATUS.Connected;
 
     protected final short playerNum;
@@ -77,10 +75,8 @@ public class Player {
             color = "#FFFFFF";
             direction = DIRECTION.DOWN;
         }
-        oldX = this.x = x;
-        oldY = this.y = y;
-        trailPosX = trailPosX2 = x + 1;
-        trailPosY = trailPosY2 = y + 1;
+        this.x = x;
+        this.y = y;
     }
 
     public DIRECTION getDirection() {
@@ -111,10 +107,6 @@ public class Player {
      * @return True if the player is still alive after moving forward one space. False otherwise.
      */
     public final boolean movePlayer(short[][] s) {
-
-        oldX = x;
-        oldY = y;
-
         // If a player issues two moves in the same game tick and the second direction is illegal,
         // spread out the moves across two ticks rather than ignoring the second move entirely
         if (desiredNextDirection != null && lastDirection == direction) {
@@ -162,14 +154,10 @@ public class Player {
                 if (!withinOneSquare(tp)) {
                     if (first) {
                         s[tp.x][tp.y] = GameBoard.TRAIL_SPOT_TAKEN;
-                        trailPosX = tp.x;
-                        trailPosY = tp.y;
                         it.remove();
                         first = false;
                     } else {
                         s[tp.x][tp.y] = GameBoard.TRAIL_SPOT_TAKEN;
-                        trailPosX2 = tp.x;
-                        trailPosY2 = tp.y;
                         it.remove();
                         break;
                     }
