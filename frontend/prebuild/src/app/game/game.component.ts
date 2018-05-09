@@ -102,6 +102,10 @@ export class GameComponent implements OnInit, OnDestroy {
         
         if (json.playerlist) {
             for (let playerInfo of json.playerlist) {
+            	  // Don't add generic bot players (used to pad out the palyerlist)
+            	  if (playerInfo.id === "")
+                continue;
+            	
             	  let newPlayer = this.players.get(playerInfo.id);
             	  if (!newPlayer) {
             		  newPlayer = new Player();
@@ -113,11 +117,7 @@ export class GameComponent implements OnInit, OnDestroy {
               
             	  if (playerInfo.status !== 'Dead')
                 newPlayer.update(playerInfo.x * GameComponent.BOX_SIZE, playerInfo.y * GameComponent.BOX_SIZE, playerInfo.direction);
-
-              // Don't show bot players which have no position initially
-              if (playerInfo.id === "") {
-                newPlayer.visible(false);
-              }
+              
               newPlayer.addTo(this.stage);
             }
         }

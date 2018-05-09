@@ -21,25 +21,41 @@ export class PlayerTooltip {
   
   public update() {
 	// positioning
-	if (this.lastY > this.player.y)
-		this.showAbove = true;
-	else if (this.lastY < this.player.y)
-		this.showAbove = false;
+	if (this.lastY < this.player.y)
+	  this.showAbove = true;
+	else if (this.lastY > this.player.y)
+	  this.showAbove = false;
+	
+	if (this.player.y < 50)
+      this.showAbove = false;
+    else if (this.player.y > (600 - 50))
+    	  this.showAbove = true;
+	
 	this.lastY = this.player.y;
 	this.shape.x = this.player.x - 50;
-	this.shape.y = this.player.y + (this.showAbove ? 30 : -45);
+	this.shape.y = this.player.y + (this.showAbove ? -48 : 36);
 	this.nameText.x = this.player.x + 8;
-	this.nameText.y = this.player.y + (this.showAbove ? 33 : -42);
+	this.nameText.y = this.player.y + (this.showAbove ? -45 : 39);
+	
+	// prevent tooltip from going off screen
+	if (this.shape.x < 0)
+	  this.shape.x = 0;
+	if ((this.shape.x + 115) > 600)
+	  this.shape.x = (600 - 115);
+	if (this.nameText.x - 50 < 0)
+	  this.nameText.x = 50;
+	if (this.nameText.x + 50 > 600)
+	  this.nameText.x = (600 - 50);
 	
 	// start fading out after 15 ticks
 	if (this.player.status === 'Alive') {
 	  if(this.lifetime > 0)
 	    this.lifetime--;
 	  if (this.lifetime < 15) {
-	    this.alpha(this.lifetime / 10);
+	    this.alpha(this.lifetime / 15);
 	  }
 	} else {
-	  this.alpha(1);
+	  this.alpha(0.9);
 	}
   }
   
@@ -49,6 +65,8 @@ export class PlayerTooltip {
   }
   
   public alpha(newAlpha: number) {
+	  if (newAlpha > 0.9)
+		newAlpha = 0.9;
 	  this.shape.alpha = newAlpha;
 	  this.nameText.alpha = newAlpha;
   }
