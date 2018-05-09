@@ -10,7 +10,7 @@ import java.util.Queue;
 import javax.json.bind.annotation.JsonbPropertyOrder;
 import javax.json.bind.annotation.JsonbTransient;
 
-@JsonbPropertyOrder({ "id", "name", "color", "status", "alive", "x", "y", "width", "height", "oldX", "oldY", "trailPosX", "trailPosY", "trailPosX2", "trailPosY2" })
+@JsonbPropertyOrder({ "id", "name", "color", "status", "alive", "x", "y", "width", "height", "oldX", "oldY", "trailPosX", "trailPosY", "trailPosX2", "trailPosY2", "direction" })
 public class Player {
 
     public static enum STATUS {
@@ -81,6 +81,10 @@ public class Player {
         oldY = this.y = y;
         trailPosX = trailPosX2 = x + 1;
         trailPosY = trailPosY2 = y + 1;
+    }
+
+    public DIRECTION getDirection() {
+        return desiredNextDirection != null ? desiredNextDirection : direction;
     }
 
     public void setDirection(DIRECTION newDirection) {

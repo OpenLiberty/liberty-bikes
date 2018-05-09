@@ -21,27 +21,35 @@ export class PlayerTooltip {
   
   public update() {
 	// positioning
-	if (this.lastY > this.player.shape.y)
+	if (this.lastY > this.player.y)
 		this.showAbove = true;
-	else if (this.lastY < this.player.shape.y)
+	else if (this.lastY < this.player.y)
 		this.showAbove = false;
-	this.lastY = this.player.shape.y;
-	this.shape.x = this.player.shape.x - 50;
-	this.shape.y = this.player.shape.y + (this.showAbove ? 20 : -35);
-	this.nameText.x = this.player.shape.x + 8;
-	this.nameText.y = this.player.shape.y + (this.showAbove ? 23 : -32);
+	this.lastY = this.player.y;
+	this.shape.x = this.player.x - 50;
+	this.shape.y = this.player.y + (this.showAbove ? 30 : -45);
+	this.nameText.x = this.player.x + 8;
+	this.nameText.y = this.player.y + (this.showAbove ? 33 : -42);
 	
 	// start fading out after 15 ticks
-	if(this.lifetime > 0)
-	  this.lifetime--;
-	if (this.lifetime < 15) {
-	  this.shape.alpha = (this.lifetime / 10);
-	  this.nameText.alpha = (this.lifetime / 10);
+	if (this.player.status === 'Alive') {
+	  if(this.lifetime > 0)
+	    this.lifetime--;
+	  if (this.lifetime < 15) {
+	    this.alpha(this.lifetime / 10);
+	  }
+	} else {
+	  this.alpha(1);
 	}
   }
   
   public visible(isVisible: boolean) {
 	this.shape.visible = isVisible;
 	this.nameText.visible = isVisible;
+  }
+  
+  public alpha(newAlpha: number) {
+	  this.shape.alpha = newAlpha;
+	  this.nameText.alpha = newAlpha;
   }
 }
