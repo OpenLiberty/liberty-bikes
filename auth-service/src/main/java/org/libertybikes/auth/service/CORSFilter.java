@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.libertybikes.auth.service;
 
 import java.io.IOException;

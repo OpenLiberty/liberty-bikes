@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.libertybikes.auth.service;
 
 import java.net.URI;
@@ -25,7 +22,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 @Path("/GoogleAuth")
 @ApplicationScoped
 public class GoogleAuth {
-    private static final long serialVersionUID = 1L;
 
     @Inject
     @ConfigProperty(name = "googleOAuthConsumerKey")
@@ -36,14 +32,11 @@ public class GoogleAuth {
     String secret;
 
     @Inject
-    @ConfigProperty(name = "auth_url", defaultValue = "https://localhost:8482/auth-service")
+    @ConfigProperty(name = "auth_url", defaultValue = AuthApp.HTTPS_AUTH_SERVICE)
     String authUrl;
 
-    @Context
-    HttpServletRequest request;
-
     @GET
-    public Response getAuthURL() {
+    public Response getAuthURL(@Context HttpServletRequest request) {
 
         JsonFactory jsonFactory = new JacksonFactory();
         HttpTransport httpTransport = new NetHttpTransport();
@@ -61,7 +54,6 @@ public class GoogleAuth {
 
             // send the user to google to be authenticated.
             return Response.temporaryRedirect(new URI(authorizationUrl)).build();
-
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(500).build();

@@ -5,9 +5,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,8 +21,6 @@ import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
@@ -28,17 +29,11 @@ import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
-/**
- * Servlet implementation class googleCallback
- */
-
 @Path("/GoogleCallback")
 @ApplicationScoped
 public class GoogleCallback extends JwtAuth {
-    private static final long serialVersionUID = 1L;
 
-    @Context
-    HttpServletRequest request;
+    private static final Jsonb jsonb = JsonbBuilder.create();
 
     @Inject
     @ConfigProperty(name = "frontend_url", defaultValue = AuthApp.FRONTEND_URL)
@@ -48,7 +43,10 @@ public class GoogleCallback extends JwtAuth {
     @ConfigProperty(name = "auth_url", defaultValue = AuthApp.HTTPS_AUTH_SERVICE)
     String authUrl;
 
-    private GoogleAuthorizationCodeFlow flow = null;
+    public static class GoogleUser {
+        public String name;
+        public String email;
+    }
 
     /**
      * Method that performs introspection on an AUTH string, and returns data as
@@ -57,10 +55,8 @@ public class GoogleCallback extends JwtAuth {
      * @param auth
      *            the authstring to query, as built by an auth impl.
      * @return the data from the introspect, in a map.
-     * @throws IOException
-     *             if anything goes wrong.
      */
-    public Map<String, String> introspectAuth(GoogleTokenResponse gResponse) throws IOException {
+    private Map<String, String> introspectAuth(GoogleAuthorizationCodeFlow flow, GoogleTokenResponse gResponse) throws IOException {
         Map<String, String> results = new HashMap<String, String>();
 
         Credential credential = flow.createAndStoreCredential(gResponse, null);
@@ -73,20 +69,18 @@ public class GoogleCallback extends JwtAuth {
             GenericUrl url = new GenericUrl("https://www.googleapis.com/oauth2/v3/userinfo");
             HttpRequest infoRequest = requestFactory.buildGetRequest(url);
 
-            infoRequest.getHeaders().setContentType("application/json");
+            infoRequest.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             String jsonIdentity = infoRequest.execute().parseAsString();
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode user = objectMapper.readTree(jsonIdentity);
-
-            String name = user.get("name").asText();
-            String email = user.get("email").asText();
+            GoogleUser user = jsonb.fromJson(jsonIdentity, GoogleUser.class);
+            System.out.println("Created user json: " + jsonb.toJson(user));
+            Objects.requireNonNull(user.name, "User name was null");
+            Objects.requireNonNull(user.email, "User email was null");
 
             results.put("valid", "true");
-            results.put("id", "GOOGLE:" + email);
-            results.put("upn", email);
-            results.put("name", name);
-            results.put("email", email);
-
+            results.put("id", "GOOGLE:" + user.email);
+            results.put("upn", user.email);
+            results.put("name", user.name);
+            results.put("email", user.email);
         } catch (Exception e) {
             System.out.println(e.toString());
             e.printStackTrace();
@@ -97,13 +91,13 @@ public class GoogleCallback extends JwtAuth {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getAuthURL() throws IOException, URISyntaxException {
+    @Produces()
+    public Response getAuthURL(@Context HttpServletRequest request) throws IOException, URISyntaxException {
         // google calls us back at this app when a user has finished authing with them.
         // when it calls us back here, it passes an oauth_verifier token that we
         // can exchange for a google access token.
 
-        flow = (GoogleAuthorizationCodeFlow) request.getSession().getAttribute("google");
+        GoogleAuthorizationCodeFlow flow = (GoogleAuthorizationCodeFlow) request.getSession().getAttribute("google");
         String code = request.getParameter("code");
 
         //now we need to invoke the access_token endpoint to swap the code for a token.
@@ -111,9 +105,10 @@ public class GoogleCallback extends JwtAuth {
 
         GoogleTokenResponse gResponse;
         Map<String, String> claims = new HashMap<String, String>();
+        claims.put("iss", "https://accounts.google.com");
         try {
             gResponse = flow.newTokenRequest(code).setRedirectUri(callbackURL.toString()).execute();
-            claims = introspectAuth(gResponse);
+            claims.putAll(introspectAuth(flow, gResponse));
         } catch (IOException e) {
             e.printStackTrace();
         }
