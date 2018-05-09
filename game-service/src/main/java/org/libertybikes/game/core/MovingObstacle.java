@@ -1,12 +1,8 @@
-/**
- *
- */
 package org.libertybikes.game.core;
 
 public class MovingObstacle extends Obstacle {
 
-    public int xDir, yDir, oldX, oldY, moveDelay, currentDelay = 0;
-    public boolean hasMoved = false;
+    private int xDir, yDir, moveDelay, currentDelay = 0;
 
     public MovingObstacle(int w, int h, int x, int y) {
         super(w, h, x, y);
@@ -62,14 +58,10 @@ public class MovingObstacle extends Obstacle {
 
         if (++currentDelay < moveDelay) {
             // don't move yet
-            hasMoved = false;
             return;
         }
 
-        hasMoved = true;
         currentDelay = 0;
-        oldX = x;
-        oldY = y;
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {

@@ -102,6 +102,10 @@ export class GameComponent implements OnInit, OnDestroy {
         
         if (json.playerlist) {
             for (let playerInfo of json.playerlist) {
+            	  // Don't add generic bot players (used to pad out the palyerlist)
+            	  if (playerInfo.id === "")
+                continue;
+            	
             	  let newPlayer = this.players.get(playerInfo.id);
             	  if (!newPlayer) {
             		  newPlayer = new Player();
@@ -113,11 +117,7 @@ export class GameComponent implements OnInit, OnDestroy {
               
             	  if (playerInfo.status !== 'Dead')
                 newPlayer.update(playerInfo.x * GameComponent.BOX_SIZE, playerInfo.y * GameComponent.BOX_SIZE, playerInfo.direction);
-
-              // Don't show bot players which have no position initially
-              if (playerInfo.id === "") {
-                newPlayer.visible(false);
-              }
+              
               newPlayer.addTo(this.stage);
             }
         }
@@ -281,54 +281,6 @@ export class GameComponent implements OnInit, OnDestroy {
     this.roundId = newRoundId;
     sessionStorage.setItem('roundId', this.roundId);
     location.reload();
-  }
-
-  // Update display
-  drawPlayer(player) {
-    this.context.fillStyle = player.color;
-    this.context.clearRect(GameComponent.BOX_SIZE * player.oldX, GameComponent.BOX_SIZE * player.oldY,
-                          GameComponent.BOX_SIZE * player.width, GameComponent.BOX_SIZE * player.height);
-    this.context.fillRect(GameComponent.BOX_SIZE * player.x, GameComponent.BOX_SIZE * player.y,
-                          GameComponent.BOX_SIZE * player.width, GameComponent.BOX_SIZE * player.height);
-    this.context.fillRect(GameComponent.BOX_SIZE * player.trailPosX, GameComponent.BOX_SIZE * player.trailPosY,
-                          GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
-    this.context.fillRect(GameComponent.BOX_SIZE * player.trailPosX2, GameComponent.BOX_SIZE * player.trailPosY2,
-                          GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
-    this.context.fillStyle = '#e8e5e5';
-    this.context.fillRect(GameComponent.BOX_SIZE * player.x + player.width / 4 * GameComponent.BOX_SIZE,
-                          GameComponent.BOX_SIZE * player.y + player.height / 4 * GameComponent.BOX_SIZE,
-                          GameComponent.BOX_SIZE * (player.width / 2), GameComponent.BOX_SIZE * (player.height / 2));
-  }
-
-  drawObstacle(obstacle) {
-    this.context.fillStyle = '#808080'; // obstacles always grey
-    this.context.fillRect(GameComponent.BOX_SIZE * obstacle.x, GameComponent.BOX_SIZE * obstacle.y,
-                          GameComponent.BOX_SIZE * obstacle.width, GameComponent.BOX_SIZE * obstacle.height);
-  }
-
-  drawMovingObstacle(obstacle) {
-    this.context.fillStyle = '#808080'; // obstacles always grey
-    if (obstacle.hasMoved) {
-      this.context.clearRect(GameComponent.BOX_SIZE * obstacle.oldX, GameComponent.BOX_SIZE * obstacle.oldY,
-                          GameComponent.BOX_SIZE * obstacle.width, GameComponent.BOX_SIZE * obstacle.height);
-    }
-    this.context.fillRect(GameComponent.BOX_SIZE * obstacle.x, GameComponent.BOX_SIZE * obstacle.y,
-                          GameComponent.BOX_SIZE * obstacle.width, GameComponent.BOX_SIZE * obstacle.height);
-  }
-
-  getStatus(status) {
-    if (status === 'Connected') {
-      return '<span class=\'badge badge-pill badge-primary\'>Connected</span>';
-    }
-    if (status === 'Alive' || status === 'Winner') {
-      return `<span class='badge badge-pill badge-success'>${status}</span>`;
-    }
-    if (status === 'Dead') {
-      return '<span class=\'badge badge-pill badge-danger\'>Dead</span>';
-    }
-    if (status === 'Disconnected') {
-      return '<span class=\'badge badge-pill badge-secondary\'>Disconnected</span>';
-    }
   }
 
   startingCountdown(seconds) {

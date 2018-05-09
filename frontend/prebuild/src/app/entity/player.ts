@@ -23,7 +23,6 @@ export class Player {
 	if (!this.image) {
 	  this.image = new Bitmap('../../assets/images/bike_wide.png');
 	}
-	this.visible(true);
 
 	if (direction === 'UP') {
       this.image.rotation = 0;
