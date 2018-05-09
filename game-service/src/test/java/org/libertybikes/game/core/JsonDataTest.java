@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.libertybikes.game.core;
 
 import static org.junit.Assert.assertEquals;
@@ -74,7 +71,7 @@ public class JsonDataTest {
                      jsonb.toJson(board));
 
         board.addObstacle(new MovingObstacle(11, 12, 13, 14, -1, 2, 50));
-        assertEquals("{\"movingObstacles\":[{\"height\":12,\"width\":11,\"x\":13,\"y\":14,\"currentDelay\":0,\"hasMoved\":false,\"moveDelay\":50,\"oldX\":0,\"oldY\":0,\"xDir\":-1,\"yDir\":2}],\"obstacles\":["
+        assertEquals("{\"movingObstacles\":[{\"height\":12,\"width\":11,\"x\":13,\"y\":14}],\"obstacles\":["
                      + obstacleJson + "],\"players\":[" + bobJson + "]}",
                      jsonb.toJson(board));
     }
