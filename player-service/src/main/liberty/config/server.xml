@@ -11,29 +11,24 @@
     </featureManager>
 
     <applicationManager autoExpand="true"/>
-        <sslDefault sslRef="RpSSLConfig" />  
-    <ssl
-         id="RpSSLConfig"
+    
+    <sslDefault sslRef="RpSSLConfig" />  
+    <ssl id="RpSSLConfig"
          keyStoreRef="validationKeystore"
          trustStoreRef="validationKeystore"  />  
-    <keyStore
-         id="validationKeystore"
+    <keyStore id="validationKeystore"
          password="secret2"
          type="jks"
          location="${server.config.dir}resources/security/validationKeystore.jks" /> 
          
     <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}resources/security/validationKeystore.jks"/>
     
-    <mpJwt 
-     id="myMpJwt"
-     keyName="rebike"
-     issuer="https://auth-service-libertybikes.mybluemix.net"
-     audiences="client">
-    </mpJwt>
+    <mpJwt id="myMpJwt" 
+           keyName="rebike" 
+           issuer="https://auth-service-libertybikes.mybluemix.net" 
+           audiences="client"/>
     
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
                   
     <applicationManager autoExpand="true"/>
-    
-    <logging traceSpecification="*=info:com.ibm.ws.security.*=all:Authentication=all:com.ibm.ws.container.service.security.internal.*=all" />
 </server>
