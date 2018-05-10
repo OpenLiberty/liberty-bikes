@@ -15,18 +15,17 @@
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
                   
     <applicationManager autoExpand="true"/>
-        <sslDefault sslRef="RpSSLConfig" />  
-    <ssl
-         id="RpSSLConfig"
+    
+    <sslDefault sslRef="RpSSLConfig" />  
+    <ssl id="RpSSLConfig"
          keyStoreRef="validationKeystore"
          trustStoreRef="validationKeystore"  />  
-    <keyStore
-         id="validationKeystore"
+    <keyStore id="validationKeystore"
          password="secret2"
          type="jks"
          location="${server.config.dir}resources/security/validationKeystore.jks" /> 
 
-     <keyStore id="defaultKeyStore" password="secret2" />
+    <keyStore id="defaultKeyStore" password="secret2" />
     <quickStartSecurity userName="admin" userPassword="admin"/>
 
     <!-- This configuration allows cross-origin HTTP requests, such
@@ -36,6 +35,4 @@
           allowedMethods="GET, DELETE, POST, PUT"
           allowedHeaders="origin, content-type, accept, authorization, cache-control"
           maxAge="3600" />
-
-    <logging traceSpecification="*=info:com.ibm.ws.security.*=all:Authentication=all:com.ibm.ws.container.service.security.internal.*=all" />
 </server>
