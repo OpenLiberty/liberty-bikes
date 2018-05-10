@@ -33,6 +33,10 @@ public abstract class JwtAuth {
     @ConfigProperty(name = "jwtKeyStoreAlias", defaultValue = "bike")
     String keyStoreAlias;
 
+    @Inject
+    @ConfigProperty(name = "auth_url", defaultValue = AuthApp.HTTPS_AUTH_SERVICE)
+    String authUrl;
+
     protected static Key signingKey = null;
 
     /**
@@ -78,7 +82,7 @@ public abstract class JwtAuth {
         // We'll use this claim to know this is a user token
         onwardsClaims.setAudience("client");
 
-        onwardsClaims.setIssuer(claims.get("iss"));
+        onwardsClaims.setIssuer(authUrl);
         // we set creation time to 24hrs ago, to avoid timezone issues in the
         // browser verification of the jwt.
         Calendar calendar1 = Calendar.getInstance();

@@ -105,7 +105,6 @@ public class GoogleCallback extends JwtAuth {
 
         GoogleTokenResponse gResponse;
         Map<String, String> claims = new HashMap<String, String>();
-        claims.put("iss", "https://accounts.google.com");
         try {
             gResponse = flow.newTokenRequest(code).setRedirectUri(callbackURL.toString()).execute();
             claims.putAll(introspectAuth(flow, gResponse));
