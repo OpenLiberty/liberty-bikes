@@ -27,7 +27,7 @@
     <mpJwt 
      id="myMpJwt"
      keyName="rebike"
-     issuer="https://accounts.google.com"
+     issuer="https://auth-service-libertybikes.mybluemix.net"
      audiences="client">
     </mpJwt>
     
