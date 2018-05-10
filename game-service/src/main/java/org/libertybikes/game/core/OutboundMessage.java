@@ -39,12 +39,12 @@ public class OutboundMessage {
         }
     }
 
-    public static class GameStartCountdown {
-        @JsonbProperty("gamestartcountdown")
+    public static class AwaitPlayersCountdown {
+        @JsonbProperty("awaitplayerscountdown")
         public final int seconds;
 
-        public GameStartCountdown(int startingSeconds) {
-            this.seconds = startingSeconds;
+        public AwaitPlayersCountdown(int remainingPlayerAwaitTime) {
+            this.seconds = remainingPlayerAwaitTime;
         }
     }
 

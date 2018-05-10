@@ -67,8 +67,8 @@ public class GameRound implements Runnable {
     private final Map<Session, Client> clients = new HashMap<>();
     private final Deque<Player> playerRanks = new ArrayDeque<>();
     private final Set<LifecycleCallback> lifecycleCallbacks = new HashSet<>();
-    private AutoStartCountdown autoStart;
-    private boolean autoStarting = false;
+    private LobbyCountdown lobbyCountdown;
+    private AtomicBoolean lobbyCountdownStarted = new AtomicBoolean();
 
     private int ticksFromGameEnd = 0;
 
@@ -93,20 +93,20 @@ public class GameRound implements Runnable {
         return board;
     }
 
-    public void autoStart(Session s, boolean isPhone) {
-        if (!autoStarting) {
-            autoStarting = true;
+    private void beginLobbyCountdown(Session s, boolean isPhone) {
+        if (!lobbyCountdownStarted.get()) {
+            lobbyCountdownStarted.set(true);
             try {
                 ManagedScheduledExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
-                autoStart = new AutoStartCountdown(this);
-                exec.submit(autoStart);
+                lobbyCountdown = new LobbyCountdown();
+                exec.submit(lobbyCountdown);
             } catch (NamingException e) {
                 log("Unable to obtain executor service reference");
                 e.printStackTrace();
             }
         }
         if (!isPhone)
-            sendTextToClient(s, jsonb.toJson(new OutboundMessage.GameStartCountdown(autoStart.roundStartCountdown)));
+            sendTextToClient(s, jsonb.toJson(new OutboundMessage.AwaitPlayersCountdown(lobbyCountdown.roundStartCountdown)));
     }
 
     public void updatePlayerDirection(Session playerSession, InboundMessage msg) {
@@ -125,7 +125,7 @@ public class GameRound implements Runnable {
 
         if (getPlayers().size() + 1 >= Player.MAX_PLAYERS) {
             gameState = State.FULL;
-            autoStart.gameFull();
+            lobbyCountdown.gameFull();
         }
 
         Player p = board.addPlayer(playerId, playerName);
@@ -141,7 +141,7 @@ public class GameRound implements Runnable {
         broadcastPlayerList();
         broadcastGameBoard();
         beginHeartbeat();
-        autoStart(s, isPhone);
+        beginLobbyCountdown(s, isPhone);
     }
 
     public void addAI() {
@@ -164,7 +164,7 @@ public class GameRound implements Runnable {
         sendTextToClient(s, jsonb.toJson(new OutboundMessage.PlayerList(getPlayers())));
         sendTextToClient(s, jsonb.toJson(board));
         beginHeartbeat();
-        autoStart(s, false);
+        beginLobbyCountdown(s, false);
     }
 
     public void addCallback(LifecycleCallback callback) {
@@ -181,7 +181,7 @@ public class GameRound implements Runnable {
                 exec.schedule(() -> {
                     log("Sending heartbeat to " + clients.size() + " clients");
                     sendTextToClients(clients.keySet(), jsonb.toJson(new OutboundMessage.Heartbeat()));
-                }, new HeartbeatTrigger(this));
+                }, new HeartbeatTrigger());
             } catch (NamingException e) {
                 log("Unable to obtain executor service reference");
                 e.printStackTrace();
@@ -316,7 +316,7 @@ public class GameRound implements Runnable {
     }
 
     private void broadcastTimeUntilGameStarts(int time) {
-        sendTextToClients(getNonMobileSessions(), jsonb.toJson(new OutboundMessage.GameStartCountdown(time)));
+        sendTextToClients(getNonMobileSessions(), jsonb.toJson(new OutboundMessage.AwaitPlayersCountdown(time)));
     }
 
     private void broadcastGameBoard() {
@@ -430,62 +430,42 @@ public class GameRound implements Runnable {
         public void gameEnding();
     }
 
-    private class AutoStartCountdown implements Runnable {
+    private class LobbyCountdown implements Runnable {
 
         public int roundStartCountdown = MAX_TIME_BETWEEN_ROUNDS;
-        private final GameRound round;
-
-        public AutoStartCountdown(GameRound round) {
-            this.round = round;
-        }
 
         public void gameFull() {
             roundStartCountdown = roundStartCountdown > 5 ? FULL_GAME_TIME_BETWEEN_ROUNDS : roundStartCountdown;
-            round.broadcastTimeUntilGameStarts(roundStartCountdown);
+            broadcastTimeUntilGameStarts(roundStartCountdown);
         }
 
         @Override
         public void run() {
-            while (round.isOpen() || round.gameState == State.FULL) {
+            while (isOpen() || gameState == State.FULL) {
                 delay(1000);
                 roundStartCountdown--;
                 //round.broadcastTimeUntilGameStarts(--roundStartCountdown);
                 if (roundStartCountdown < 1) {
-                    if (round.clients.size() == 0) {
-                        log("No clients remaining.  Cancelling autoStart.");
+                    if (clients.size() == 0) {
+                        log("No clients remaining.  Cancelling LobbyCountdown.");
                         // Ensure that game state is closed off so that no other players can quick join while a round is marked for deletion
                         gameState = State.FINISHED;
                     } else {
-                        round.startGame();
+                        startGame();
                     }
                 }
             }
         }
-
-        private void delay(long ms) {
-            if (ms < 0)
-                return;
-            try {
-                Thread.sleep(ms);
-            } catch (InterruptedException ie) {
-            }
-        }
-
     }
 
     private class HeartbeatTrigger implements Trigger {
 
         private static final int HEARTBEAT_INTERVAL_SEC = 100;
-        private final GameRound round;
-
-        public HeartbeatTrigger(GameRound round) {
-            this.round = round;
-        }
 
         @Override
         public Date getNextRunTime(LastExecution lastExecutionInfo, Date taskScheduledTime) {
             // If there are any clients still connected to this game, keep sending heartbeats
-            if (round.clients.size() == 0) {
+            if (clients.size() == 0) {
                 log("No clients remaining.  Cancelling heartbeat.");
                 // Ensure that game state is closed off so that no other players can quick join while a round is marked for deletion
                 gameState = State.FINISHED;
@@ -496,7 +476,7 @@ public class GameRound implements Runnable {
 
         @Override
         public boolean skipRun(LastExecution lastExecutionInfo, Date scheduledRunTime) {
-            return round.clients.size() == 0;
+            return clients.size() == 0;
         }
 
     }
