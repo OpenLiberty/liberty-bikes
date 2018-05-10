@@ -50,6 +50,8 @@ public class GameRound implements Runnable {
     public static final int GAME_TICK_SPEED = 50; // ms
     private static final int DELAY_BETWEEN_ROUNDS = 5; //ticks
     private static final int STARTING_COUNTDOWN = 3; // seconds
+    private static final int MAX_TIME_BETWEEN_ROUNDS = 30; //seconds
+    private static final int FULL_GAME_TIME_BETWEEN_ROUNDS = 5; //seconds
     private static final Random r = new Random();
     private static final AtomicInteger runningGames = new AtomicInteger();
 
@@ -65,6 +67,8 @@ public class GameRound implements Runnable {
     private final Map<Session, Client> clients = new HashMap<>();
     private final Deque<Player> playerRanks = new ArrayDeque<>();
     private final Set<LifecycleCallback> lifecycleCallbacks = new HashSet<>();
+    private AutoStartCountdown autoStart;
+    private boolean autoStarting = false;
 
     private int ticksFromGameEnd = 0;
 
@@ -83,11 +87,26 @@ public class GameRound implements Runnable {
     public GameRound(String id) {
         this.id = id;
         nextRoundId = getRandomId();
-
     }
 
     public GameBoard getBoard() {
         return board;
+    }
+
+    public void autoStart(Session s, boolean isPhone) {
+        if (!autoStarting) {
+            autoStarting = true;
+            try {
+                ManagedScheduledExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
+                autoStart = new AutoStartCountdown(this);
+                exec.submit(autoStart);
+            } catch (NamingException e) {
+                log("Unable to obtain executor service reference");
+                e.printStackTrace();
+            }
+        }
+        if (!isPhone)
+            sendTextToClient(s, jsonb.toJson(new OutboundMessage.GameStartCountdown(autoStart.roundStartCountdown)));
     }
 
     public void updatePlayerDirection(Session playerSession, InboundMessage msg) {
@@ -106,12 +125,14 @@ public class GameRound implements Runnable {
 
         if (getPlayers().size() + 1 >= Player.MAX_PLAYERS) {
             gameState = State.FULL;
+            autoStart.gameFull();
         }
 
         Player p = board.addPlayer(playerId, playerName);
+        boolean isPhone = false;
         if (p != null) {
             Client c = new Client(s, p);
-            c.isPhone = hasGameBoard ? false : true;
+            isPhone = c.isPhone = hasGameBoard ? false : true;
             clients.put(s, c);
             log("Player " + playerId + " has joined.");
         } else {
@@ -120,6 +141,7 @@ public class GameRound implements Runnable {
         broadcastPlayerList();
         broadcastGameBoard();
         beginHeartbeat();
+        autoStart(s, isPhone);
     }
 
     public void addAI() {
@@ -142,6 +164,7 @@ public class GameRound implements Runnable {
         sendTextToClient(s, jsonb.toJson(new OutboundMessage.PlayerList(getPlayers())));
         sendTextToClient(s, jsonb.toJson(board));
         beginHeartbeat();
+        autoStart(s, false);
     }
 
     public void addCallback(LifecycleCallback callback) {
@@ -292,6 +315,10 @@ public class GameRound implements Runnable {
                         .collect(Collectors.toSet());
     }
 
+    private void broadcastTimeUntilGameStarts(int time) {
+        sendTextToClients(getNonMobileSessions(), jsonb.toJson(new OutboundMessage.GameStartCountdown(time)));
+    }
+
     private void broadcastGameBoard() {
         sendTextToClients(getNonMobileSessions(), jsonb.toJson(board));
     }
@@ -392,6 +419,7 @@ public class GameRound implements Runnable {
         for (Client c : clients.values())
             if (c.autoRequeue)
                 GameRoundWebsocket.requeueClient(gameSvc, this, c.session);
+
     }
 
     private void log(String msg) {
@@ -399,8 +427,49 @@ public class GameRound implements Runnable {
     }
 
     public interface LifecycleCallback {
-
         public void gameEnding();
+    }
+
+    private class AutoStartCountdown implements Runnable {
+
+        public int roundStartCountdown = MAX_TIME_BETWEEN_ROUNDS;
+        private final GameRound round;
+
+        public AutoStartCountdown(GameRound round) {
+            this.round = round;
+        }
+
+        public void gameFull() {
+            roundStartCountdown = roundStartCountdown > 5 ? FULL_GAME_TIME_BETWEEN_ROUNDS : roundStartCountdown;
+            round.broadcastTimeUntilGameStarts(roundStartCountdown);
+        }
+
+        @Override
+        public void run() {
+            while (round.isOpen() || round.gameState == State.FULL) {
+                delay(1000);
+                roundStartCountdown--;
+                //round.broadcastTimeUntilGameStarts(--roundStartCountdown);
+                if (roundStartCountdown < 1) {
+                    if (round.clients.size() == 0) {
+                        log("No clients remaining.  Cancelling autoStart.");
+                        // Ensure that game state is closed off so that no other players can quick join while a round is marked for deletion
+                        gameState = State.FINISHED;
+                    } else {
+                        round.startGame();
+                    }
+                }
+            }
+        }
+
+        private void delay(long ms) {
+            if (ms < 0)
+                return;
+            try {
+                Thread.sleep(ms);
+            } catch (InterruptedException ie) {
+            }
+        }
 
     }
 

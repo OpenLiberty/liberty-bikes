@@ -39,6 +39,15 @@ public class OutboundMessage {
         }
     }
 
+    public static class GameStartCountdown {
+        @JsonbProperty("gamestartcountdown")
+        public final int seconds;
+
+        public GameStartCountdown(int startingSeconds) {
+            this.seconds = startingSeconds;
+        }
+    }
+
     public static class Heartbeat {
         @JsonbProperty("keepAlive")
         public final boolean keepAlive = true;
