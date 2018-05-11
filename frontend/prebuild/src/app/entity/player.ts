@@ -51,14 +51,17 @@ export class Player {
   }
   
   public setStatus(status: string) {
-    this.status = status;
-    if (status === 'Dead') {
+    if (status === 'Dead' && this.status !== 'Dead') {
     	  this.image = new Bitmap('../../assets/images/status_dead.png');
     	  this.image.scaleX = 0.7;
     	  this.image.scaleY = 0.7;
     	  this.image.x = this.x - 10;
     	  this.image.y = this.y - 10;
+    	  var bam = new Audio('../../assets/sound/bam.wav');
+    	  bam.load();
+    	  bam.play();
     }
+    this.status = status;
   }
   
   public addTo(stage: Stage) {
