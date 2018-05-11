@@ -5,6 +5,7 @@ export class Player {
   // According to EaselJS, "When a string path or image tag that is not yet loaded is used, the stage may need to be redrawn before the Bitmap will be displayed."
   // For this reason, we need to pre-load an instance of the image (this copy never gets used)
   static readonly PLAYER_BITMAP = new Bitmap('../../assets/images/bike_wide.png');
+  static readonly PLAYER_DEAD_BITMAP = new Bitmap('../../assets/images/status_dead.png');
 	
   public name: string;
   public status: string;
@@ -47,6 +48,17 @@ export class Player {
   public visible(isVisible: boolean) {
 	this.image.visible = isVisible;
 	this.tooltip.visible(isVisible);
+  }
+  
+  public setStatus(status: string) {
+    this.status = status;
+    if (status === 'Dead') {
+    	  this.image = new Bitmap('../../assets/images/status_dead.png');
+    	  this.image.scaleX = 0.7;
+    	  this.image.scaleY = 0.7;
+    	  this.image.x = this.x - 10;
+    	  this.image.y = this.y - 10;
+    }
   }
   
   public addTo(stage: Stage) {

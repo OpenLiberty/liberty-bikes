@@ -142,7 +142,7 @@ export class GameComponent implements OnInit, OnDestroy {
             	  playerEntity.tooltip.alpha(1);
             }
 
-            playerEntity.status = player.status;
+            playerEntity.setStatus(player.status);
           });
           if (noneAlive) {
         	    this.players.forEach((player: Player, id: string) => {
