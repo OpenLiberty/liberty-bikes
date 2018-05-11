@@ -164,7 +164,9 @@ public class Hal extends AIPlayer {
         lastLastDirection = lastDirection;
         lastDirection = direction;
 
-        direction = dontBackOntoSelf();
+        // Don't move back on self
+        if (direction.isOppositeOf(lastDirection))
+            direction = lastDirection;
         return direction;
     }
 
@@ -182,37 +184,8 @@ public class Hal extends AIPlayer {
     }
 
     private DIRECTION setDirection(DIRECTION newDirection) {
-
-        if ((newDirection == DIRECTION.UP && lastDirection == DIRECTION.DOWN) ||
-            (newDirection == DIRECTION.DOWN && lastDirection == DIRECTION.UP) ||
-            (newDirection == DIRECTION.LEFT && lastDirection == DIRECTION.RIGHT) ||
-            (newDirection == DIRECTION.RIGHT && lastDirection == DIRECTION.LEFT)) {
+        if (newDirection.isOppositeOf(lastDirection))
             return lastDirection;
-        }
-
         return newDirection;
     }
-
-    private DIRECTION dontBackOntoSelf() {
-        switch (direction) {
-            case DOWN:
-                if (lastLastDirection == DIRECTION.UP)
-                    return DIRECTION.UP;
-                break;
-            case LEFT:
-                if (lastLastDirection == DIRECTION.RIGHT)
-                    return DIRECTION.RIGHT;
-                break;
-            case RIGHT:
-                if (lastLastDirection == DIRECTION.LEFT)
-                    return DIRECTION.LEFT;
-                break;
-            case UP:
-                if (lastLastDirection == DIRECTION.DOWN)
-                    return DIRECTION.DOWN;
-                break;
-        }
-        return direction;
-    }
-
 }

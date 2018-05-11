@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.libertybikes.game.bot;
 
 import java.util.Random;
@@ -12,20 +9,19 @@ public class Wally extends AIPlayer {
 
     static Random ran = new Random();
 
-    private DIRECTION direction, lastDirection;
+    private DIRECTION direction;
 
     private int locX, locY;
 
     public Wally(int startX, int startY, int width, int height, DIRECTION startDirection, short takenSpotNumber) {
         super(startX, startY, width, height, startDirection, takenSpotNumber);
-        lastDirection = direction = startDirection;
+        direction = startDirection;
         locX = startX;
         locY = startY;
     }
 
     @Override
     public DIRECTION processGameTick(short[][] board) {
-        lastDirection = direction;
         direction = straightLine(board, locX, locY);
         if (direction == DIRECTION.LEFT) {
             locX--;
