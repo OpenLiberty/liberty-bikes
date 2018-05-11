@@ -2,7 +2,7 @@ package org.libertybikes.game.maps;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 import org.libertybikes.game.core.DIRECTION;
 import org.libertybikes.game.core.GameBoard;
@@ -12,13 +12,16 @@ import org.libertybikes.game.core.Obstacle;
 
 public class GameMap {
 
+    public static final int NUM_MAPS = 4; // Not including empty map
+    private static final Random r = new Random();
+
     /**
      * @param map -1=random, 0=empty, >0=specific map
      */
     public static GameMap create(int map) {
         switch (map) {
             case -1:
-                return create(ThreadLocalRandom.current().nextInt(1, 5));
+                return create(r.nextInt(NUM_MAPS) + 1);
             case 0:
                 return new EmptyMap();
             case 1:
