@@ -95,18 +95,26 @@ public class JsonDataTest {
     @Test
     public void testPlayerList() {
         Set<Player> players = new LinkedHashSet<>();
-        players.add(new Player("123", "Bob", (short) 0, 9, 9));
+        Player p = new Player("123", "Bob", (short) 0);
+        p.x = 9;
+        p.y = 9;
+        p.direction = DIRECTION.RIGHT;
+        players.add(p);
         PlayerList list = new OutboundMessage.PlayerList(players);
         String bob = "{\"id\":\"123\",\"name\":\"Bob\",\"color\":\"#DF740C\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":9,\"width\":3,\"height\":3,\"direction\":\"RIGHT\"}";
-        String bot1 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#FF0000\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3,\"direction\":\"DOWN\"}";
-        String bot2 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#6FC3DF\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3,\"direction\":\"UP\"}";
-        String bot3 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#FFE64D\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3,\"direction\":\"LEFT\"}";
+        String bot1 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#FF0000\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3}";
+        String bot2 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#6FC3DF\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3}";
+        String bot3 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#FFE64D\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3}";
         System.out.println("@AGG " + jsonb.toJson(list));
         assertEquals("{\"playerlist\":[" + bob + "," + bot1 + "," + bot2 + "," + bot3 + "]}",
                      jsonb.toJson(list));
 
         String chuck = "{\"id\":\"456\",\"name\":\"Chuck\",\"color\":\"#6FC3DF\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":110,\"width\":3,\"height\":3,\"direction\":\"UP\"}";
-        players.add(new Player("456", "Chuck", (short) 2, 9, 110));
+        Player p2 = new Player("456", "Chuck", (short) 2);
+        p2.x = 9;
+        p2.y = 110;
+        p2.direction = DIRECTION.UP;
+        players.add(p2);
         list = new OutboundMessage.PlayerList(players);
         assertEquals("{\"playerlist\":[" + bob + "," + bot1 + "," + chuck + "," + bot3 + "]}",
                      jsonb.toJson(list));

@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.libertybikes.game.core;
 
 import java.util.Arrays;
@@ -14,12 +11,25 @@ import javax.json.bind.annotation.JsonbTransient;
 
 import org.libertybikes.game.bot.Hal;
 import org.libertybikes.game.bot.Wally;
+import org.libertybikes.game.maps.GameMap;
 
 public class GameBoard {
 
     public static final int BOARD_SIZE = 121;
     public static final short SPOT_AVAILABLE = 0, TRAIL_SPOT_TAKEN = -10, OBJECT_SPOT_TAKEN = -8, PLAYER_SPOT_TAKEN = 1;
     private static final Map<String, Short> preferredPlayerSlots = new ConcurrentHashMap<>();
+
+    public static class Point {
+        public final int x;
+        public final int y;
+
+        public Point(int x, int y) {
+            if (x < 0 || y < 0 || x >= BOARD_SIZE || y >= BOARD_SIZE)
+                throw new IllegalArgumentException("Invalid point location x=" + x + " y=" + y);
+            this.x = x;
+            this.y = y;
+        }
+    }
 
     @JsonbTransient
     public final short[][] board = new short[BOARD_SIZE][BOARD_SIZE];
@@ -41,7 +51,7 @@ public class GameBoard {
     }
 
     private void initializeGameMap(int map) {
-        gameMap = new GameMap(map);
+        gameMap = GameMap.create(map);
         for (Obstacle o : gameMap.getObstacles()) {
             addObstacle(o);
         }
@@ -102,7 +112,7 @@ public class GameBoard {
             preferredPlayerSlots.clear();
 
         // Initialize Player
-        Player p = new Player(playerId, playerName, playerNum, gameMap.getPlayerPositionX(playerNum), gameMap.getPlayerPositionY(playerNum));
+        Player p = new Player(playerId, playerName, playerNum).addTo(gameMap);
 
         if (p.x + p.width > BOARD_SIZE || p.y + p.height > BOARD_SIZE)
             throw new IllegalArgumentException("Player does not fit on board: " + p);
@@ -195,16 +205,10 @@ public class GameBoard {
         }
 
         // Initialize Player
-        Player p;
-        AI ai;
-
-        if (Math.random() < .5) {
-            p = new Player("Hal-" + playerNum, "Hal-" + playerNum, playerNum, gameMap.getPlayerPositionX(playerNum), gameMap.getPlayerPositionY(playerNum));
-            ai = new Hal(p.x, p.y, p.width, p.height, p.direction, playerNum);
-        } else {
-            p = new Player("Wally-" + playerNum, "Wally-" + playerNum, playerNum, gameMap.getPlayerPositionX(playerNum), gameMap.getPlayerPositionY(playerNum));
-            ai = new Wally(p.x, p.y, p.width, p.height, p.direction, playerNum);
-        }
+        Player p = Math.random() < 0.5 ? //
+                        new Hal(gameMap, playerNum).asPlayer() : //
+                        new Wally(gameMap, playerNum).asPlayer();
+        p.addTo(gameMap);
 
         if (p.x + p.width > BOARD_SIZE || p.y + p.height > BOARD_SIZE)
             throw new IllegalArgumentException("Player does not fit on board: " + p);
@@ -216,7 +220,6 @@ public class GameBoard {
         }
 
         players.add(p);
-        p.addAI(ai);
     }
 
     public boolean removeAI(Player p) {

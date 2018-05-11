@@ -4,17 +4,18 @@ import java.util.Random;
 
 import org.libertybikes.game.core.DIRECTION;
 import org.libertybikes.game.core.GameBoard;
+import org.libertybikes.game.maps.GameMap;
 
 public class Wally extends AIPlayer {
 
-    static Random ran = new Random();
+    static final Random ran = new Random();
 
     private DIRECTION direction;
 
     private int locX, locY;
 
-    public Wally(int startX, int startY, int width, int height, DIRECTION startDirection, short takenSpotNumber) {
-        super(startX, startY, width, height, startDirection, takenSpotNumber);
+    public Wally(GameMap map, short playerNum) {
+        super(map, playerNum);
         direction = startDirection;
         locX = startX;
         locY = startY;

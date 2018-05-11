@@ -1,12 +1,10 @@
-/**
- *
- */
 package org.libertybikes.game.bot;
 
 import java.util.Random;
 
 import org.libertybikes.game.core.DIRECTION;
 import org.libertybikes.game.core.GameBoard;
+import org.libertybikes.game.maps.GameMap;
 
 public class Hal extends AIPlayer {
 
@@ -19,16 +17,16 @@ public class Hal extends AIPlayer {
     // Border detection distance
     private final static int BD = 2;
 
-    private DIRECTION direction, lastDirection, lastLastDirection;
+    private DIRECTION direction, lastDirection;
 
     private int x, y;
     private boolean hasMoved = false;
 
-    public Hal(int startX, int startY, int width, int height, DIRECTION startDirection, short takenSpotNumber) {
-        super(startX, startY, width, height, startDirection, takenSpotNumber);
-        lastLastDirection = lastDirection = direction = startDirection;
+    public Hal(GameMap map, short playerNum) {
+        super(map, playerNum);
         x = startX;
         y = startY;
+        lastDirection = direction = startDirection;
     }
 
     @Override
@@ -161,7 +159,6 @@ public class Hal extends AIPlayer {
                 }
                 break;
         }
-        lastLastDirection = lastDirection;
         lastDirection = direction;
 
         // Don't move back on self
