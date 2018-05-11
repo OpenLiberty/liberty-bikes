@@ -8,6 +8,8 @@ import java.util.Queue;
 import javax.json.bind.annotation.JsonbPropertyOrder;
 import javax.json.bind.annotation.JsonbTransient;
 
+import org.libertybikes.game.maps.GameMap;
+
 @JsonbPropertyOrder({ "id", "name", "color", "status", "alive", "x", "y", "width", "height", "direction" })
 public class Player {
 
@@ -19,15 +21,16 @@ public class Player {
         Disconnected
     }
 
+    public static final int PLAYER_SIZE = 3; // squares
     public static final int MAX_PLAYERS = 4;
+    public static final String[] PLAYER_COLORS = {};
 
     // Properties exposed by JSON-B
     public final String name;
     public final String id;
     public final String color;
-    public int x, y;
-    public final int width = 3;
-    public final int height = 3;
+    public int x = 0, y = 0;
+    public final int width = PLAYER_SIZE, height = PLAYER_SIZE;
     private boolean isAlive = true;
     private STATUS playerStatus = STATUS.Connected;
 
@@ -50,31 +53,23 @@ public class Player {
         }
     }
 
-    public Player(String id, String name, short playerNum, int x, int y) {
+    public Player(String id, String name, short playerNum) {
         this.id = id;
         this.name = name;
         this.playerNum = playerNum;
 
         // Initialize starting data
+        if (playerNum >= MAX_PLAYERS)
+            throw new IllegalArgumentException("Cannot create player number " + playerNum + " because MAX_PLAYERS=" + MAX_PLAYERS);
         if (playerNum == 0) {
             color = "#DF740C";
-            direction = DIRECTION.RIGHT;
         } else if (playerNum == 1) {
             color = "#FF0000";
-            direction = DIRECTION.DOWN;
         } else if (playerNum == 2) {
             color = "#6FC3DF";
-            direction = DIRECTION.UP;
-        } else if (playerNum == 3) {
-            color = "#FFE64D";
-            direction = DIRECTION.LEFT;
         } else {
-            //error
-            color = "#FFFFFF";
-            direction = DIRECTION.DOWN;
+            color = "#FFE64D";
         }
-        this.x = x;
-        this.y = y;
     }
 
     public DIRECTION getDirection() {
@@ -235,7 +230,7 @@ public class Player {
     }
 
     @JsonbTransient
-    public int getPlayerNum() {
+    public short getPlayerNum() {
         return this.playerNum;
     }
 
@@ -259,7 +254,14 @@ public class Player {
         }
     }
 
-    public void addAI(AI ai) {
+    public void setAI(AI ai) {
         this.ai = ai;
+    }
+
+    public Player addTo(GameMap map) {
+        this.x = map.startingPosition(playerNum).x;
+        this.y = map.startingPosition(playerNum).y;
+        this.direction = map.startingDirection(playerNum);
+        return this;
     }
 }

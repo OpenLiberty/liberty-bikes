@@ -17,7 +17,7 @@ public class OutboundMessage {
                 playerlist[p.playerNum] = p;
             for (int i = 0; i < Player.MAX_PLAYERS; i++)
                 if (playerlist[i] == null)
-                    playerlist[i] = new Player("", "Bot Player", (short) i, 0, 0);
+                    playerlist[i] = new Player("", "Bot Player", (short) i);
         }
     }
 
