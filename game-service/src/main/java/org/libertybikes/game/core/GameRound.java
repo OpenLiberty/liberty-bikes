@@ -50,7 +50,7 @@ public class GameRound implements Runnable {
     public static final int GAME_TICK_SPEED = 50; // ms
     private static final int DELAY_BETWEEN_ROUNDS = 5; //ticks
     private static final int STARTING_COUNTDOWN = 3; // seconds
-    private static final int MAX_TIME_BETWEEN_ROUNDS = 30; //seconds
+    private static final int MAX_TIME_BETWEEN_ROUNDS = Integer.getInteger("game-service.time.between.rounds", 20); // 20 seconds default
     private static final int FULL_GAME_TIME_BETWEEN_ROUNDS = 5; //seconds
     private static final Random r = new Random();
     private static final AtomicInteger runningGames = new AtomicInteger();
@@ -444,7 +444,6 @@ public class GameRound implements Runnable {
             while (isOpen() || gameState == State.FULL) {
                 delay(1000);
                 roundStartCountdown--;
-                //round.broadcastTimeUntilGameStarts(--roundStartCountdown);
                 if (roundStartCountdown < 1) {
                     if (clients.size() == 0) {
                         log("No clients remaining.  Cancelling LobbyCountdown.");
