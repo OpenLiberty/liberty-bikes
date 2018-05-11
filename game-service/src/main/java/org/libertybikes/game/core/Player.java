@@ -1,10 +1,8 @@
-/**
- *
- */
 package org.libertybikes.game.core;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Queue;
 
 import javax.json.bind.annotation.JsonbPropertyOrder;
@@ -35,8 +33,8 @@ public class Player {
 
     protected final short playerNum;
     protected DIRECTION direction;
-    private DIRECTION lastDirection = null;
-    private DIRECTION desiredNextDirection = null;
+    private DIRECTION[] directionLastTick = { null, null };
+    private Optional<DIRECTION> desiredNextDirection = Optional.empty();
 
     private AI ai = null;
 
@@ -80,7 +78,7 @@ public class Player {
     }
 
     public DIRECTION getDirection() {
-        return desiredNextDirection != null ? desiredNextDirection : direction;
+        return desiredNextDirection.orElse(direction);
     }
 
     public void setDirection(DIRECTION newDirection) {
@@ -88,12 +86,9 @@ public class Player {
             return;
 
         // Make sure the player doesn't move backwards on themselves
-        if (lastDirection != null) {
-            if ((newDirection == DIRECTION.UP && lastDirection == DIRECTION.DOWN) ||
-                (newDirection == DIRECTION.DOWN && lastDirection == DIRECTION.UP) ||
-                (newDirection == DIRECTION.LEFT && lastDirection == DIRECTION.RIGHT) ||
-                (newDirection == DIRECTION.RIGHT && lastDirection == DIRECTION.LEFT)) {
-                desiredNextDirection = newDirection;
+        if (directionLastTick[0] != null) {
+            if (newDirection.isOppositeOf(directionLastTick[0]) || newDirection.isOppositeOf(directionLastTick[1])) {
+                desiredNextDirection = Optional.of(newDirection);
                 return;
             }
         }
@@ -106,42 +101,42 @@ public class Player {
      *
      * @return True if the player is still alive after moving forward one space. False otherwise.
      */
-    public final boolean movePlayer(short[][] s) {
-        // If a player issues two moves in the same game tick and the second direction is illegal,
-        // spread out the moves across two ticks rather than ignoring the second move entirely
-        if (desiredNextDirection != null && lastDirection == direction) {
-            setDirection(desiredNextDirection);
-            desiredNextDirection = null;
+    public final boolean movePlayer(short[][] board) {
+        // If a player issues two moves in the same game tick and the second direction would kill themselves,
+        // spread out the moves across 2-3 ticks rather than ignoring the second move entirely
+        if (desiredNextDirection.isPresent() && directionLastTick[0] == direction && directionLastTick[1] == direction) {
+            setDirection(desiredNextDirection.get());
+            desiredNextDirection = Optional.empty();
         }
 
         switch (direction) {
             case UP:
-                if (y - 1 < 0 || checkCollision(s, x, y - 1)) {
+                if (y - 1 < 0 || checkCollision(board, x, y - 1)) {
                     setStatus(STATUS.Dead);
                     return isAlive();
                 }
-                moveUp(s);
+                moveUp(board);
                 break;
             case DOWN:
-                if (y + height + 1 >= GameBoard.BOARD_SIZE || checkCollision(s, x, y + 1)) {
+                if (y + height + 1 >= GameBoard.BOARD_SIZE || checkCollision(board, x, y + 1)) {
                     setStatus(STATUS.Dead);
                     return isAlive();
                 }
-                moveDown(s);
+                moveDown(board);
                 break;
             case RIGHT:
-                if (x + width + 1 >= GameBoard.BOARD_SIZE || checkCollision(s, x + 1, y)) {
+                if (x + width + 1 >= GameBoard.BOARD_SIZE || checkCollision(board, x + 1, y)) {
                     setStatus(STATUS.Dead);
                     return isAlive();
                 }
-                moveRight(s);
+                moveRight(board);
                 break;
             case LEFT:
-                if (x - 1 < 0 || checkCollision(s, x - 1, y)) {
+                if (x - 1 < 0 || checkCollision(board, x - 1, y)) {
                     setStatus(STATUS.Dead);
                     return isAlive();
                 }
-                moveLeft(s);
+                moveLeft(board);
                 break;
         }
 
@@ -153,11 +148,11 @@ public class Player {
                 TrailPosition tp = it.next();
                 if (!withinOneSquare(tp)) {
                     if (first) {
-                        s[tp.x][tp.y] = GameBoard.TRAIL_SPOT_TAKEN;
+                        board[tp.x][tp.y] = GameBoard.TRAIL_SPOT_TAKEN;
                         it.remove();
                         first = false;
                     } else {
-                        s[tp.x][tp.y] = GameBoard.TRAIL_SPOT_TAKEN;
+                        board[tp.x][tp.y] = GameBoard.TRAIL_SPOT_TAKEN;
                         it.remove();
                         break;
                     }
@@ -165,7 +160,8 @@ public class Player {
             }
         }
 
-        lastDirection = direction;
+        directionLastTick[1] = directionLastTick[0];
+        directionLastTick[0] = direction;
 
         return isAlive();
     }
