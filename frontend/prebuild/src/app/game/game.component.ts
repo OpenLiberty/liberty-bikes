@@ -101,25 +101,32 @@ export class GameComponent implements OnInit, OnDestroy {
         }
         
         if (json.playerlist) {
-            for (let playerInfo of json.playerlist) {
-            	  // Don't add generic bot players (used to pad out the palyerlist)
-            	  if (playerInfo.id === "")
-                continue;
+          let oldPlayers: Map<string,Player> = new Map<string,Player>(this.players);
+          this.players.clear();
+          for (let playerInfo of json.playerlist) {
+            // Don't add generic bot players (used to pad out the palyerlist)
+            if (playerInfo.id === "")
+              continue;
             	
-            	  let newPlayer = this.players.get(playerInfo.id);
-            	  if (!newPlayer) {
-            		  newPlayer = new Player();
-                   newPlayer.name = playerInfo.name;
-                   newPlayer.color = playerInfo.color;
-                   newPlayer.status = playerInfo.status;
-            		  this.players.set(playerInfo.id, newPlayer);
-            	  }
-              
-            	  if (playerInfo.status !== 'Dead')
-                newPlayer.update(playerInfo.x * GameComponent.BOX_SIZE, playerInfo.y * GameComponent.BOX_SIZE, playerInfo.direction);
-              
-              newPlayer.addTo(this.stage);
+            let newPlayer = oldPlayers.get(playerInfo.id);
+            if (!newPlayer) {
+              newPlayer = new Player();
+              newPlayer.name = playerInfo.name;
+              newPlayer.color = playerInfo.color;
+              newPlayer.status = playerInfo.status;
+            } else {
+              oldPlayers.delete(playerInfo.id);
             }
+            this.players.set(playerInfo.id, newPlayer);
+
+            if (playerInfo.status !== 'Dead')
+              newPlayer.update(playerInfo.x * GameComponent.BOX_SIZE, playerInfo.y * GameComponent.BOX_SIZE, playerInfo.direction);
+
+            newPlayer.addTo(this.stage);
+          }
+          oldPlayers.forEach((playerThatLeft: Player, id: string) => {
+            playerThatLeft.removeFrom(this.stage);
+          });
         }
         if (json.players) {
         	  let noneAlive: boolean = true;
