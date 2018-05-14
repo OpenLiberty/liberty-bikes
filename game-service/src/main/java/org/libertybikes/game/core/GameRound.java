@@ -1,7 +1,7 @@
 package org.libertybikes.game.core;
 
 import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToClient;
-import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToClients;
+import static org.libertybikes.game.round.service.GameRoundWebsocket.sendToClients;
 
 import java.time.Instant;
 import java.util.ArrayDeque;
@@ -115,7 +115,7 @@ public class GameRound implements Runnable {
             }
         }
         if (!isPhone)
-            sendTextToClient(s, jsonb.toJson(new OutboundMessage.AwaitPlayersCountdown(lobbyCountdown.roundStartCountdown)));
+            sendTextToClient(s, new OutboundMessage.AwaitPlayersCountdown(lobbyCountdown.roundStartCountdown));
     }
 
     public void updatePlayerDirection(Session playerSession, InboundMessage msg) {
@@ -170,8 +170,8 @@ public class GameRound implements Runnable {
     public void addSpectator(Session s) {
         log("A spectator has joined.");
         clients.put(s, new Client(s));
-        sendTextToClient(s, jsonb.toJson(new OutboundMessage.PlayerList(getPlayers())));
-        sendTextToClient(s, jsonb.toJson(board));
+        sendTextToClient(s, new OutboundMessage.PlayerList(getPlayers()));
+        sendTextToClient(s, board);
         beginHeartbeat();
         beginLobbyCountdown(s, false);
     }
@@ -189,7 +189,7 @@ public class GameRound implements Runnable {
                 log("Initiating heartbeat to clients");
                 exec.schedule(() -> {
                     log("Sending heartbeat to " + clients.size() + " clients");
-                    sendTextToClients(clients.keySet(), jsonb.toJson(new OutboundMessage.Heartbeat()));
+                    sendToClients(clients.keySet(), new OutboundMessage.Heartbeat());
                 }, new HeartbeatTrigger());
             } catch (NamingException e) {
                 log("Unable to obtain executor service reference");
@@ -243,8 +243,10 @@ public class GameRound implements Runnable {
         int numGames = runningGames.incrementAndGet();
         if (numGames > 3)
             log("WARNING: There are currently " + numGames + " game instances running.");
+        long nextTick = System.currentTimeMillis() + GAME_TICK_SPEED;
         while (gameRunning.get()) {
-            delay(GAME_TICK_SPEED);
+            delayTo(nextTick);
+            nextTick += GAME_TICK_SPEED;
             gameTick();
             if (ticksFromGameEnd > DELAY_BETWEEN_ROUNDS)
                 gameRunning.set(false); // end the game if nobody can move anymore
@@ -279,32 +281,30 @@ public class GameRound implements Runnable {
         board.broadcastToAI();
 
         boolean boardUpdated = board.moveObjects();
-
-        boolean death = false;
-        // Move all living players forward 1
-        boolean playerStatusChange = false;
+        boolean playerDied = false;
         boolean playersMoved = false;
+        // Move all living players forward 1
         for (Player p : getPlayers()) {
             if (p.isAlive()) {
                 if (p.movePlayer(board.board)) {
                     playersMoved = true;
                 } else {
-                    death = true;
+                    playerDied = true;
                     playerRanks.push(p);
                 }
             }
         }
 
-        if (death) {
+        if (playerDied) {
             checkForWinner();
-            playerStatusChange = true;
+            broadcastPlayerList();
         }
-
         if (playersMoved || boardUpdated)
             broadcastGameBoard();
+    }
 
-        if (playerStatusChange)
-            broadcastPlayerList();
+    private void delayTo(long wakeUpTime) {
+        delay(wakeUpTime - System.currentTimeMillis());
     }
 
     private void delay(long ms) {
@@ -325,15 +325,15 @@ public class GameRound implements Runnable {
     }
 
     private void broadcastTimeUntilGameStarts(int time) {
-        sendTextToClients(getNonMobileSessions(), jsonb.toJson(new OutboundMessage.AwaitPlayersCountdown(time)));
+        sendToClients(getNonMobileSessions(), new OutboundMessage.AwaitPlayersCountdown(time));
     }
 
     private void broadcastGameBoard() {
-        sendTextToClients(getNonMobileSessions(), jsonb.toJson(board));
+        sendToClients(getNonMobileSessions(), board);
     }
 
     private void broadcastPlayerList() {
-        sendTextToClients(getNonMobileSessions(), jsonb.toJson(new OutboundMessage.PlayerList(getPlayers())));
+        sendToClients(getNonMobileSessions(), new OutboundMessage.PlayerList(getPlayers()));
     }
 
     private void checkForWinner() {
@@ -381,7 +381,7 @@ public class GameRound implements Runnable {
         // Issue a countdown to all of the clients
         gameState = State.STARTING;
 
-        sendTextToClients(clients.keySet(), jsonb.toJson(new OutboundMessage.StartingCountdown(STARTING_COUNTDOWN)));
+        sendToClients(clients.keySet(), new OutboundMessage.StartingCountdown(STARTING_COUNTDOWN));
         delay(TimeUnit.SECONDS.toMillis(STARTING_COUNTDOWN));
 
         paused.set(false);
@@ -428,7 +428,8 @@ public class GameRound implements Runnable {
         for (Client c : clients.values())
             if (c.autoRequeue)
                 GameRoundWebsocket.requeueClient(gameSvc, this, c.session);
-
+            else
+                sendTextToClient(c.session, new OutboundMessage.GameStatus(State.FINISHED));
     }
 
     private void log(String msg) {

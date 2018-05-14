@@ -32,6 +32,8 @@ export class ControlsComponent implements OnInit, OnDestroy {
   leftPressed: boolean;
   downPressed: boolean;
   rightPressed: boolean;
+  
+  currentDirection: string;
 
   private preventScrolling = (evt: TouchEvent) => {
     evt.preventDefault();
@@ -54,6 +56,15 @@ export class ControlsComponent implements OnInit, OnDestroy {
       if (json.keepAlive) {
         this.gameService.send({ keepAlive: true });
       }
+      if (json.gameStatus === 'FINISHED') {
+    	    if (confirm('Game is over, would you like to requeue?')) {
+    	    	  this.requeue();
+    	    } else {
+          this.ngZone.run(() => {
+            this.router.navigate(['/login']);
+          });
+    	    }
+      }
     }, (err) => {
       console.log(err);
     });
@@ -64,20 +75,6 @@ export class ControlsComponent implements OnInit, OnDestroy {
     this.gameService.send({ 'playerjoined': sessionStorage.getItem('userId'), 'hasGameBoard' : 'false'});
 
     this.initCanvas();
-
-    window.onkeydown = (e: KeyboardEvent): any => {
-      const key = e.keyCode ? e.keyCode : e.which;
-
-      if (key === 38) {
-        this.moveUp();
-      } else if (key === 40) {
-        this.moveDown();
-      } else if (key === 37) {
-        this.moveLeft();
-      } else if (key === 39) {
-        this.moveRight();
-      }
-    };
 
     // Make sure the view is at the top of the page so touch event coordinates line up
     window.scrollTo(0, 0);
@@ -253,31 +250,26 @@ export class ControlsComponent implements OnInit, OnDestroy {
   }
 
   touchStarted(evt: TouchEvent) {
-    console.log(evt);
     if (evt.touches.length > 0) {
       this.canvasPressed(evt.touches[0].pageX, evt.touches[0].pageY);
     }
   }
 
   touchMoved(evt: TouchEvent) {
-    console.log(evt);
     if (evt.changedTouches.length > 0) {
       this.canvasPressed(evt.changedTouches[0].pageX, evt.changedTouches[0].pageY);
     }
   }
 
   touchEnded(evt: TouchEvent) {
-    console.log(evt);
     this.canvasReleased(evt.changedTouches[0].pageX, evt.changedTouches[0].pageY);
   }
 
   mouseDown(evt: MouseEvent) {
-    console.log(evt);
     this.canvasPressed(evt.pageX, evt.pageY);
   }
 
   mouseUp(evt: MouseEvent) {
-    console.log(evt);
     this.canvasReleased(evt.pageX, evt.pageY);
   }
 
@@ -289,28 +281,28 @@ export class ControlsComponent implements OnInit, OnDestroy {
 
     if (this.upTriangle.containsPoint(location)) {
       this.upPressed = true;
-      this.moveUp();
+      this.setDirection('UP');
     } else {
       this.upPressed = false;
     }
 
     if (this.leftTriangle.containsPoint(location)) {
       this.leftPressed = true;
-      this.moveLeft();
+      this.setDirection('LEFT');
     } else {
       this.leftPressed = false;
     }
 
     if (this.downTriangle.containsPoint(location)) {
       this.downPressed = true;
-      this.moveDown();
+      this.setDirection('DOWN');
     } else {
       this.downPressed = false;
     }
 
     if (this.rightTriangle.containsPoint(location)) {
       this.rightPressed = true;
-      this.moveRight();
+      this.setDirection('RIGHT');
     } else {
       this.rightPressed = false;
     }
@@ -349,8 +341,8 @@ export class ControlsComponent implements OnInit, OnDestroy {
   }
 
   requeue() {
-    let partyId = sessionStorage.getItem('partyId');
-    if (sessionStorage.getItem('isSpectator') === 'true' || partyId === null) {
+    let partyId: string = sessionStorage.getItem('partyId');
+    if (partyId === null) {
       this.gameService.send({ message: 'GAME_REQUEUE' });
     } else {
       let queueCallback = new EventSource(`${environment.API_URL_PARTY}/${partyId}/queue`);
@@ -377,20 +369,11 @@ export class ControlsComponent implements OnInit, OnDestroy {
     }
   }
 
-  moveUp() {
-    this.gameService.send({ direction: 'UP' });
-  }
-
-  moveDown() {
-    this.gameService.send({ direction: 'DOWN' });
-  }
-
-  moveLeft() {
-    this.gameService.send({ direction: 'LEFT' });
-  }
-
-  moveRight() {
-    this.gameService.send({ direction: 'RIGHT' });
+  setDirection(newDir: string) {
+    if (this.currentDirection !== null && this.currentDirection !== newDir) {
+      this.currentDirection = newDir;
+      this.gameService.send({ direction: `${newDir}` });
+    }
   }
 
   ngOnDestroy() {

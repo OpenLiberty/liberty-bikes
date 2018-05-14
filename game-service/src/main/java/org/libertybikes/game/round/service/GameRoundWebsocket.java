@@ -95,24 +95,25 @@ public class GameRoundWebsocket {
         GameRound nextGame = gameSvc.requeue(oldRound, oldRound.isPlayer(s));
         if (nextGame == null)
             return;
-        String requeueMsg = jsonb.toJson(new OutboundMessage.RequeueGame(nextGame.id));
-        sendTextToClient(s, requeueMsg);
+        sendTextToClient(s, new OutboundMessage.RequeueGame(nextGame.id));
     }
 
-    public static void sendTextToClient(Session client, String message) {
+    public static void sendTextToClient(Session client, Object message) {
         if (client != null) {
+            String msg = message instanceof String ? (String) message : jsonb.toJson(message);
             try {
-                client.getBasicRemote().sendText(message);
+                client.getBasicRemote().sendText(msg);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public static void sendTextToClients(Set<Session> clients, String message) {
+    public static void sendToClients(Set<Session> clients, Object message) {
+        String msg = message instanceof String ? (String) message : jsonb.toJson(message);
         // System.out.println("Sending " + clients.size() + " clients the message: " + message);
         for (Session client : clients)
-            sendTextToClient(client, message);
+            sendTextToClient(client, msg);
     }
 
     private static void log(String roundId, String msg) {
