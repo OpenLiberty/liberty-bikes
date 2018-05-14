@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.naming.InitialContext;
+
 import org.libertybikes.game.core.DIRECTION;
 import org.libertybikes.game.core.GameBoard;
 import org.libertybikes.game.core.GameBoard.Point;
@@ -19,6 +21,15 @@ public class GameMap {
      * @param map -1=random, 0=empty, >0=specific map
      */
     public static GameMap create(int map) {
+        try {
+            int mapOverride = InitialContext.doLookup("round/map");
+            if (mapOverride >= 0 && mapOverride <= NUM_MAPS) {
+                map = mapOverride;
+                System.out.println("Overriding map selection to map #" + map);
+            }
+        } catch (Exception ignore) {
+        }
+
         switch (map) {
             case -1:
                 return create(r.nextInt(NUM_MAPS) + 1);

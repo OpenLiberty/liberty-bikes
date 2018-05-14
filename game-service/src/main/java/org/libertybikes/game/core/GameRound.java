@@ -46,8 +46,8 @@ public class GameRound implements Runnable {
         FINISHED // game has ended and a winner has been declared
     }
 
-    public static final Jsonb jsonb = JsonbBuilder.create();
-    public static final int GAME_TICK_SPEED = 50; // ms
+    private static final Jsonb jsonb = JsonbBuilder.create();
+    private static final int GAME_TICK_SPEED_DEFAULT = 50; // ms
     private static final int DELAY_BETWEEN_ROUNDS = 5; //ticks
     private static final int STARTING_COUNTDOWN = 3; // seconds
     private static final int MAX_TIME_BETWEEN_ROUNDS = Integer.getInteger("game-service.time.between.rounds", 20); // 20 seconds default
@@ -67,6 +67,7 @@ public class GameRound implements Runnable {
     private final Map<Session, Client> clients = new HashMap<>();
     private final Deque<Player> playerRanks = new ArrayDeque<>();
     private final Set<LifecycleCallback> lifecycleCallbacks = new HashSet<>();
+    private final int GAME_TICK_SPEED;
     private LobbyCountdown lobbyCountdown;
     private AtomicBoolean lobbyCountdownStarted = new AtomicBoolean();
 
@@ -87,6 +88,14 @@ public class GameRound implements Runnable {
     public GameRound(String id) {
         this.id = id;
         nextRoundId = getRandomId();
+
+        Integer tickSpeed = GAME_TICK_SPEED_DEFAULT;
+        try {
+            tickSpeed = InitialContext.doLookup("round/gameSpeed");
+        } catch (Exception e) {
+            log("Unable to perform JNDI lookup to determine game tick speed, using default value");
+        }
+        GAME_TICK_SPEED = (tickSpeed < 20 || tickSpeed > 100) ? GAME_TICK_SPEED_DEFAULT : tickSpeed;
     }
 
     public GameBoard getBoard() {
