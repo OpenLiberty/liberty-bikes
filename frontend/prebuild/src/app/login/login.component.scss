@@ -133,6 +133,10 @@ h2 {
   color: white;
 }
 
+.slider {
+  width: 100%;
+}
+
 @media screen and (min-width: 550px) {
   #login-container {
     width: 500px;
@@ -170,10 +174,6 @@ h2 {
     position: absolute;
     background: none;
     top: 0px;
-  }
-
-  .slider {
-    width: 100%;
   }
 
   :host {

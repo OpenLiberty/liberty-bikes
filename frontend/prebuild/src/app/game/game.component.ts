@@ -17,8 +17,9 @@ import { Shape, Stage, Text } from 'createjs-module';
   providers: [ GameService ],
 })
 export class GameComponent implements OnInit, OnDestroy {
-  static readonly BOX_SIZE = 5;
+  static readonly BOX_SIZE = 10;
   static readonly OBSTACLE_COLOR = '#808080';
+  static readonly BOARD_SIZE = 1200;
 
   roundId: string;
   serverHost: string;
@@ -99,7 +100,7 @@ export class GameComponent implements OnInit, OnDestroy {
           }
 
         }
-        
+
         if (json.playerlist) {
           let oldPlayers: Map<string,Player> = new Map<string,Player>(this.players);
           this.players.clear();
@@ -107,7 +108,7 @@ export class GameComponent implements OnInit, OnDestroy {
             // Don't add generic bot players (used to pad out the palyerlist)
             if (playerInfo.id === "")
               continue;
-            	
+
             let newPlayer = oldPlayers.get(playerInfo.id);
             if (!newPlayer) {
               newPlayer = new Player();
@@ -135,14 +136,14 @@ export class GameComponent implements OnInit, OnDestroy {
             if (player.status === 'Alive') {
             	  noneAlive = false;
               playerEntity.update(player.x * GameComponent.BOX_SIZE, player.y * GameComponent.BOX_SIZE, player.direction);
-              
+
               // Stamp down player on trails canvas so it can be erased properly when obstacles roll over it
               this.trailsContext.fillStyle = player.color;
               this.trailsContext.fillRect(GameComponent.BOX_SIZE * player.x + player.width / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
                 GameComponent.BOX_SIZE * player.y + player.height / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
                 GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
 
-              this.trailsShape.graphics.clear().beginBitmapFill(this.trailsCanvas, 'no-repeat').drawRect(0, 0, 600, 600);
+              this.trailsShape.graphics.clear().beginBitmapFill(this.trailsCanvas, 'no-repeat').drawRect(0, 0, GameComponent.BOARD_SIZE, GameComponent.BOARD_SIZE);
             } else if (!player.alive) {
             	  // Ensure tooltip is hidden in case player dies before it fades out
             	  playerEntity.tooltip.visible(false);
@@ -172,7 +173,7 @@ export class GameComponent implements OnInit, OnDestroy {
       });
     });
   }
-  
+
   ngOnInit() {
     this.roundId = sessionStorage.getItem('roundId');
 
@@ -204,8 +205,8 @@ export class GameComponent implements OnInit, OnDestroy {
 
     this.trailsCanvas = <HTMLCanvasElement> document.createElement('canvas');
     this.trailsContext = this.trailsCanvas.getContext('2d');
-    this.trailsCanvas.width = 600;
-    this.trailsCanvas.height = 600;
+    this.trailsCanvas.width = GameComponent.BOARD_SIZE;
+    this.trailsCanvas.height = GameComponent.BOARD_SIZE;
 
     this.obstaclesShape = new Shape();
     this.obstaclesShape.x = 0;
