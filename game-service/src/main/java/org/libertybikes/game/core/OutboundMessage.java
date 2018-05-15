@@ -21,6 +21,15 @@ public class OutboundMessage {
         }
     }
 
+    public static class GameStatus {
+        @JsonbProperty("gameStatus")
+        public final String gameStatus;
+
+        public GameStatus(GameRound.State status) {
+            this.gameStatus = status.toString();
+        }
+    }
+
     public static class RequeueGame {
         @JsonbProperty("requeue")
         public final String roundId;
@@ -61,6 +70,15 @@ public class OutboundMessage {
 
         public QueuePosition(int pos) {
             queuePosition = pos;
+        }
+    }
+
+    public static class ErrorEvent {
+        @JsonbProperty("errorMessage")
+        public final String msg;
+
+        public ErrorEvent(String errMsg) {
+            msg = errMsg;
         }
     }
 

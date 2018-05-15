@@ -85,21 +85,25 @@ public class GameRoundService {
         return allRounds.get(roundId);
     }
 
-    public GameRound requeue(GameRound oldRound, boolean isPlayer) {
+    @GET
+    @Path("/{roundId}/requeue")
+    public String requeue(@PathParam("roundId") String oldRoundId, @QueryParam("isPlayer") boolean isPlayer) {
+        GameRound oldRound = getRound(oldRoundId);
+
         // Do not allow anyone to skip ahead past a round that has not started yet
-        if (!oldRound.isStarted())
+        if (oldRound == null || !oldRound.isStarted())
             return null;
 
         GameRound nextRound = createRoundById(oldRound.nextRoundId);
 
         // If player tries to requeue and next game is already in progress, requeue ahead to the next game
         if (isPlayer && nextRound.isStarted())
-            return requeue(nextRound, isPlayer);
+            return requeue(nextRound.id, isPlayer);
         // If next round is already done, requeue ahead to next game
         else if (nextRound.gameState == GameRound.State.FINISHED)
-            return requeue(nextRound, isPlayer);
+            return requeue(nextRound.id, isPlayer);
         else
-            return nextRound;
+            return nextRound.id;
     }
 
     public void deleteRound(GameRound round) {

@@ -26,7 +26,7 @@ public abstract class AIPlayer implements AI {
     public abstract DIRECTION processGameTick(short[][] board);
 
     public Player asPlayer() {
-        String name = getClass().getSimpleName() + '-' + takenSpotNumber;
+        String name = getClass().getSimpleName() + ' ' + (takenSpotNumber + 1);
         Player p = new Player(name, name, takenSpotNumber);
         p.setAI(this);
         return p;

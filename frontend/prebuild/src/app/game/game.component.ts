@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Meta } from '@angular/platform-browser';
 import { GameService } from './game.service';
 import { LoginComponent } from '../login/login.component';
@@ -46,13 +47,30 @@ export class GameComponent implements OnInit, OnDestroy {
   constructor(private meta: Meta,
     private router: Router,
     private ngZone: NgZone,
+    private http: HttpClient,
     private gameService: GameService,
   ) {
     this.ngZone.runOutsideAngular(() => {
       gameService.messages.subscribe((msg) => {
         const json = msg as any;
-        if (json.requeue) {
-          this.processRequeue(json.requeue);
+        if (json.errorMessage) {
+          console.log('Received error message from server: ' + json.errorMessage);
+          alert('Your connection to the game server has been closed. You will be redirected to the login page.');
+          this.ngZone.run(() => {
+            this.router.navigate(['/login']);
+          });
+        }
+        if (json.countdown) {
+          this.ngZone.run(() => this.startingCountdown(json.countdown));
+        }
+        if (json.keepAlive) {
+          this.gameService.send({ keepAlive: true });
+        }
+        if (json.gameStatus === 'FINISHED') {
+          console.log(`Round ${this.roundId} has finished.`);
+        	  if (sessionStorage.getItem('isSpectator') === 'true') {
+            this.requeue();
+        	  }
         }
         if (json.obstacles) {
           for (let obstacle of json.obstacles) {
@@ -160,13 +178,6 @@ export class GameComponent implements OnInit, OnDestroy {
           }
 
         }
-        if (json.countdown) {
-          this.ngZone.run(() => this.startingCountdown(json.countdown));
-        }
-        if (json.keepAlive) {
-          this.gameService.send({ keepAlive: true });
-        }
-
         this.stage.update();
       }, (err) => {
         console.log(`Error occurred: ${err}`);
@@ -233,17 +244,30 @@ export class GameComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     sessionStorage.removeItem('roundId');
+    this.gameService.close();
   }
 
   // Game actions
   startGame() {
+	this.verifyOpen();
     this.gameService.send({ message: 'GAME_START' });
   }
 
-  requeue() {
+  async requeue() {
     let partyId = sessionStorage.getItem('partyId');
-    if (sessionStorage.getItem('isSpectator') === 'true' || partyId === null) {
-      this.gameService.send({ message: 'GAME_REQUEUE' });
+    let isSpectator: boolean = sessionStorage.getItem('isSpectator') === 'true' ? true : false;
+    if (isSpectator || partyId === null) {
+      let roundId: string = sessionStorage.getItem('roundId');
+      let nextRoundID: any = await this.http.get(`${environment.API_URL_GAME_ROUND}/${roundId}/requeue?isPlayer=${!isSpectator}`, { responseType: 'text' }).toPromise();
+      // if a spectator, wait 5s before moving to next round to let people look at the final state of the board a bit
+      if (isSpectator) {
+    	    console.log(`Will requeue to round ${nextRoundID} in 5 seconds.`);
+    	    setTimeout(() => {
+          this.processRequeue(nextRoundID);
+    	    }, 5000);
+      } else {
+    	    this.processRequeue(nextRoundID);    	  
+      }
     } else {
       let queueCallback = new EventSource(`${environment.API_URL_PARTY}/${partyId}/queue`);
       queueCallback.onmessage = msg => {
@@ -286,6 +310,7 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   processRequeue(newRoundId) {
+    console.log(`Requeueing to round ${newRoundId}`);
     this.roundId = newRoundId;
     sessionStorage.setItem('roundId', this.roundId);
     location.reload();
@@ -296,6 +321,15 @@ export class GameComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.showLoader = false;
     }, (1000 * seconds));
+  }
+  
+  verifyOpen() {
+    if (!this.gameService.isOpen()) {
+    	  console.log('GameService socket not open');
+    	  this.ngZone.run(() => {
+        this.router.navigate(['/login']);
+      });
+    }
   }
 
 }

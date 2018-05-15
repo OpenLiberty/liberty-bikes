@@ -16,8 +16,8 @@ import org.libertybikes.game.round.service.GameRoundService;
 public class Party {
 
     private static final Random r = new Random();
-    // Chars that will be used to generate party IDs (0-9 A-Z minus most commonly used chars in words)
-    private static final char[] SAFE_CHARS = "346789BCDGHJKMPQRTVWXY".toCharArray();
+    // Chars that will be used to generate party IDs (A-Z minus most commonly used chars in words)
+    private static final char[] SAFE_CHARS = "BCDGHJKMPQRTVWXY".toCharArray();
 
     @Inject
     @JsonbTransient

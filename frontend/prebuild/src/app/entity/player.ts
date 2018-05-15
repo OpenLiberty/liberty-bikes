@@ -6,7 +6,9 @@ export class Player {
   // For this reason, we need to pre-load an instance of the image (this copy never gets used)
   static readonly PLAYER_BITMAP = new Bitmap('../../assets/images/bike_wide.png');
   static readonly PLAYER_DEAD_BITMAP = new Bitmap('../../assets/images/status_dead.png');
-
+  static readonly BAM = new Audio('../../assets/sound/bam.wav');
+  static audioLoaded: boolean = false;
+  
   public name: string;
   public status: string;
   public color: string;
@@ -59,9 +61,11 @@ export class Player {
     	  this.image.scaleY = 1.2;
     	  this.image.x = this.x - 20;
     	  this.image.y = this.y - 20;
-    	  var bam = new Audio('../../assets/sound/bam.wav');
-    	  bam.load();
-    	  bam.play();
+      if (!Player.audioLoaded) {
+        Player.audioLoaded = true;
+        Player.BAM.load();
+      }
+    	  Player.BAM.play();
     }
     this.status = status;
   }

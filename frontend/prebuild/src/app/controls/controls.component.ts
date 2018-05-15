@@ -1,4 +1,5 @@
 import { Component, NgZone, OnInit, OnDestroy } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { GameService } from '../game/game.service';
 import { Triangle } from '../geom/triangle';
@@ -32,6 +33,8 @@ export class ControlsComponent implements OnInit, OnDestroy {
   leftPressed: boolean;
   downPressed: boolean;
   rightPressed: boolean;
+  
+  currentDirection: string;
 
   private preventScrolling = (evt: TouchEvent) => {
     evt.preventDefault();
@@ -44,15 +47,30 @@ export class ControlsComponent implements OnInit, OnDestroy {
 
   constructor(private router: Router,
 		      private ngZone: NgZone,
+		      private http: HttpClient,
 		      private gameService: GameService) {
     gameService.messages.subscribe((msg) => {
       const json = msg as any;
       console.log(`received: ${JSON.stringify(json)}`);
-      if (json.requeue) {
-        this.processRequeue(json.requeue);
+      if (json.errorMessage) {
+        console.log('Received error message from server: ' + json.errorMessage);
+        alert('Your connection to the game server has been closed. You will be redirected to the login page.');
+        this.ngZone.run(() => {
+          this.router.navigate(['/login']);
+        });
       }
       if (json.keepAlive) {
         this.gameService.send({ keepAlive: true });
+      }
+      if (json.gameStatus === 'FINISHED') {
+    	    console.log(`Round ${this.roundId} has finished.`);
+    	    if (confirm('Game is over, requeue to next round?')) {
+    	    	  this.requeue();
+    	    } else {
+          this.ngZone.run(() => {
+            this.router.navigate(['/login']);
+          });
+    	    }
       }
     }, (err) => {
       console.log(err);
@@ -64,20 +82,6 @@ export class ControlsComponent implements OnInit, OnDestroy {
     this.gameService.send({ 'playerjoined': sessionStorage.getItem('userId'), 'hasGameBoard' : 'false'});
 
     this.initCanvas();
-
-    window.onkeydown = (e: KeyboardEvent): any => {
-      const key = e.keyCode ? e.keyCode : e.which;
-
-      if (key === 38) {
-        this.moveUp();
-      } else if (key === 40) {
-        this.moveDown();
-      } else if (key === 37) {
-        this.moveLeft();
-      } else if (key === 39) {
-        this.moveRight();
-      }
-    };
 
     // Make sure the view is at the top of the page so touch event coordinates line up
     window.scrollTo(0, 0);
@@ -150,6 +154,7 @@ export class ControlsComponent implements OnInit, OnDestroy {
   }
   
   processRequeue(newRoundId) {
+    console.log(`Requeueing to round ${newRoundId}`);
     this.roundId = newRoundId;
     sessionStorage.setItem('roundId', this.roundId);
     location.reload();
@@ -253,32 +258,29 @@ export class ControlsComponent implements OnInit, OnDestroy {
   }
 
   touchStarted(evt: TouchEvent) {
-    console.log(evt);
     if (evt.touches.length > 0) {
       this.canvasPressed(evt.touches[0].pageX, evt.touches[0].pageY);
     }
   }
 
   touchMoved(evt: TouchEvent) {
-    console.log(evt);
     if (evt.changedTouches.length > 0) {
       this.canvasPressed(evt.changedTouches[0].pageX, evt.changedTouches[0].pageY);
     }
   }
 
   touchEnded(evt: TouchEvent) {
-    console.log(evt);
     this.canvasReleased(evt.changedTouches[0].pageX, evt.changedTouches[0].pageY);
+    this.verifyOpen();
   }
 
   mouseDown(evt: MouseEvent) {
-    console.log(evt);
     this.canvasPressed(evt.pageX, evt.pageY);
   }
 
   mouseUp(evt: MouseEvent) {
-    console.log(evt);
     this.canvasReleased(evt.pageX, evt.pageY);
+    this.verifyOpen();
   }
 
   canvasPressed(x: number, y: number) {
@@ -289,28 +291,28 @@ export class ControlsComponent implements OnInit, OnDestroy {
 
     if (this.upTriangle.containsPoint(location)) {
       this.upPressed = true;
-      this.moveUp();
+      this.setDirection('UP');
     } else {
       this.upPressed = false;
     }
 
     if (this.leftTriangle.containsPoint(location)) {
       this.leftPressed = true;
-      this.moveLeft();
+      this.setDirection('LEFT');
     } else {
       this.leftPressed = false;
     }
 
     if (this.downTriangle.containsPoint(location)) {
       this.downPressed = true;
-      this.moveDown();
+      this.setDirection('DOWN');
     } else {
       this.downPressed = false;
     }
 
     if (this.rightTriangle.containsPoint(location)) {
       this.rightPressed = true;
-      this.moveRight();
+      this.setDirection('RIGHT');
     } else {
       this.rightPressed = false;
     }
@@ -341,17 +343,16 @@ export class ControlsComponent implements OnInit, OnDestroy {
     }
 
     window.requestAnimationFrame(() => this.draw());
+    this.verifyOpen();
   }
 
   // Game actions
-  startGame() {
-    this.gameService.send({ message: 'GAME_START' });
-  }
-
-  requeue() {
-    let partyId = sessionStorage.getItem('partyId');
-    if (sessionStorage.getItem('isSpectator') === 'true' || partyId === null) {
-      this.gameService.send({ message: 'GAME_REQUEUE' });
+  async requeue() {
+    let partyId: string = sessionStorage.getItem('partyId');
+    if (partyId === null) {
+        let roundId: string = sessionStorage.getItem('roundId');
+        let nextRoundID: any = await this.http.get(`${environment.API_URL_GAME_ROUND}/${roundId}/requeue?isPlayer=true`, { responseType: 'text' }).toPromise();
+        this.processRequeue(nextRoundID);
     } else {
       let queueCallback = new EventSource(`${environment.API_URL_PARTY}/${partyId}/queue`);
       queueCallback.onmessage = msg => {
@@ -377,20 +378,20 @@ export class ControlsComponent implements OnInit, OnDestroy {
     }
   }
 
-  moveUp() {
-    this.gameService.send({ direction: 'UP' });
+  setDirection(newDir: string) {
+    if (this.currentDirection !== null && this.currentDirection !== newDir) {
+      this.currentDirection = newDir;
+      this.gameService.send({ direction: `${newDir}` });
+    }
   }
-
-  moveDown() {
-    this.gameService.send({ direction: 'DOWN' });
-  }
-
-  moveLeft() {
-    this.gameService.send({ direction: 'LEFT' });
-  }
-
-  moveRight() {
-    this.gameService.send({ direction: 'RIGHT' });
+  
+  verifyOpen() {
+    if (!this.gameService.isOpen()) {
+    	  console.log('GameService socket not open');
+    	  this.ngZone.run(() => {
+        this.router.navigate(['/login']);
+      });
+    }
   }
 
   ngOnDestroy() {
@@ -398,5 +399,6 @@ export class ControlsComponent implements OnInit, OnDestroy {
     window.removeEventListener('orientationchange', this.pageWasResized);
     window.removeEventListener('resize', this.pageWasResized);
     sessionStorage.removeItem('roundId');
+    this.gameService.close();
   }
 }
