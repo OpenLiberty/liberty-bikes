@@ -53,6 +53,13 @@ export class GameComponent implements OnInit, OnDestroy {
     this.ngZone.runOutsideAngular(() => {
       gameService.messages.subscribe((msg) => {
         const json = msg as any;
+        if (json.errorMessage) {
+          console.log('Received error message from server: ' + json.errorMessage);
+          alert('Your connection to the game server has been closed. You will be redirected to the login page.');
+          this.ngZone.run(() => {
+            this.router.navigate(['/login']);
+          });
+        }
         if (json.countdown) {
           this.ngZone.run(() => this.startingCountdown(json.countdown));
         }

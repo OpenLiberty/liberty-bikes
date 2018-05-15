@@ -73,4 +73,13 @@ public class OutboundMessage {
         }
     }
 
+    public static class ErrorEvent {
+        @JsonbProperty("errorMessage")
+        public final String msg;
+
+        public ErrorEvent(String errMsg) {
+            msg = errMsg;
+        }
+    }
+
 }

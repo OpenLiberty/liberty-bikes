@@ -52,6 +52,13 @@ export class ControlsComponent implements OnInit, OnDestroy {
     gameService.messages.subscribe((msg) => {
       const json = msg as any;
       console.log(`received: ${JSON.stringify(json)}`);
+      if (json.errorMessage) {
+        console.log('Received error message from server: ' + json.errorMessage);
+        alert('Your connection to the game server has been closed. You will be redirected to the login page.');
+        this.ngZone.run(() => {
+          this.router.navigate(['/login']);
+        });
+      }
       if (json.keepAlive) {
         this.gameService.send({ keepAlive: true });
       }

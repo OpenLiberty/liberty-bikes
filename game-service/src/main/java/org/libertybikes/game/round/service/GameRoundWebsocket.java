@@ -22,6 +22,7 @@ import org.libertybikes.game.core.GameRound;
 import org.libertybikes.game.core.GameRound.State;
 import org.libertybikes.game.core.InboundMessage;
 import org.libertybikes.game.core.InboundMessage.GameEvent;
+import org.libertybikes.game.core.OutboundMessage;
 import org.libertybikes.restclient.PlayerService;
 
 @Dependent
@@ -65,6 +66,10 @@ public class GameRoundWebsocket {
             final GameRound round = gameSvc.getRound(roundId);
             if (round == null || round.gameState == State.FINISHED) {
                 log(roundId, "[onMessage] Received message for round that did not exist or has completed.  Closing this websocket connection.");
+                if (round == null)
+                    sendToClient(session, new OutboundMessage.ErrorEvent("Round " + roundId + " did not exist"));
+                else
+                    sendToClient(session, new OutboundMessage.ErrorEvent("Round " + roundId + " has already completed."));
                 session.close();
                 return;
             }
