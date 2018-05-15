@@ -12,7 +12,7 @@ export class GameService {
 
   roundId: string;
 
-  constructor(socketService: SocketService) {
+  constructor(private socketService: SocketService) {
     this.roundId = sessionStorage.getItem('roundId');
     console.log(`Round ID: ${this.roundId}`);
 
@@ -26,5 +26,13 @@ export class GameService {
 
   public send(message: any) {
     this.messages.next(JSON.stringify(message));
+  }
+  
+  public isOpen() {
+    return this.socketService.socketOpen;
+  }
+  
+  public close() {
+    this.socketService.close();
   }
 }

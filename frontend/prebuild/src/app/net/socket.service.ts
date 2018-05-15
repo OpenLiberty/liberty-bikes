@@ -7,6 +7,7 @@ import 'rxjs/add/operator/share';
 @Injectable()
 export class SocketService {
 
+  private ws;
   private socketUrl: string;
   private subject: Subject<MessageEvent>;
   private hasUrl = false;
@@ -19,10 +20,11 @@ export class SocketService {
 
   set url(newUrl: string) {
     console.log(`Setting url to ${newUrl}`);
+    if (this.socketOpen) {
+    	  this.close();
+    }
     if (this.socketUrl !== newUrl) {
-      console.log(`Updating socket with new URL`);
       this.open = false;
-
       this.hasUrl = false;
       this.subject = this.create(newUrl);
       this.socketUrl = newUrl;
@@ -49,34 +51,44 @@ export class SocketService {
     }
     return this.subject;
   }
+  
+  public close() {
+    this.open = false;
+    this.ws.close();
+  }
 
   private create(url): Subject<MessageEvent> {
     console.log(`Creating new socket for ${url}`);
-    const ws = new WebSocket(url);
+    this.ws = new WebSocket(url);
 
-    ws.onopen = () => {
+    this.ws.onopen = () => {
       console.log('Socket open, sending buffered messages');
       this.open = true;
       while (this.messageBuffer.length > 0) {
         this.subject.next(this.messageBuffer.shift() as any);
       }
     };
+    
+    this.ws.onclose = () => {
+    	  console.log('Socket closed');
+    	  this.open = false;
+    }
 
     const observable = Observable.create(
       (obs: Observer<MessageEvent>) => {
-        ws.onmessage = obs.next.bind(obs);
-        ws.onerror = obs.error.bind(obs);
-        ws.onclose = obs.complete.bind(obs);
+    	    this.ws.onmessage = obs.next.bind(obs);
+    	    this.ws.onerror = obs.error.bind(obs);
+    	    this.ws.onclose = obs.complete.bind(obs);
 
-        return ws.close.bind(ws);
+        return this.ws.close.bind(this.ws);
       }
     );
 
     const observer = {
       next: (data: string) => {
-        if (ws.readyState === ws.OPEN) {
+        if (this.ws.readyState === this.ws.OPEN) {
           console.log(`sending text: ${data}`);
-          ws.send(data);
+          this.ws.send(data);
         } else {
           console.log('socket not open, buffering message');
           this.open = false;

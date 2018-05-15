@@ -17,6 +17,7 @@
     <!-- Dynamically configurable settings -->
     <jndiEntry jndiName="round/gameSpeed" value="50"/> <!-- Default = 50(ms) -->
     <jndiEntry jndiName="round/map" value="-1"/> <!-- Default = -1 (random map) -->
+    <jndiEntry jndiName="round/autoStartCooldown" value="20"/> <!-- Default = 20(sec) -->
                   
     <applicationManager autoExpand="true"/>
     

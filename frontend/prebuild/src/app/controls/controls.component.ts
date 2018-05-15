@@ -1,4 +1,5 @@
 import { Component, NgZone, OnInit, OnDestroy } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { GameService } from '../game/game.service';
 import { Triangle } from '../geom/triangle';
@@ -46,18 +47,16 @@ export class ControlsComponent implements OnInit, OnDestroy {
 
   constructor(private router: Router,
 		      private ngZone: NgZone,
+		      private http: HttpClient,
 		      private gameService: GameService) {
     gameService.messages.subscribe((msg) => {
       const json = msg as any;
       console.log(`received: ${JSON.stringify(json)}`);
-      if (json.requeue) {
-        this.processRequeue(json.requeue);
-      }
       if (json.keepAlive) {
         this.gameService.send({ keepAlive: true });
       }
       if (json.gameStatus === 'FINISHED') {
-    	    if (confirm('Game is over, would you like to requeue?')) {
+    	    if (confirm('Game is over, requeue to next round?')) {
     	    	  this.requeue();
     	    } else {
           this.ngZone.run(() => {
@@ -147,6 +146,7 @@ export class ControlsComponent implements OnInit, OnDestroy {
   }
   
   processRequeue(newRoundId) {
+    console.log(`Requeueing to round ${newRoundId}`);
     this.roundId = newRoundId;
     sessionStorage.setItem('roundId', this.roundId);
     location.reload();
@@ -263,6 +263,7 @@ export class ControlsComponent implements OnInit, OnDestroy {
 
   touchEnded(evt: TouchEvent) {
     this.canvasReleased(evt.changedTouches[0].pageX, evt.changedTouches[0].pageY);
+    this.verifyOpen();
   }
 
   mouseDown(evt: MouseEvent) {
@@ -271,6 +272,7 @@ export class ControlsComponent implements OnInit, OnDestroy {
 
   mouseUp(evt: MouseEvent) {
     this.canvasReleased(evt.pageX, evt.pageY);
+    this.verifyOpen();
   }
 
   canvasPressed(x: number, y: number) {
@@ -333,17 +335,16 @@ export class ControlsComponent implements OnInit, OnDestroy {
     }
 
     window.requestAnimationFrame(() => this.draw());
+    this.verifyOpen();
   }
 
   // Game actions
-  startGame() {
-    this.gameService.send({ message: 'GAME_START' });
-  }
-
-  requeue() {
+  async requeue() {
     let partyId: string = sessionStorage.getItem('partyId');
     if (partyId === null) {
-      this.gameService.send({ message: 'GAME_REQUEUE' });
+        let roundId: string = sessionStorage.getItem('roundId');
+        let nextRoundID: any = await this.http.get(`${environment.API_URL_GAME_ROUND}/${roundId}/requeue?isPlayer=true`, { responseType: 'text' }).toPromise();
+        this.processRequeue(nextRoundID);
     } else {
       let queueCallback = new EventSource(`${environment.API_URL_PARTY}/${partyId}/queue`);
       queueCallback.onmessage = msg => {
@@ -375,11 +376,21 @@ export class ControlsComponent implements OnInit, OnDestroy {
       this.gameService.send({ direction: `${newDir}` });
     }
   }
+  
+  verifyOpen() {
+    if (!this.gameService.isOpen()) {
+    	  console.log('GameService socket not open');
+    	  this.ngZone.run(() => {
+        this.router.navigate(['/login']);
+      });
+    }
+  }
 
   ngOnDestroy() {
     window.removeEventListener('touchmove', this.preventScrolling);
     window.removeEventListener('orientationchange', this.pageWasResized);
     window.removeEventListener('resize', this.pageWasResized);
     sessionStorage.removeItem('roundId');
+    this.gameService.close();
   }
 }

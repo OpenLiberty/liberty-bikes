@@ -19,9 +19,9 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.GameRound;
+import org.libertybikes.game.core.GameRound.State;
 import org.libertybikes.game.core.InboundMessage;
 import org.libertybikes.game.core.InboundMessage.GameEvent;
-import org.libertybikes.game.core.OutboundMessage;
 import org.libertybikes.restclient.PlayerService;
 
 @Dependent
@@ -63,27 +63,24 @@ public class GameRoundWebsocket {
         try {
             final InboundMessage msg = jsonb.fromJson(message, InboundMessage.class);
             final GameRound round = gameSvc.getRound(roundId);
-            if (round == null) {
-                log(roundId, "[onMessage] unable to locate roundId=" + roundId);
+            if (round == null || round.gameState == State.FINISHED) {
+                log(roundId, "[onMessage] Received message for round that did not exist or has completed.  Closing this websocket connection.");
+                session.close();
                 return;
             }
             // System.out.println("[onMessage] roundId=" + roundId + "  msg=" + message);
 
-            if (GameEvent.GAME_REQUEUE == msg.event) {
-                requeueClient(gameSvc, round, session);
-            }
             if (GameEvent.GAME_START == msg.event) {
                 round.startGame();
-            }
-            if (msg.direction != null) {
+            } else if (msg.direction != null) {
                 round.updatePlayerDirection(session, msg);
-            }
-            if (msg.playerJoinedId != null) {
+            } else if (msg.playerJoinedId != null) {
                 org.libertybikes.restclient.Player playerResponse = playerSvc.getPlayerById(msg.playerJoinedId);
                 round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard);
-            }
-            if (Boolean.TRUE == msg.isSpectator) {
+            } else if (Boolean.TRUE == msg.isSpectator) {
                 round.addSpectator(session);
+            } else {
+                log(roundId, "ERR: Unrecognized message: " + jsonb.toJson(msg));
             }
         } catch (Exception e) {
             log(roundId, "ERR: " + e.getMessage());
@@ -91,14 +88,7 @@ public class GameRoundWebsocket {
         }
     }
 
-    public static void requeueClient(GameRoundService gameSvc, GameRound oldRound, Session s) {
-        GameRound nextGame = gameSvc.requeue(oldRound, oldRound.isPlayer(s));
-        if (nextGame == null)
-            return;
-        sendTextToClient(s, new OutboundMessage.RequeueGame(nextGame.id));
-    }
-
-    public static void sendTextToClient(Session client, Object message) {
+    public static void sendToClient(Session client, Object message) {
         if (client != null) {
             String msg = message instanceof String ? (String) message : jsonb.toJson(message);
             try {
@@ -113,7 +103,7 @@ public class GameRoundWebsocket {
         String msg = message instanceof String ? (String) message : jsonb.toJson(message);
         // System.out.println("Sending " + clients.size() + " clients the message: " + message);
         for (Session client : clients)
-            sendTextToClient(client, msg);
+            sendToClient(client, msg);
     }
 
     private static void log(String roundId, String msg) {

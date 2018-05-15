@@ -1,6 +1,6 @@
 package org.libertybikes.game.core;
 
-import static org.libertybikes.game.round.service.GameRoundWebsocket.sendTextToClient;
+import static org.libertybikes.game.round.service.GameRoundWebsocket.sendToClient;
 import static org.libertybikes.game.round.service.GameRoundWebsocket.sendToClients;
 
 import java.time.Instant;
@@ -21,8 +21,6 @@ import javax.enterprise.concurrent.LastExecution;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.concurrent.Trigger;
 import javax.enterprise.inject.spi.CDI;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 import javax.json.bind.annotation.JsonbPropertyOrder;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.naming.InitialContext;
@@ -31,8 +29,6 @@ import javax.websocket.Session;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.Player.STATUS;
-import org.libertybikes.game.round.service.GameRoundService;
-import org.libertybikes.game.round.service.GameRoundWebsocket;
 import org.libertybikes.restclient.PlayerService;
 
 @JsonbPropertyOrder({ "id", "gameState", "board", "nextRoundId" })
@@ -46,11 +42,10 @@ public class GameRound implements Runnable {
         FINISHED // game has ended and a winner has been declared
     }
 
-    private static final Jsonb jsonb = JsonbBuilder.create();
     private static final int GAME_TICK_SPEED_DEFAULT = 50; // ms
     private static final int DELAY_BETWEEN_ROUNDS = 5; //ticks
     private static final int STARTING_COUNTDOWN = 3; // seconds
-    private static final int MAX_TIME_BETWEEN_ROUNDS = Integer.getInteger("game-service.time.between.rounds", 20); // 20 seconds default
+    private static final int MAX_TIME_BETWEEN_ROUNDS_DEFAULT = 20; // seconds
     private static final int FULL_GAME_TIME_BETWEEN_ROUNDS = 5; //seconds
     private static final Random r = new Random();
     private static final AtomicInteger runningGames = new AtomicInteger();
@@ -67,7 +62,7 @@ public class GameRound implements Runnable {
     private final Map<Session, Client> clients = new HashMap<>();
     private final Deque<Player> playerRanks = new ArrayDeque<>();
     private final Set<LifecycleCallback> lifecycleCallbacks = new HashSet<>();
-    private final int GAME_TICK_SPEED;
+    private final int GAME_TICK_SPEED, MAX_TIME_BETWEEN_ROUNDS;
     private LobbyCountdown lobbyCountdown;
     private AtomicBoolean lobbyCountdownStarted = new AtomicBoolean();
 
@@ -89,6 +84,7 @@ public class GameRound implements Runnable {
         this.id = id;
         nextRoundId = getRandomId();
 
+        // Get game tick speed
         Integer tickSpeed = GAME_TICK_SPEED_DEFAULT;
         try {
             tickSpeed = InitialContext.doLookup("round/gameSpeed");
@@ -96,6 +92,15 @@ public class GameRound implements Runnable {
             log("Unable to perform JNDI lookup to determine game tick speed, using default value");
         }
         GAME_TICK_SPEED = (tickSpeed < 20 || tickSpeed > 100) ? GAME_TICK_SPEED_DEFAULT : tickSpeed;
+
+        // Get delay between rounds
+        Integer maxTimeBetweenRounds = MAX_TIME_BETWEEN_ROUNDS_DEFAULT;
+        try {
+            maxTimeBetweenRounds = InitialContext.doLookup("round/autoStartCooldown");
+        } catch (Exception e) {
+            log("Unable to perform JNDI lookup to determine time between rounds, using default value");
+        }
+        MAX_TIME_BETWEEN_ROUNDS = (maxTimeBetweenRounds < 5 || maxTimeBetweenRounds > 60) ? MAX_TIME_BETWEEN_ROUNDS_DEFAULT : maxTimeBetweenRounds;
     }
 
     public GameBoard getBoard() {
@@ -115,7 +120,7 @@ public class GameRound implements Runnable {
             }
         }
         if (!isPhone)
-            sendTextToClient(s, new OutboundMessage.AwaitPlayersCountdown(lobbyCountdown.roundStartCountdown));
+            sendToClient(s, new OutboundMessage.AwaitPlayersCountdown(lobbyCountdown.roundStartCountdown));
     }
 
     public void updatePlayerDirection(Session playerSession, InboundMessage msg) {
@@ -170,8 +175,8 @@ public class GameRound implements Runnable {
     public void addSpectator(Session s) {
         log("A spectator has joined.");
         clients.put(s, new Client(s));
-        sendTextToClient(s, new OutboundMessage.PlayerList(getPlayers()));
-        sendTextToClient(s, board);
+        sendToClient(s, new OutboundMessage.PlayerList(getPlayers()));
+        sendToClient(s, board);
         beginHeartbeat();
         beginLobbyCountdown(s, false);
     }
@@ -257,10 +262,6 @@ public class GameRound implements Runnable {
     private void updatePlayerStats() {
         if (gameState != State.FINISHED)
             throw new IllegalStateException("Canot update player stats while game is still running.");
-
-        Set<Player> players = getPlayers();
-        if (players.size() < 2)
-            return; // Don't update player stats for single-player games
 
         PlayerService playerSvc = CDI.current().select(PlayerService.class, RestClient.LITERAL).get();
         int rank = 1;
@@ -406,7 +407,6 @@ public class GameRound implements Runnable {
         log("<<< Finished round");
         broadcastPlayerList();
 
-        long start = System.nanoTime();
         try {
             ManagedScheduledExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
             exec.submit(() -> {
@@ -420,16 +420,11 @@ public class GameRound implements Runnable {
             e.printStackTrace();
         }
 
-        // Wait for 5 seconds, but subtract the amount of time it took to update player stats
-        long nanoWait = TimeUnit.SECONDS.toNanos(5) - (System.nanoTime() - start);
-        delay(TimeUnit.NANOSECONDS.toMillis(nanoWait));
-        log("Clients flagged for auto-requeue will be redirected to the next round now");
-        GameRoundService gameSvc = CDI.current().select(GameRoundService.class).get();
-        for (Client c : clients.values())
-            if (c.autoRequeue)
-                GameRoundWebsocket.requeueClient(gameSvc, this, c.session);
-            else
-                sendTextToClient(c.session, new OutboundMessage.GameStatus(State.FINISHED));
+        // Tell each client that the game is done and close the websockets
+        for (Session s : clients.keySet())
+            sendToClient(s, new OutboundMessage.GameStatus(State.FINISHED));
+        for (Session s : clients.keySet())
+            removeClient(s);
     }
 
     private void log(String msg) {
