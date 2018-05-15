@@ -63,6 +63,7 @@ export class ControlsComponent implements OnInit, OnDestroy {
         this.gameService.send({ keepAlive: true });
       }
       if (json.gameStatus === 'FINISHED') {
+    	    console.log(`Round ${this.roundId} has finished.`);
     	    if (confirm('Game is over, requeue to next round?')) {
     	    	  this.requeue();
     	    } else {

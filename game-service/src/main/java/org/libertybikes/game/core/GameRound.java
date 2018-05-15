@@ -110,13 +110,10 @@ public class GameRound implements Runnable {
     private void beginLobbyCountdown(Session s, boolean isPhone) {
         if (!lobbyCountdownStarted.get()) {
             lobbyCountdownStarted.set(true);
-            try {
-                ManagedScheduledExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
+            ManagedScheduledExecutorService exec = executor();
+            if (exec != null) {
                 lobbyCountdown = new LobbyCountdown();
                 exec.submit(lobbyCountdown);
-            } catch (NamingException e) {
-                log("Unable to obtain executor service reference");
-                e.printStackTrace();
             }
         }
         if (!isPhone)
@@ -189,16 +186,13 @@ public class GameRound implements Runnable {
         // Send a heartbeat to connected clients every 100 seconds in an attempt to keep them connected.
         // It appears that when running in IBM Cloud, sockets time out after 120 seconds
         if (!heartbeatStarted.getAndSet(true)) {
-            try {
-                ManagedScheduledExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
+            ManagedScheduledExecutorService exec = executor();
+            if (exec != null) {
                 log("Initiating heartbeat to clients");
                 exec.schedule(() -> {
                     log("Sending heartbeat to " + clients.size() + " clients");
                     sendToClients(clients.keySet(), new OutboundMessage.Heartbeat());
                 }, new HeartbeatTrigger());
-            } catch (NamingException e) {
-                log("Unable to obtain executor service reference");
-                e.printStackTrace();
             }
         }
     }
@@ -296,12 +290,12 @@ public class GameRound implements Runnable {
             }
         }
 
-        if (playerDied) {
+        if (playerDied)
             checkForWinner();
-            broadcastPlayerList();
-        }
         if (playersMoved || boardUpdated)
             broadcastGameBoard();
+        if (playerDied)
+            broadcastPlayerList();
     }
 
     private void delayTo(long wakeUpTime) {
@@ -391,13 +385,9 @@ public class GameRound implements Runnable {
                 p.setStatus(STATUS.Alive);
         broadcastPlayerList();
         if (!gameRunning.get()) {
-            try {
-                ManagedScheduledExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
+            ManagedScheduledExecutorService exec = executor();
+            if (exec != null)
                 exec.submit(this);
-            } catch (NamingException e) {
-                log("Unable to start game due to: " + e);
-                e.printStackTrace();
-            }
         }
         gameState = State.RUNNING;
     }
@@ -407,24 +397,36 @@ public class GameRound implements Runnable {
         log("<<< Finished round");
         broadcastPlayerList();
 
-        try {
-            ManagedScheduledExecutorService exec = InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
+        ManagedScheduledExecutorService exec = executor();
+        if (exec != null) {
             exec.submit(() -> {
                 updatePlayerStats();
             });
             exec.submit(() -> {
                 lifecycleCallbacks.forEach(c -> c.gameEnding());
             });
-        } catch (NamingException e) {
-            log("Unable to perform post game processing");
-            e.printStackTrace();
         }
 
         // Tell each client that the game is done and close the websockets
         for (Session s : clients.keySet())
             sendToClient(s, new OutboundMessage.GameStatus(State.FINISHED));
-        for (Session s : clients.keySet())
-            removeClient(s);
+
+        // Give players a 10s grace period before they are removed from a finished game
+        if (exec != null)
+            exec.schedule(() -> {
+                for (Session s : clients.keySet())
+                    removeClient(s);
+            }, 10, TimeUnit.SECONDS);
+    }
+
+    private ManagedScheduledExecutorService executor() {
+        try {
+            return InitialContext.doLookup("java:comp/DefaultManagedScheduledExecutorService");
+        } catch (NamingException e) {
+            log("Unable to obtain ManagedScheduledExecutorService");
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void log(String msg) {

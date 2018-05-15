@@ -67,6 +67,7 @@ export class GameComponent implements OnInit, OnDestroy {
           this.gameService.send({ keepAlive: true });
         }
         if (json.gameStatus === 'FINISHED') {
+          console.log(`Round ${this.roundId} has finished.`);
         	  if (sessionStorage.getItem('isSpectator') === 'true') {
             this.requeue();
         	  }
@@ -293,22 +294,18 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   moveUp() {
-    this.verifyOpen()
     this.gameService.send({ direction: 'UP' });
   }
 
   moveDown() {
-    this.verifyOpen();
     this.gameService.send({ direction: 'DOWN' });
   }
 
   moveLeft() {
-    this.verifyOpen();
     this.gameService.send({ direction: 'LEFT' });
   }
 
   moveRight() {
-    this.verifyOpen();
     this.gameService.send({ direction: 'RIGHT' });
   }
 

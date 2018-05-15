@@ -68,7 +68,8 @@ public class GameRoundWebsocket {
                 log(roundId, "[onMessage] Received message for round that did not exist or has completed.  Closing this websocket connection.");
                 if (round == null)
                     sendToClient(session, new OutboundMessage.ErrorEvent("Round " + roundId + " did not exist"));
-                else
+                // don't immediately boot out players that may keep sending messages a few seconds after the game is done
+                else if (!round.isPlayer(session))
                     sendToClient(session, new OutboundMessage.ErrorEvent("Round " + roundId + " has already completed."));
                 session.close();
                 return;
