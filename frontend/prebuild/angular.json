@@ -29,7 +29,7 @@
             ]
           },
           "configurations": {
-            "prod": {
+            "production": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -45,8 +45,8 @@
             "browserTarget": "frontend:build"
           },
           "configurations": {
-            "prod": {
-              "browserTarget": "frontend:build:prod"
+            "production": {
+              "browserTarget": "frontend:build:production"
             }
           }
         },
