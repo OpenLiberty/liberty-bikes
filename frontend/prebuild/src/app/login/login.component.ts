@@ -3,7 +3,7 @@ import { Meta } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import * as EventSource from 'eventsource';
+import { EventSourcePolyfill } from 'ng-event-source';
 import { trigger, animate, style, transition, group, query, stagger, state } from '@angular/animations';
 import { environment } from './../../environments/environment';
 import { PaneType } from '../slider/slider.component';
@@ -20,7 +20,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   party: string;
   queuePosition: number;
   player = new Player();
-  static queueCallback: EventSource;
+  static queueCallback: EventSourcePolyfill;
   isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   constructor(
@@ -183,7 +183,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     console.log(`enering queue for party ${this.party}`);
     if (LoginComponent.queueCallback)
       LoginComponent.queueCallback.close();
-    LoginComponent.queueCallback = new EventSource(`${environment.API_URL_PARTY}/${this.party}/queue`);
+    LoginComponent.queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${this.party}/queue`);
     this.setQueueOnMessage();
     LoginComponent.queueCallback.onerror = msg => {
       console.log('Error showing queue position: ' + JSON.stringify(msg.data));

@@ -5,7 +5,7 @@ import { GameService } from '../game/game.service';
 import { Triangle } from '../geom/triangle';
 import { Point } from '../geom/point';
 import { LoginComponent } from '../login/login.component';
-import * as EventSource from 'eventsource';
+import { EventSourcePolyfill } from 'ng-event-source';
 import { environment } from './../../environments/environment';
 
 @Component({
@@ -33,7 +33,7 @@ export class ControlsComponent implements OnInit, OnDestroy {
   leftPressed: boolean;
   downPressed: boolean;
   rightPressed: boolean;
-  
+
   currentDirection: string;
 
   private preventScrolling = (evt: TouchEvent) => {
@@ -152,7 +152,7 @@ export class ControlsComponent implements OnInit, OnDestroy {
 
     window.requestAnimationFrame(() => this.draw());
   }
-  
+
   processRequeue(newRoundId) {
     console.log(`Requeueing to round ${newRoundId}`);
     this.roundId = newRoundId;
@@ -354,7 +354,7 @@ export class ControlsComponent implements OnInit, OnDestroy {
         let nextRoundID: any = await this.http.get(`${environment.API_URL_GAME_ROUND}/${roundId}/requeue?isPlayer=true`, { responseType: 'text' }).toPromise();
         this.processRequeue(nextRoundID);
     } else {
-      let queueCallback = new EventSource(`${environment.API_URL_PARTY}/${partyId}/queue`);
+      let queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${partyId}/queue`);
       queueCallback.onmessage = msg => {
         let queueMsg = JSON.parse(msg.data);
         if (queueMsg.queuePosition) {
@@ -384,7 +384,7 @@ export class ControlsComponent implements OnInit, OnDestroy {
       this.gameService.send({ direction: `${newDir}` });
     }
   }
-  
+
   verifyOpen() {
     if (!this.gameService.isOpen()) {
     	  console.log('GameService socket not open');
