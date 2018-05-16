@@ -21,9 +21,9 @@ public class Player {
         Disconnected
     }
 
-    public static final int PLAYER_SIZE = 3; // squares
-    public static final int MAX_PLAYERS = 4;
-    public static final String[] PLAYER_COLORS = {};
+    public static final int PLAYER_SIZE = 3; // 3x3 squares
+    public static final String[] PLAYER_COLORS = { "#f28415", "#ABD155", "#6FC3DF", "#c178c9" }; // orange, green, blue purple
+    public static final int MAX_PLAYERS = PLAYER_COLORS.length;
 
     // Properties exposed by JSON-B
     public final String name;
@@ -59,17 +59,9 @@ public class Player {
         this.playerNum = playerNum;
 
         // Initialize starting data
-        if (playerNum >= MAX_PLAYERS)
+        if (playerNum >= MAX_PLAYERS || playerNum < 0)
             throw new IllegalArgumentException("Cannot create player number " + playerNum + " because MAX_PLAYERS=" + MAX_PLAYERS);
-        if (playerNum == 0) {
-            color = "#f28415"; // orange
-        } else if (playerNum == 1) {
-            color = "#ABD155"; // bright green
-        } else if (playerNum == 2) {
-            color = "#6FC3DF"; // light blue
-        } else {
-            color = "#c178c9"; // light purple
-        }
+        color = PLAYER_COLORS[playerNum];
     }
 
     public DIRECTION getDirection() {

@@ -19,7 +19,6 @@ import { Shape, Stage, Text } from 'createjs-module';
 })
 export class GameComponent implements OnInit, OnDestroy {
   static readonly BOX_SIZE = 10;
-  static readonly OBSTACLE_COLOR = '#808080';
   static readonly BOARD_SIZE = 1200;
 
   roundId: string;
@@ -43,7 +42,7 @@ export class GameComponent implements OnInit, OnDestroy {
   trailsCanvas: HTMLCanvasElement;
   trailsContext: CanvasRenderingContext2D;
   obstaclesShape: Shape;
-
+  
   constructor(private meta: Meta,
     private router: Router,
     private ngZone: NgZone,
@@ -74,7 +73,7 @@ export class GameComponent implements OnInit, OnDestroy {
         }
         if (json.obstacles) {
           for (let obstacle of json.obstacles) {
-            this.obstaclesShape.graphics.beginFill(GameComponent.OBSTACLE_COLOR).rect(
+            this.obstaclesShape.graphics.beginFill(Obstacle.COLOR).rect(
               obstacle.x * GameComponent.BOX_SIZE,
               obstacle.y * GameComponent.BOX_SIZE,
               obstacle.width * GameComponent.BOX_SIZE,
@@ -83,7 +82,8 @@ export class GameComponent implements OnInit, OnDestroy {
           }
         }
         if (json.movingObstacles) {
-          if (this.obstacles == null || this.obstacles.length < json.movingObstacles.length) {
+          if (this.obstacles == null || this.obstacles.length !== json.movingObstacles.length) {
+        	    // If we got obstacles for the first time, or number of obstacles changed, create new obstacles
             if (this.obstacles != null) {
               this.obstacles.forEach(obstacle => {
                 if (obstacle.shape != null) {
@@ -94,29 +94,18 @@ export class GameComponent implements OnInit, OnDestroy {
 
             this.obstacles = new Array<Obstacle>();
             json.movingObstacles.forEach((obstacle, i) => {
-              const newObstacle = new Obstacle();
-              newObstacle.width = obstacle.width;
-              newObstacle.height = obstacle.height;
-
-              const obShape = new Shape();
-              obShape.graphics.beginFill(GameComponent.OBSTACLE_COLOR).rect(0, 0, newObstacle.width * GameComponent.BOX_SIZE, newObstacle.height * GameComponent.BOX_SIZE);
-              obShape.x = obstacle.x * GameComponent.BOX_SIZE;
-              obShape.y = obstacle.y * GameComponent.BOX_SIZE;
-
-              newObstacle.shape = obShape;
+              let newObstacle: Obstacle = new Obstacle(obstacle.width * GameComponent.BOX_SIZE, obstacle.height * GameComponent.BOX_SIZE);
+              newObstacle.update(obstacle.x * GameComponent.BOX_SIZE, obstacle.y * GameComponent.BOX_SIZE)
               this.obstacles.push(newObstacle);
               this.stage.addChild(newObstacle.shape);
-
             });
           } else {
+        	    // Otherwise, just update the shape positions
             json.movingObstacles.forEach((obstacle, i) => {
-              this.obstacles[i].shape.x = obstacle.x * GameComponent.BOX_SIZE;
-              this.obstacles[i].shape.y = obstacle.y * GameComponent.BOX_SIZE;
-
+            	  this.obstacles[i].update(obstacle.x * GameComponent.BOX_SIZE, obstacle.y * GameComponent.BOX_SIZE);
               this.trailsContext.clearRect(obstacle.x * GameComponent.BOX_SIZE, obstacle.y * GameComponent.BOX_SIZE, obstacle.width * GameComponent.BOX_SIZE, obstacle.height * GameComponent.BOX_SIZE);
             });
           }
-
         }
 
         if (json.playerlist) {
@@ -149,19 +138,19 @@ export class GameComponent implements OnInit, OnDestroy {
         }
         if (json.players) {
         	  let noneAlive: boolean = true;
+        	  let playersMoved: boolean = false;
           json.players.forEach((player, i) => {
         	    const playerEntity = this.players.get(player.id);
             if (player.status === 'Alive') {
             	  noneAlive = false;
-              playerEntity.update(player.x * GameComponent.BOX_SIZE, player.y * GameComponent.BOX_SIZE, player.direction);
+              if (playerEntity.update(player.x * GameComponent.BOX_SIZE, player.y * GameComponent.BOX_SIZE, player.direction))
+            	    playersMoved = true;
 
               // Stamp down player on trails canvas so it can be erased properly when obstacles roll over it
               this.trailsContext.fillStyle = player.color;
               this.trailsContext.fillRect(GameComponent.BOX_SIZE * player.x + player.width / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
                 GameComponent.BOX_SIZE * player.y + player.height / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
                 GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
-
-              this.trailsShape.graphics.clear().beginBitmapFill(this.trailsCanvas, 'no-repeat').drawRect(0, 0, GameComponent.BOARD_SIZE, GameComponent.BOARD_SIZE);
             } else if (!player.alive) {
             	  // Ensure tooltip is hidden in case player dies before it fades out
             	  playerEntity.tooltip.visible(false);
@@ -170,6 +159,10 @@ export class GameComponent implements OnInit, OnDestroy {
 
             playerEntity.setStatus(player.status);
           });
+          if (playersMoved)
+            this.trailsShape.graphics.clear()
+                                     .beginBitmapFill(this.trailsCanvas, 'no-repeat')
+                                     .drawRect(0, 0, GameComponent.BOARD_SIZE, GameComponent.BOARD_SIZE);
           if (noneAlive) {
         	    this.players.forEach((player: Player, id: string) => {
         	    	  player.tooltip.alpha(1);
