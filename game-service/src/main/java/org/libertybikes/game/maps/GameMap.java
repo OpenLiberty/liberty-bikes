@@ -14,7 +14,7 @@ import org.libertybikes.game.core.Obstacle;
 
 public class GameMap {
 
-    public static final int NUM_MAPS = 4; // Not including empty map
+    public static final int NUM_MAPS = 5; // Not including empty map
     private static final Random r = new Random();
 
     /**
