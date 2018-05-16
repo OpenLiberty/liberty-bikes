@@ -13,7 +13,7 @@ export class PlayerTooltip {
   constructor(public player: Player) {
 	if (!this.player.color)
       console.log('WARNING: Creating a tooltip with a player that is not properly initialized');
-    this.nameText = new Text(this.player.name, "28px Arial", "#fff");
+    this.nameText = new Text(this.player.name, "28px Arial", "#000");
     this.nameText.textAlign = 'center';
     this.nameText.maxWidth = 200;
 	this.shape.graphics.beginFill(this.player.color)

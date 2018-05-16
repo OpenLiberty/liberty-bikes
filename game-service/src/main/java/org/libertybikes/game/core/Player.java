@@ -62,13 +62,13 @@ public class Player {
         if (playerNum >= MAX_PLAYERS)
             throw new IllegalArgumentException("Cannot create player number " + playerNum + " because MAX_PLAYERS=" + MAX_PLAYERS);
         if (playerNum == 0) {
-            color = "#DF740C";
+            color = "#f28415"; // orange
         } else if (playerNum == 1) {
-            color = "#FF0000";
+            color = "#ABD155"; // bright green
         } else if (playerNum == 2) {
-            color = "#6FC3DF";
+            color = "#6FC3DF"; // light blue
         } else {
-            color = "#FFE64D";
+            color = "#c178c9"; // light purple
         }
     }
 
