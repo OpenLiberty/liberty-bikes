@@ -4,7 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Meta } from '@angular/platform-browser';
 import { GameService } from './game.service';
 import { LoginComponent } from '../login/login.component';
-import * as EventSource from 'eventsource';
+import { EventSourcePolyfill } from 'ng-event-source';
 import { environment } from './../../environments/environment';
 import { Player } from '../entity/player';
 import { Obstacle } from '../entity/obstacle';
@@ -259,10 +259,10 @@ export class GameComponent implements OnInit, OnDestroy {
           this.processRequeue(nextRoundID);
     	    }, 5000);
       } else {
-    	    this.processRequeue(nextRoundID);    	  
+    	    this.processRequeue(nextRoundID);
       }
     } else {
-      let queueCallback = new EventSource(`${environment.API_URL_PARTY}/${partyId}/queue`);
+      let queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${partyId}/queue`);
       queueCallback.onmessage = msg => {
         let queueMsg = JSON.parse(msg.data);
         if (queueMsg.queuePosition) {
@@ -315,7 +315,7 @@ export class GameComponent implements OnInit, OnDestroy {
       this.showLoader = false;
     }, (1000 * seconds));
   }
-  
+
   verifyOpen() {
     if (!this.gameService.isOpen()) {
     	  console.log('GameService socket not open');

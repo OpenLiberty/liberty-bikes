@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs/Subject';
-import { Observable } from 'rxjs/Observable';
-import { Observer } from 'rxjs/Observer';
+import { Subject, Observable, Observer } from 'rxjs';
 import 'rxjs/add/operator/share';
+
 
 @Injectable()
 export class SocketService {

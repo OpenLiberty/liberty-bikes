@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { SocketService } from '../net/socket.service';
-import { Subject } from 'rxjs/Subject';
+import { Subject } from 'rxjs';
 import { environment } from './../../environments/environment';
-import 'rxjs/add/operator/map';
+import { map } from 'rxjs/operators';
 
 
 
@@ -18,20 +18,20 @@ export class GameService {
 
     socketService.url = `${environment.API_URL_GAME_WS}/${this.roundId}`;
     this.messages = <Subject<Object>>socketService.socket
-    .map((response: MessageEvent): any => {
+    .pipe(map((response: MessageEvent): any => {
       //console.log(`Game service handling message: ${response.data}`);
       return JSON.parse(response.data);
-    });
+    }));
   }
 
   public send(message: any) {
     this.messages.next(JSON.stringify(message));
   }
-  
+
   public isOpen() {
     return this.socketService.socketOpen;
   }
-  
+
   public close() {
     this.socketService.close();
   }
