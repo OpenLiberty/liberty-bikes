@@ -19,14 +19,15 @@ export class Player {
 
   public update(x: number, y: number, direction: string) {
 	//console.log(`[Player-${this.name}]  x=${x}  y=${y}  direction=${direction}`);
+	let playerMoved: boolean = (this.x !== x) || (this.y !== y);
     this.x = x;
     this.y = y;
 	if (!this.tooltip)
 	  this.tooltip = new PlayerTooltip(this);
 	if (!this.image) {
-    this.image = new Bitmap('../../assets/images/bike_wide.png');
-    this.image.scaleX = 2.0;
-    this.image.scaleY = 2.0;
+      this.image = new Bitmap('../../assets/images/bike_wide.png');
+      this.image.scaleX = 2.0;
+      this.image.scaleY = 2.0;
 	}
 
 	if (direction === 'UP') {
@@ -47,6 +48,7 @@ export class Player {
   	  this.image.y = y + 40;
 	}
 	this.tooltip.update();
+	return playerMoved;
   }
 
   public visible(isVisible: boolean) {
@@ -73,7 +75,7 @@ export class Player {
   public addTo(stage: Stage) {
 	  if (this.tooltip) {
 	    stage.addChild(this.tooltip.shape);
-      stage.addChild(this.tooltip.nameText);
+        stage.addChild(this.tooltip.nameText);
 	  }
       stage.addChild(this.image);
   }

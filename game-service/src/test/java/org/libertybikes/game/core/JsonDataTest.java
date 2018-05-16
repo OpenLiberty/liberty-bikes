@@ -65,7 +65,8 @@ public class JsonDataTest {
         board.addObstacle(new Obstacle(1, 2, 3, 4));
         assertEquals("{\"movingObstacles\":[],\"obstacles\":[" + obstacleJson + "],\"players\":[]}", jsonb.toJson(board));
 
-        String bobJson = "{\"id\":\"1234\",\"name\":\"Bob\",\"color\":\"#DF740C\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":9,\"width\":3,\"height\":3,\"direction\":\"RIGHT\"}";
+        String bobJson = "{\"id\":\"1234\",\"name\":\"Bob\",\"color\":\"" + Player.PLAYER_COLORS[0]
+                         + "\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":9,\"width\":3,\"height\":3,\"direction\":\"RIGHT\"}";
         board.addPlayer("1234", "Bob");
         assertEquals("{\"movingObstacles\":[],\"obstacles\":[" + obstacleJson + "],\"players\":[" + bobJson + "]}",
                      jsonb.toJson(board));
@@ -101,15 +102,20 @@ public class JsonDataTest {
         p.direction = DIRECTION.RIGHT;
         players.add(p);
         PlayerList list = new OutboundMessage.PlayerList(players);
-        String bob = "{\"id\":\"123\",\"name\":\"Bob\",\"color\":\"#DF740C\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":9,\"width\":3,\"height\":3,\"direction\":\"RIGHT\"}";
-        String bot1 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#FF0000\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3}";
-        String bot2 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#6FC3DF\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3}";
-        String bot3 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"#FFE64D\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3}";
+        String bob = "{\"id\":\"123\",\"name\":\"Bob\",\"color\":\"" + Player.PLAYER_COLORS[0]
+                     + "\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":9,\"width\":3,\"height\":3,\"direction\":\"RIGHT\"}";
+        String bot1 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"" + Player.PLAYER_COLORS[1]
+                      + "\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3}";
+        String bot2 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"" + Player.PLAYER_COLORS[2]
+                      + "\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3}";
+        String bot3 = "{\"id\":\"\",\"name\":\"Bot Player\",\"color\":\"" + Player.PLAYER_COLORS[3]
+                      + "\",\"status\":\"Connected\",\"alive\":true,\"x\":0,\"y\":0,\"width\":3,\"height\":3}";
         System.out.println("@AGG " + jsonb.toJson(list));
         assertEquals("{\"playerlist\":[" + bob + "," + bot1 + "," + bot2 + "," + bot3 + "]}",
                      jsonb.toJson(list));
 
-        String chuck = "{\"id\":\"456\",\"name\":\"Chuck\",\"color\":\"#6FC3DF\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":110,\"width\":3,\"height\":3,\"direction\":\"UP\"}";
+        String chuck = "{\"id\":\"456\",\"name\":\"Chuck\",\"color\":\"" + Player.PLAYER_COLORS[2]
+                       + "\",\"status\":\"Connected\",\"alive\":true,\"x\":9,\"y\":110,\"width\":3,\"height\":3,\"direction\":\"UP\"}";
         Player p2 = new Player("456", "Chuck", (short) 2);
         p2.x = 9;
         p2.y = 110;

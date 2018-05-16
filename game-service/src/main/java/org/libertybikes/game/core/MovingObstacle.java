@@ -4,10 +4,6 @@ public class MovingObstacle extends Obstacle {
 
     private int xDir, yDir, moveDelay, currentDelay = 0;
 
-    public MovingObstacle(int w, int h, int x, int y) {
-        super(w, h, x, y);
-    }
-
     public MovingObstacle(int w, int h, int x, int y, int xDir, int yDir) {
         super(w, h, x, y);
         moveDelay = 1;
