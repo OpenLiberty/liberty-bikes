@@ -43,6 +43,8 @@ public class GameMap {
                 return new FakeBlock();
             case 4:
                 return new Smile();
+            case 5:
+                return new HulkSmash();
             default:
                 throw new IllegalArgumentException("Illegal map number: " + map);
         }
