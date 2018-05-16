@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject, Observable, Observer } from 'rxjs';
-import { share } from 'rxjs/operators';
+import 'rxjs/add/operator/share';
 
 
 @Injectable()
