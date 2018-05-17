@@ -261,7 +261,7 @@ export class GameComponent implements OnInit, OnDestroy {
     	    this.processRequeue(nextRoundID);
       }
     } else {
-      let queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${partyId}/queue`);
+      let queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${partyId}/queue`, {});
       queueCallback.onmessage = msg => {
         let queueMsg = JSON.parse(msg.data);
         if (queueMsg.queuePosition) {

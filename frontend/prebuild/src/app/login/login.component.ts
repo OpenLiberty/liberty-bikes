@@ -183,7 +183,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     console.log(`enering queue for party ${this.party}`);
     if (LoginComponent.queueCallback)
       LoginComponent.queueCallback.close();
-    LoginComponent.queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${this.party}/queue`);
+    LoginComponent.queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${this.party}/queue`, {});
     this.setQueueOnMessage();
     LoginComponent.queueCallback.onerror = msg => {
       console.log('Error showing queue position: ' + JSON.stringify(msg.data));
