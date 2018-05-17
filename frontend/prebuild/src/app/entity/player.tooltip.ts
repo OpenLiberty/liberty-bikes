@@ -1,6 +1,6 @@
 import { Shape, Text } from 'createjs-module';
 import { Player } from './player';
-import { GameComponent } from '../game/game.component';
+import { Constants } from '../game/constants';
 
 export class PlayerTooltip {
   public shape: Shape = new Shape();
@@ -29,7 +29,7 @@ export class PlayerTooltip {
 
 	if (this.player.y < 100)
       this.showAbove = false;
-    else if (this.player.y > (GameComponent.BOARD_SIZE - 100))
+    else if (this.player.y > (Constants.BOARD_SIZE - 100))
     	  this.showAbove = true;
 
 	this.lastY = this.player.y;
@@ -41,12 +41,12 @@ export class PlayerTooltip {
 	// prevent tooltip from going off screen
 	if (this.shape.x < 0)
 	  this.shape.x = 0;
-	if ((this.shape.x + 230) > GameComponent.BOARD_SIZE)
-	  this.shape.x = (GameComponent.BOARD_SIZE - 230);
+	if ((this.shape.x + 230) > Constants.BOARD_SIZE)
+	  this.shape.x = (Constants.BOARD_SIZE - 230);
 	if (this.nameText.x - 100 < 0)
 	  this.nameText.x = 100;
-	if (this.nameText.x + 100 > GameComponent.BOARD_SIZE)
-	  this.nameText.x = (GameComponent.BOARD_SIZE - 100);
+	if (this.nameText.x + 100 > Constants.BOARD_SIZE)
+	  this.nameText.x = (Constants.BOARD_SIZE - 100);
 
 	// start fading out after 15 ticks
 	if (this.player.status === 'Alive') {
