@@ -22,7 +22,7 @@ public class Player {
     }
 
     public static final int PLAYER_SIZE = 3; // 3x3 squares
-    public static final String[] PLAYER_COLORS = { "#f28415", "#ABD155", "#6FC3DF", "#c178c9" }; // orange, green, blue purple
+    public static final String[] PLAYER_COLORS = { "#ABD155", "#6FC3DF", "#c178c9", "#f28415" }; // green, blue, purple, orange
     public static final int MAX_PLAYERS = PLAYER_COLORS.length;
 
     // Properties exposed by JSON-B
