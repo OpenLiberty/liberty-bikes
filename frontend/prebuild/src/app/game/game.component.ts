@@ -145,6 +145,8 @@ export class GameComponent implements OnInit, OnDestroy {
             	    playersMoved = true;
 
               // Stamp down player on trails canvas so it can be erased properly when obstacles roll over it
+              this.trailsContext.shadowBlur = 20;
+              this.trailsContext.shadowColor = player.color;
               this.trailsContext.fillStyle = player.color;
               this.trailsContext.fillRect(Constants.BOX_SIZE * player.x + player.width / 2 * Constants.BOX_SIZE - Constants.BOX_SIZE / 2,
                 Constants.BOX_SIZE * player.y + player.height / 2 * Constants.BOX_SIZE - Constants.BOX_SIZE / 2,
