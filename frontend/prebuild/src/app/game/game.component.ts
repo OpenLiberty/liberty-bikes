@@ -10,6 +10,7 @@ import { Player } from '../entity/player';
 import { Obstacle } from '../entity/obstacle';
 import { PlayerTooltip } from '../entity/player.tooltip';
 import { Shape, Stage, Text } from 'createjs-module';
+import { Constants } from './constants';
 
 @Component({
   selector: 'app-game',
@@ -18,9 +19,6 @@ import { Shape, Stage, Text } from 'createjs-module';
   providers: [ GameService ],
 })
 export class GameComponent implements OnInit, OnDestroy {
-  static readonly BOX_SIZE = 10;
-  static readonly BOARD_SIZE = 1200;
-
   roundId: string;
   serverHost: string;
   serverPort: string;
@@ -42,7 +40,7 @@ export class GameComponent implements OnInit, OnDestroy {
   trailsCanvas: HTMLCanvasElement;
   trailsContext: CanvasRenderingContext2D;
   obstaclesShape: Shape;
-  
+
   constructor(private meta: Meta,
     private router: Router,
     private ngZone: NgZone,
@@ -74,10 +72,10 @@ export class GameComponent implements OnInit, OnDestroy {
         if (json.obstacles) {
           for (let obstacle of json.obstacles) {
             this.obstaclesShape.graphics.beginFill(Obstacle.COLOR).rect(
-              obstacle.x * GameComponent.BOX_SIZE,
-              obstacle.y * GameComponent.BOX_SIZE,
-              obstacle.width * GameComponent.BOX_SIZE,
-              obstacle.height * GameComponent.BOX_SIZE
+              obstacle.x * Constants.BOX_SIZE,
+              obstacle.y * Constants.BOX_SIZE,
+              obstacle.width * Constants.BOX_SIZE,
+              obstacle.height * Constants.BOX_SIZE
             );
           }
         }
@@ -94,16 +92,16 @@ export class GameComponent implements OnInit, OnDestroy {
 
             this.obstacles = new Array<Obstacle>();
             json.movingObstacles.forEach((obstacle, i) => {
-              let newObstacle: Obstacle = new Obstacle(obstacle.width * GameComponent.BOX_SIZE, obstacle.height * GameComponent.BOX_SIZE);
-              newObstacle.update(obstacle.x * GameComponent.BOX_SIZE, obstacle.y * GameComponent.BOX_SIZE)
+              let newObstacle: Obstacle = new Obstacle(obstacle.width * Constants.BOX_SIZE, obstacle.height * Constants.BOX_SIZE);
+              newObstacle.update(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE)
               this.obstacles.push(newObstacle);
               this.stage.addChild(newObstacle.shape);
             });
           } else {
         	    // Otherwise, just update the shape positions
             json.movingObstacles.forEach((obstacle, i) => {
-            	  this.obstacles[i].update(obstacle.x * GameComponent.BOX_SIZE, obstacle.y * GameComponent.BOX_SIZE);
-              this.trailsContext.clearRect(obstacle.x * GameComponent.BOX_SIZE, obstacle.y * GameComponent.BOX_SIZE, obstacle.width * GameComponent.BOX_SIZE, obstacle.height * GameComponent.BOX_SIZE);
+            	  this.obstacles[i].update(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE);
+              this.trailsContext.clearRect(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE, obstacle.width * Constants.BOX_SIZE, obstacle.height * Constants.BOX_SIZE);
             });
           }
         }
@@ -128,7 +126,7 @@ export class GameComponent implements OnInit, OnDestroy {
             this.players.set(playerInfo.id, newPlayer);
 
             if (playerInfo.status !== 'Dead')
-              newPlayer.update(playerInfo.x * GameComponent.BOX_SIZE, playerInfo.y * GameComponent.BOX_SIZE, playerInfo.direction);
+              newPlayer.update(playerInfo.x * Constants.BOX_SIZE, playerInfo.y * Constants.BOX_SIZE, playerInfo.direction);
 
             newPlayer.addTo(this.stage);
           }
@@ -143,14 +141,14 @@ export class GameComponent implements OnInit, OnDestroy {
         	    const playerEntity = this.players.get(player.id);
             if (player.status === 'Alive') {
             	  noneAlive = false;
-              if (playerEntity.update(player.x * GameComponent.BOX_SIZE, player.y * GameComponent.BOX_SIZE, player.direction))
+              if (playerEntity.update(player.x * Constants.BOX_SIZE, player.y * Constants.BOX_SIZE, player.direction))
             	    playersMoved = true;
 
               // Stamp down player on trails canvas so it can be erased properly when obstacles roll over it
               this.trailsContext.fillStyle = player.color;
-              this.trailsContext.fillRect(GameComponent.BOX_SIZE * player.x + player.width / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
-                GameComponent.BOX_SIZE * player.y + player.height / 2 * GameComponent.BOX_SIZE - GameComponent.BOX_SIZE / 2,
-                GameComponent.BOX_SIZE, GameComponent.BOX_SIZE);
+              this.trailsContext.fillRect(Constants.BOX_SIZE * player.x + player.width / 2 * Constants.BOX_SIZE - Constants.BOX_SIZE / 2,
+                Constants.BOX_SIZE * player.y + player.height / 2 * Constants.BOX_SIZE - Constants.BOX_SIZE / 2,
+                Constants.BOX_SIZE, Constants.BOX_SIZE);
             } else if (!player.alive) {
             	  // Ensure tooltip is hidden in case player dies before it fades out
             	  playerEntity.tooltip.visible(false);
@@ -162,7 +160,7 @@ export class GameComponent implements OnInit, OnDestroy {
           if (playersMoved)
             this.trailsShape.graphics.clear()
                                      .beginBitmapFill(this.trailsCanvas, 'no-repeat')
-                                     .drawRect(0, 0, GameComponent.BOARD_SIZE, GameComponent.BOARD_SIZE);
+                                     .drawRect(0, 0, Constants.BOARD_SIZE, Constants.BOARD_SIZE);
           if (noneAlive) {
         	    this.players.forEach((player: Player, id: string) => {
         	    	  player.tooltip.alpha(1);
@@ -209,8 +207,8 @@ export class GameComponent implements OnInit, OnDestroy {
 
     this.trailsCanvas = <HTMLCanvasElement> document.createElement('canvas');
     this.trailsContext = this.trailsCanvas.getContext('2d');
-    this.trailsCanvas.width = GameComponent.BOARD_SIZE;
-    this.trailsCanvas.height = GameComponent.BOARD_SIZE;
+    this.trailsCanvas.width = Constants.BOARD_SIZE;
+    this.trailsCanvas.height = Constants.BOARD_SIZE;
 
     this.obstaclesShape = new Shape();
     this.obstaclesShape.x = 0;

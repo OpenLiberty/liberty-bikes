@@ -1,14 +1,10 @@
 import { Shape, Bitmap, Stage } from 'createjs-module';
 import { PlayerTooltip } from './player.tooltip';
+import { Assets } from '../game/assets';
 
 export class Player {
-  // According to EaselJS, "When a string path or image tag that is not yet loaded is used, the stage may need to be redrawn before the Bitmap will be displayed."
-  // For this reason, we need to pre-load an instance of the image (this copy never gets used)
-  static readonly PLAYER_BITMAP = new Bitmap('../../assets/images/bike_wide.png');
-  static readonly PLAYER_DEAD_BITMAP = new Bitmap('../../assets/images/status_dead.png');
-  static readonly BAM = new Audio('../../assets/sound/bam.wav');
   static audioLoaded: boolean = false;
-  
+
   public name: string;
   public status: string;
   public color: string;
@@ -25,7 +21,7 @@ export class Player {
 	if (!this.tooltip)
 	  this.tooltip = new PlayerTooltip(this);
 	if (!this.image) {
-      this.image = new Bitmap('../../assets/images/bike_wide.png');
+      this.image = Assets.PLAYER_BITMAP.clone();
       this.image.scaleX = 2.0;
       this.image.scaleY = 2.0;
 	}
@@ -58,16 +54,16 @@ export class Player {
 
   public setStatus(status: string) {
     if (status === 'Dead' && this.status !== 'Dead') {
-    	  this.image = new Bitmap('../../assets/images/status_dead.png');
+    	  this.image = Assets.PLAYER_DEAD_BITMAP.clone();
     	  this.image.scaleX = 1.2;
     	  this.image.scaleY = 1.2;
     	  this.image.x = this.x - 20;
     	  this.image.y = this.y - 20;
       if (!Player.audioLoaded) {
         Player.audioLoaded = true;
-        Player.BAM.load();
+        Assets.BAM.load();
       }
-    	  Player.BAM.play();
+      Assets.BAM.play();
     }
     this.status = status;
   }
