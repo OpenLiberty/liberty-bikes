@@ -43,7 +43,7 @@ export class Player {
   	  this.image.x = x - 10;
   	  this.image.y = y + 40;
 	}
-	this.tooltip.update();
+	this.tooltip.update(direction);
 	return playerMoved;
   }
 
@@ -70,15 +70,13 @@ export class Player {
 
   public addTo(stage: Stage) {
 	  if (this.tooltip) {
-	    stage.addChild(this.tooltip.shape);
-        stage.addChild(this.tooltip.nameText);
+	    stage.addChild(this.tooltip.tooltipShape);
 	  }
       stage.addChild(this.image);
   }
   public removeFrom(stage: Stage) {
 	  if (this.tooltip) {
-        stage.removeChild(this.tooltip.shape);
-        stage.removeChild(this.tooltip.nameText);
+        stage.removeChild(this.tooltip.tooltipShape);
 	  }
       stage.removeChild(this.image);
   }
