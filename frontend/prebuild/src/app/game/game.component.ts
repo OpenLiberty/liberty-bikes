@@ -154,7 +154,7 @@ export class GameComponent implements OnInit, OnDestroy {
             } else if (!player.alive) {
             	  // Ensure tooltip is hidden in case player dies before it fades out
             	  playerEntity.tooltip.visible(false);
-            	  playerEntity.tooltip.alpha(1);
+            	  playerEntity.tooltip.alpha = 1;
             }
 
             playerEntity.setStatus(player.status);
@@ -165,7 +165,7 @@ export class GameComponent implements OnInit, OnDestroy {
                                      .drawRect(0, 0, Constants.BOARD_SIZE, Constants.BOARD_SIZE);
           if (noneAlive) {
         	    this.players.forEach((player: Player, id: string) => {
-        	    	  player.tooltip.alpha(1);
+        	    	  player.tooltip.alpha = 1;
         	    	  player.tooltip.visible(true);
         	    });
           }
