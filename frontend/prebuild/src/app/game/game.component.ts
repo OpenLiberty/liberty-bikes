@@ -127,10 +127,10 @@ export class GameComponent implements OnInit, OnDestroy {
 
             newPlayer.update(playerInfo.x * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE, playerInfo.y * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE, playerInfo.direction);
 
-            newPlayer.addTo(this.stage);
+            this.stage.addChild(newPlayer.object);
           }
           oldPlayers.forEach((playerThatLeft: Player, id: string) => {
-            playerThatLeft.removeFrom(this.stage);
+            this.stage.removeChild(playerThatLeft.object);
           });
         }
         if (json.players) {

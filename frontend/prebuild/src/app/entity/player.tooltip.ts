@@ -4,7 +4,7 @@ import { Constants } from '../game/constants';
 import { Tooltip } from './tooltip';
 
 export class PlayerTooltip {
-  static readonly tooltipDistance = Constants.BOX_SIZE * 3;
+  static readonly tooltipDistance = Constants.BOX_SIZE * 5;
 
   public tooltipShape: Container;
   public lifetime: number = 30;
@@ -26,6 +26,9 @@ export class PlayerTooltip {
       this.player.color,
       230
     ).object;
+
+    this.tooltipShape.regX = this.tooltipShape.getBounds().width / 2;
+    this.tooltipShape.regY = this.tooltipShape.getBounds().height / 2;
   }
 
   public update(direction?: string) {
@@ -33,17 +36,14 @@ export class PlayerTooltip {
       // Nothing to update
       return;
     }
-    const tooltipBounds = this.tooltipShape.getBounds();
-    const playerBounds = this.player.image.getBounds();
-    let verticalMargin = PlayerTooltip.tooltipDistance * 2;
+    const tooltipBounds = this.tooltipShape.getTransformedBounds();
+    const playerBounds = this.player.image.getTransformedBounds();
+    let verticalMargin = PlayerTooltip.tooltipDistance;
 
     // positioning
-    // If label positioning becomes misaligned again, rewrite this to use the player size etc
-    // rather than magic constants.
-
-    if (this.player.y > Constants.BOARD_SIZE - (tooltipBounds.height + verticalMargin + playerBounds.height)) {
+    if (this.player.y > Constants.BOARD_SIZE - (this.player.image.getTransformedBounds().height / 2 + verticalMargin + tooltipBounds.height)) {
       this.showAbove = true;
-    } else if (this.player.y <= (tooltipBounds.height + verticalMargin)) {
+    } else if (this.player.y <= (this.player.image.getTransformedBounds().height / 2 + verticalMargin + tooltipBounds.height)) {
       this.showAbove = false;
     } else if (this.player.y < this.lastY) {
       this.showAbove = false;
@@ -60,30 +60,21 @@ export class PlayerTooltip {
     this.lastX = this.player.x;
     this.lastY = this.player.y;
 
-    if (this.playerVertical) {
-      this.tooltipShape.x = (this.player.x - tooltipBounds.width / 2) + playerBounds.width / 2;
-      if (this.showAbove) {
-        this.tooltipShape.y = (this.player.y - tooltipBounds.height) - verticalMargin;
-      } else {
-        this.tooltipShape.y = (this.player.y + playerBounds.height) + verticalMargin;
-      }
+    // The player sprite and tooltip are both registered at their center, rather than top left
+    this.tooltipShape.x = this.player.image.x;
+    if (this.showAbove) {
+      this.tooltipShape.y = (this.player.image.y - (tooltipBounds.height / 2 + playerBounds.height / 2 + verticalMargin));
     } else {
-      // The image rotates, but the bounds don't, so swap width and height for the player bounds
-      this.tooltipShape.x = (this.player.x - tooltipBounds.width / 2);
-      if (this.showAbove) {
-        this.tooltipShape.y = (this.player.y - tooltipBounds.height) - verticalMargin;
-      } else {
-        this.tooltipShape.y = (this.player.y + playerBounds.height) + verticalMargin;
-      }
+      this.tooltipShape.y = (this.player.image.y + (tooltipBounds.height / 2 + playerBounds.height / 2 + verticalMargin));
     }
 
     // prevent tooltip from going off screen
-    if (this.tooltipShape.x < 0) {
-      this.tooltipShape.x = 0;
+    if (this.player.x < tooltipBounds.width / 2) {
+      this.tooltipShape.x = (tooltipBounds.width / 2) - this.player.x;
     }
 
-    if (this.tooltipShape.x + tooltipBounds.width > Constants.BOARD_SIZE) {
-      this.tooltipShape.x = Constants.BOARD_SIZE - tooltipBounds.width;
+    if (this.player.x + (tooltipBounds.width / 2) > Constants.BOARD_SIZE) {
+      this.tooltipShape.x = -(this.player.x + tooltipBounds.width / 2) + Constants.BOARD_SIZE;
     }
 
     // start fading out after 15 ticks
