@@ -125,12 +125,12 @@ export class GameComponent implements OnInit, OnDestroy {
             }
             this.players.set(playerInfo.id, newPlayer);
 
-            newPlayer.update(playerInfo.x * Constants.BOX_SIZE, playerInfo.y * Constants.BOX_SIZE, playerInfo.direction);
+            newPlayer.update(playerInfo.x * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE, playerInfo.y * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE, playerInfo.direction);
 
-            newPlayer.addTo(this.stage);
+            this.stage.addChild(newPlayer.object);
           }
           oldPlayers.forEach((playerThatLeft: Player, id: string) => {
-            playerThatLeft.removeFrom(this.stage);
+            this.stage.removeChild(playerThatLeft.object);
           });
         }
         if (json.players) {
@@ -140,15 +140,15 @@ export class GameComponent implements OnInit, OnDestroy {
         	    const playerEntity = this.players.get(player.id);
             if (player.status === 'Alive') {
             	  noneAlive = false;
-              if (playerEntity.update(player.x * Constants.BOX_SIZE, player.y * Constants.BOX_SIZE, player.direction))
+              if (playerEntity.update(player.x * Constants.BOX_SIZE + (player.width / 2) * Constants.BOX_SIZE, player.y * Constants.BOX_SIZE + (player.height / 2) * Constants.BOX_SIZE, player.direction))
             	    playersMoved = true;
 
               // Stamp down player on trails canvas so it can be erased properly when obstacles roll over it
               this.trailsContext.shadowBlur = 20;
               this.trailsContext.shadowColor = player.color;
               this.trailsContext.fillStyle = player.color;
-              this.trailsContext.fillRect(Constants.BOX_SIZE * player.x + player.width / 2 * Constants.BOX_SIZE - Constants.BOX_SIZE / 2,
-                Constants.BOX_SIZE * player.y + player.height / 2 * Constants.BOX_SIZE - Constants.BOX_SIZE / 2,
+              this.trailsContext.fillRect(Constants.BOX_SIZE * player.x + (player.width / 2) * Constants.BOX_SIZE - Constants.BOX_SIZE / 2,
+                Constants.BOX_SIZE * player.y + (player.height / 2) * Constants.BOX_SIZE - Constants.BOX_SIZE / 2,
                 Constants.BOX_SIZE, Constants.BOX_SIZE);
             } else if (!player.alive) {
             	  // Ensure tooltip is hidden in case player dies before it fades out
