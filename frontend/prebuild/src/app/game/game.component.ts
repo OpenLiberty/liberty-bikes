@@ -125,7 +125,7 @@ export class GameComponent implements OnInit, OnDestroy {
             }
             this.players.set(playerInfo.id, newPlayer);
 
-            newPlayer.update(playerInfo.x * Constants.BOX_SIZE, playerInfo.y * Constants.BOX_SIZE, playerInfo.direction);
+            newPlayer.update(playerInfo.x * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE, playerInfo.y * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE, playerInfo.direction);
 
             newPlayer.addTo(this.stage);
           }
