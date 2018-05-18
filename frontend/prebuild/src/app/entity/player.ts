@@ -16,38 +16,39 @@ export class Player {
   direction: string;
 
   public update(x: number, y: number, direction: string) {
-	//console.log(`[Player-${this.name}]  x=${x}  y=${y}  direction=${direction}`);
-	let playerMoved: boolean = (this.x !== x) || (this.y !== y) || (this.direction !== direction);
+    //console.log(`[Player-${this.name}]  x=${x}  y=${y}  direction=${direction}`);
+    let playerMoved: boolean = this.x !== x || this.y !== y || this.direction !== direction;
     this.x = x;
     this.y = y;
     this.direction = direction;
-	if (!this.tooltip)
-	  this.tooltip = new PlayerTooltip(this);
-	if (!this.image) {
+
+    if (!this.tooltip) {
+      this.tooltip = new PlayerTooltip(this);
+    }
+
+    if (!this.image) {
       this.image = Assets.PLAYER_BITMAP.clone();
+      this.image.regX = this.image.getBounds().width / 2;
+      this.image.regY = this.image.getBounds().height / 2;
       this.image.scaleX = 2.0;
       this.image.scaleY = 2.0;
-	}
+    }
 
-	if (direction === 'UP') {
+    if (direction === 'UP') {
       this.image.rotation = 0;
-  	  this.image.x = x - 10;
-  	  this.image.y = y - 10;
-	} else if (direction === 'RIGHT') {
+    } else if (direction === 'RIGHT') {
       this.image.rotation = 90;
-  	  this.image.x = x + 40;
-  	  this.image.y = y - 10;
-	} else if (direction === 'DOWN') {
+    } else if (direction === 'DOWN') {
       this.image.rotation = 180;
-  	  this.image.x = x + 40;
-  	  this.image.y = y + 40;
-	} else {
+    } else {
       this.image.rotation = 270;
-  	  this.image.x = x - 10;
-  	  this.image.y = y + 40;
-	}
-	this.tooltip.update(direction);
-	return playerMoved;
+    }
+
+    this.image.x = x;
+    this.image.y = y;
+    this.tooltip.update(direction);
+
+    return playerMoved;
   }
 
   public visible(isVisible: boolean) {
@@ -61,8 +62,8 @@ export class Player {
       this.explosionImage = Assets.PLAYER_DEAD_BITMAP.clone();
       this.explosionImage.scaleX = 1.2;
       this.explosionImage.scaleY = 1.2;
-      this.explosionImage.x = this.x - 16;
-      this.explosionImage.y = this.y - 16;
+      this.explosionImage.x = this.x - this.explosionImage.getBounds().width / 2;
+      this.explosionImage.y = this.y - this.explosionImage.getBounds().height / 2;
       if (!Player.audioLoaded) {
         Player.audioLoaded = true;
         Assets.BAM.load();
@@ -73,17 +74,26 @@ export class Player {
   }
 
   public addTo(stage: Stage) {
-	  if (this.tooltip)
-	    stage.addChild(this.tooltip.tooltipShape);
-      stage.addChild(this.image);
-	  if (this.explosionImage)
-        stage.addChild(this.explosionImage);
+    if (this.tooltip) {
+      stage.addChild(this.tooltip.tooltipShape);
+    }
+
+    stage.addChild(this.image);
+
+    if (this.explosionImage) {
+      stage.addChild(this.explosionImage);
+    }
   }
+
   public removeFrom(stage: Stage) {
-	  if (this.tooltip)
-        stage.removeChild(this.tooltip.tooltipShape);
-	  if (this.explosionImage)
-        stage.removeChild(this.explosionImage);
-      stage.removeChild(this.image);
+    if (this.tooltip) {
+      stage.removeChild(this.tooltip.tooltipShape);
+    }
+
+    stage.removeChild(this.image);
+
+    if (this.explosionImage) {
+      stage.removeChild(this.explosionImage);
+    }
   }
 }
