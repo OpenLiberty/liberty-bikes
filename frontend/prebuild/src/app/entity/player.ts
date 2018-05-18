@@ -1,4 +1,4 @@
-import { Shape, Bitmap, Stage, Container } from 'createjs-module';
+import { Bitmap, Container } from 'createjs-module';
 import { PlayerTooltip } from './player.tooltip';
 import { Assets } from '../game/assets';
 
