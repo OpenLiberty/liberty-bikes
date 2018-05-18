@@ -69,7 +69,7 @@ public class Player {
     }
 
     public void setDirection(DIRECTION newDirection) {
-        if (newDirection == direction)
+        if (!isAlive || newDirection == direction)
             return;
 
         // Make sure the player doesn't move backwards on themselves

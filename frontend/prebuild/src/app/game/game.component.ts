@@ -125,8 +125,7 @@ export class GameComponent implements OnInit, OnDestroy {
             }
             this.players.set(playerInfo.id, newPlayer);
 
-            if (playerInfo.status !== 'Dead')
-              newPlayer.update(playerInfo.x * Constants.BOX_SIZE, playerInfo.y * Constants.BOX_SIZE, playerInfo.direction);
+            newPlayer.update(playerInfo.x * Constants.BOX_SIZE, playerInfo.y * Constants.BOX_SIZE, playerInfo.direction);
 
             newPlayer.addTo(this.stage);
           }
@@ -262,7 +261,7 @@ export class GameComponent implements OnInit, OnDestroy {
     	    this.processRequeue(nextRoundID);
       }
     } else {
-      let queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${partyId}/queue`);
+      let queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${partyId}/queue`, {});
       queueCallback.onmessage = msg => {
         let queueMsg = JSON.parse(msg.data);
         if (queueMsg.queuePosition) {

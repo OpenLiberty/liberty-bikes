@@ -21,8 +21,8 @@ public class CrossSlice extends GameMap {
         startingPoints = new Point[] {
                                        new Point(GameBoard.BOARD_SIZE / 2 - 15, GameBoard.BOARD_SIZE / 2 - 15),
                                        new Point(GameBoard.BOARD_SIZE / 2 + 15, GameBoard.BOARD_SIZE / 2 - 15),
-                                       new Point(GameBoard.BOARD_SIZE / 2 + 15, GameBoard.BOARD_SIZE / 2 + 15),
-                                       new Point(GameBoard.BOARD_SIZE / 2 - 15, GameBoard.BOARD_SIZE / 2 + 15)
+                                       new Point(GameBoard.BOARD_SIZE / 2 - 15, GameBoard.BOARD_SIZE / 2 + 15),
+                                       new Point(GameBoard.BOARD_SIZE / 2 + 15, GameBoard.BOARD_SIZE / 2 + 15)
         };
         startingDirections = new DIRECTION[] { DIRECTION.UP, DIRECTION.RIGHT, DIRECTION.DOWN, DIRECTION.LEFT };
     }
