@@ -40,8 +40,11 @@ export class PlayerComponent implements OnInit {
 	  if (status === 'connected') {
       status = 'alive';
     }
-
-	  return `/assets/images/status_${status}.png`;
+	  
+	if (status === 'alive')
+      return `/assets/images/bike_full.png`;
+	else
+      return `/assets/images/status_${status}.png`;
   }
 
   backgroundColor(color: string): string {
