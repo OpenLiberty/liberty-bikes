@@ -37,10 +37,11 @@ export class Player {
       this.displayObject.addChild(this.tooltip.tooltipShape);
 
       this.image = Assets.PLAYER_BITMAP.clone();
+      this.image.scaleX = 1 / 60;
+      this.image.scaleY = 1 / 60;
+      // Set the center point of the player image to be the front 1/3 of the area
       this.image.regX = this.image.getBounds().width / 2;
-      this.image.regY = this.image.getBounds().height / 2;
-      this.image.scaleX = 2.0;
-      this.image.scaleY = 2.0;
+      this.image.regY = this.image.getBounds().height / 3;
       this.displayObject.addChild(this.image);
 
       this.explosionImage = Assets.PLAYER_DEAD_BITMAP.clone();
