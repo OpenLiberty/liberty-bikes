@@ -51,11 +51,7 @@ export class GameComponent implements OnInit, OnDestroy {
       gameService.messages.subscribe((msg) => {
         const json = msg as any;
         if (json.errorMessage) {
-          console.log('Received error message from server: ' + json.errorMessage);
-          alert('Your connection to the game server has been closed. You will be redirected to the login page.');
-          this.ngZone.run(() => {
-            this.router.navigate(['/login']);
-          });
+          this.handleGameError(json.errorMessage);
         }
         if (json.countdown) {
           this.ngZone.run(() => this.startingCountdown(json.countdown));
@@ -64,111 +60,20 @@ export class GameComponent implements OnInit, OnDestroy {
           this.gameService.send({ keepAlive: true });
         }
         if (json.gameStatus === 'FINISHED') {
-          console.log(`Round ${this.roundId} has finished.`);
-        	  if (sessionStorage.getItem('isSpectator') === 'true') {
-            this.requeue();
-        	  }
+          this.finishGame();
         }
         if (json.obstacles) {
-          for (let obstacle of json.obstacles) {
-            this.obstaclesShape.graphics.beginFill(Obstacle.COLOR).rect(
-              obstacle.x * Constants.BOX_SIZE,
-              obstacle.y * Constants.BOX_SIZE,
-              obstacle.width * Constants.BOX_SIZE,
-              obstacle.height * Constants.BOX_SIZE
-            );
-          }
+          this.updateObstacles(json.obstacles);
         }
         if (json.movingObstacles) {
-          if (this.obstacles == null || this.obstacles.length !== json.movingObstacles.length) {
-        	    // If we got obstacles for the first time, or number of obstacles changed, create new obstacles
-            if (this.obstacles != null) {
-              this.obstacles.forEach(obstacle => {
-                if (obstacle.shape != null) {
-                  this.stage.removeChild(obstacle.shape);
-                }
-              });
-            }
-
-            this.obstacles = new Array<Obstacle>();
-            json.movingObstacles.forEach((obstacle, i) => {
-              let newObstacle: Obstacle = new Obstacle(obstacle.width * Constants.BOX_SIZE, obstacle.height * Constants.BOX_SIZE);
-              newObstacle.update(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE)
-              this.obstacles.push(newObstacle);
-              this.stage.addChild(newObstacle.shape);
-            });
-          } else {
-        	    // Otherwise, just update the shape positions
-            json.movingObstacles.forEach((obstacle, i) => {
-            	  this.obstacles[i].update(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE);
-              this.trailsContext.clearRect(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE, obstacle.width * Constants.BOX_SIZE, obstacle.height * Constants.BOX_SIZE);
-            });
-          }
+          this.updateMovingObstacles(json.movingObstacles);
         }
 
         if (json.playerlist) {
-          let oldPlayers: Map<string,Player> = new Map<string,Player>(this.players);
-          this.players.clear();
-          for (let playerInfo of json.playerlist) {
-            // Don't add generic bot players (used to pad out the palyerlist)
-            if (playerInfo.id === "")
-              continue;
-
-            let newPlayer = oldPlayers.get(playerInfo.id);
-            if (!newPlayer) {
-              newPlayer = new Player();
-              newPlayer.name = playerInfo.name;
-              newPlayer.color = playerInfo.color;
-              newPlayer.status = playerInfo.status;
-            } else {
-              oldPlayers.delete(playerInfo.id);
-            }
-            this.players.set(playerInfo.id, newPlayer);
-
-            newPlayer.update(playerInfo.x * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE, playerInfo.y * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE, playerInfo.direction);
-
-            this.stage.addChild(newPlayer.object);
-          }
-          oldPlayers.forEach((playerThatLeft: Player, id: string) => {
-            this.stage.removeChild(playerThatLeft.object);
-          });
+          this.updatePlayerList(json.playerlist);
         }
         if (json.players) {
-        	  let noneAlive: boolean = true;
-        	  let playersMoved: boolean = false;
-          json.players.forEach((player, i) => {
-        	    const playerEntity = this.players.get(player.id);
-            if (player.status === 'Alive') {
-            	  noneAlive = false;
-              if (playerEntity.update(player.x * Constants.BOX_SIZE + (player.width / 2) * Constants.BOX_SIZE, player.y * Constants.BOX_SIZE + (player.height / 2) * Constants.BOX_SIZE, player.direction))
-            	    playersMoved = true;
-
-              // Stamp down player on trails canvas so it can be erased properly when obstacles roll over it
-              this.trailsContext.shadowBlur = 20;
-              this.trailsContext.shadowColor = player.color;
-              this.trailsContext.fillStyle = player.color;
-              this.trailsContext.fillRect(Constants.BOX_SIZE * player.x + (player.width / 2) * Constants.BOX_SIZE - Constants.BOX_SIZE / 2,
-                Constants.BOX_SIZE * player.y + (player.height / 2) * Constants.BOX_SIZE - Constants.BOX_SIZE / 2,
-                Constants.BOX_SIZE, Constants.BOX_SIZE);
-            } else if (!player.alive) {
-            	  // Ensure tooltip is hidden in case player dies before it fades out
-            	  playerEntity.tooltip.visible(false);
-            	  playerEntity.tooltip.alpha = 1;
-            }
-
-            playerEntity.setStatus(player.status);
-          });
-          if (playersMoved)
-            this.trailsShape.graphics.clear()
-                                     .beginBitmapFill(this.trailsCanvas, 'no-repeat')
-                                     .drawRect(0, 0, Constants.BOARD_SIZE, Constants.BOARD_SIZE);
-          if (noneAlive) {
-        	    this.players.forEach((player: Player, id: string) => {
-        	    	  player.tooltip.alpha = 1;
-        	    	  player.tooltip.visible(true);
-        	    });
-          }
-
+        	  this.updatePlayerStatus(json.players);
         }
         this.stage.update();
       }, (err) => {
@@ -189,7 +94,6 @@ export class GameComponent implements OnInit, OnDestroy {
     } else {
       this.gameService.send({'playerjoined': sessionStorage.getItem('userId'), 'hasGameBoard' : 'true'});
     }
-
 
     this.meta.addTag({name: 'viewport', content: 'width=1600'}, true);
 
@@ -237,6 +141,123 @@ export class GameComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     sessionStorage.removeItem('roundId');
     this.gameService.close();
+  }
+
+  // Event handlers
+  handleGameError(errorMessage: any) {
+    console.log('Received error message from server: ' + errorMessage);
+    alert('Your connection to the game server has been closed. You will be redirected to the login page.');
+    this.ngZone.run(() => {
+      this.router.navigate(['/login']);
+    });
+  }
+
+  finishGame() {
+    console.log(`Round ${this.roundId} has finished.`);
+    if (sessionStorage.getItem('isSpectator') === 'true') {
+      this.requeue();
+    }
+  }
+
+  updateObstacles(obstacles: any) {
+    for (let obstacle of obstacles) {
+      this.obstaclesShape.graphics.beginFill(Obstacle.COLOR).rect(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE, obstacle.width * Constants.BOX_SIZE, obstacle.height * Constants.BOX_SIZE);
+    }
+  }
+
+  updateMovingObstacles(movingObstacles: any) {
+    if (this.obstacles == null || this.obstacles.length !== movingObstacles.length) {
+      // If we got obstacles for the first time, or number of obstacles changed, create new obstacles
+      if (this.obstacles != null) {
+        this.obstacles.forEach(obstacle => {
+          if (obstacle.shape != null) {
+            this.stage.removeChild(obstacle.shape);
+          }
+        });
+      }
+      this.obstacles = new Array<Obstacle>();
+      movingObstacles.forEach((obstacle, i) => {
+        let newObstacle: Obstacle = new Obstacle(obstacle.width * Constants.BOX_SIZE, obstacle.height * Constants.BOX_SIZE);
+        newObstacle.update(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE);
+        this.obstacles.push(newObstacle);
+        this.stage.addChild(newObstacle.shape);
+      });
+    } else {
+      // Otherwise, just update the shape positions
+      movingObstacles.forEach((obstacle, i) => {
+        this.obstacles[i].update(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE);
+        this.trailsContext.clearRect(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE, obstacle.width * Constants.BOX_SIZE, obstacle.height * Constants.BOX_SIZE);
+      });
+    }
+  }
+
+  updatePlayerList(playerlist: any) {
+    let oldPlayers: Map<string,Player> = new Map<string,Player>(this.players);
+    this.players.clear();
+    for (let playerInfo of playerlist) {
+      // Don't add generic bot players (used to pad out the playerlist)
+      if (playerInfo.id === "")
+        continue;
+
+      let newPlayer = oldPlayers.get(playerInfo.id);
+
+      if (!newPlayer) {
+        newPlayer = new Player();
+        newPlayer.name = playerInfo.name;
+        newPlayer.color = playerInfo.color;
+        newPlayer.status = playerInfo.status;
+      } else {
+        oldPlayers.delete(playerInfo.id);
+      }
+
+      this.players.set(playerInfo.id, newPlayer);
+
+      newPlayer.update(playerInfo.x * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE, playerInfo.y * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE, playerInfo.direction);
+
+      this.stage.addChild(newPlayer.object);
+    }
+
+    oldPlayers.forEach((playerThatLeft: Player, id: string) => {
+      this.stage.removeChild(playerThatLeft.object);
+    });
+  }
+
+  updatePlayerStatus(players: any) {
+    let noneAlive: boolean = true;
+    let playersMoved: boolean = false;
+    players.forEach((player, i) => {
+      const playerEntity = this.players.get(player.id);
+      if (player.status === 'Alive') {
+        noneAlive = false;
+
+        if (playerEntity.update(player.x * Constants.BOX_SIZE + (player.width / 2) * Constants.BOX_SIZE, player.y * Constants.BOX_SIZE + (player.height / 2) * Constants.BOX_SIZE, player.direction)) {
+          playersMoved = true;
+        }
+        // Stamp down player on trails canvas so it can be erased properly when obstacles roll over it
+        this.trailsContext.shadowBlur = 20;
+        this.trailsContext.shadowColor = player.color;
+        this.trailsContext.fillStyle = player.color;
+        this.trailsContext.fillRect(Constants.BOX_SIZE * player.x + (player.width / 2) * Constants.BOX_SIZE - Constants.BOX_SIZE / 2, Constants.BOX_SIZE * player.y + (player.height / 2) * Constants.BOX_SIZE - Constants.BOX_SIZE / 2, Constants.BOX_SIZE, Constants.BOX_SIZE);
+      } else if (!player.alive) {
+        // Ensure tooltip is hidden in case player dies before it fades out
+        playerEntity.tooltip.visible(false);
+        playerEntity.tooltip.alpha = 1;
+      }
+
+      playerEntity.setStatus(player.status);
+    });
+
+    if (playersMoved)
+      this.trailsShape.graphics.clear()
+        .beginBitmapFill(this.trailsCanvas, 'no-repeat')
+        .drawRect(0, 0, Constants.BOARD_SIZE, Constants.BOARD_SIZE);
+
+    if (noneAlive) {
+      this.players.forEach((player: Player, id: string) => {
+        player.tooltip.alpha = 1;
+        player.tooltip.visible(true);
+      });
+    }
   }
 
   // Game actions
