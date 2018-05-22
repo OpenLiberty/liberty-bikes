@@ -162,6 +162,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   showGuestLogin() {
     this.pane = 'center';
+    document.getElementById("signin").innerHTML="Sign In As Guest";
   }
 
   setQueueOnMessage() {
@@ -208,7 +209,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   async loginAsGuest(username: string) {
-    if (await this.createUser(username, null))
+    if (await this.createUser(username, sessionStorage.getItem('userId')))
       this.pane = 'right';
   }
 
@@ -218,16 +219,14 @@ export class LoginComponent implements OnInit, OnDestroy {
         'Content-Type':  'application/json',
         'Authorization': 'Bearer ' + `${jwt}`
     }) }).toPromise();
+    sessionStorage.setItem('userId', user.id);
     if (user.exists === 'true') {
       sessionStorage.setItem('username', user.username);
-      sessionStorage.setItem('userId', user.id);
 	  this.player.name = user.username;
 	  this.pane = 'right';
     } else {
-      var username = prompt("Choose a username:", "");
-      if (await this.createUser(username, user.id)) {
-    	    this.pane = 'right';
-      }
+      this.pane = 'center';
+      document.getElementById("signin").innerHTML="register username";
     }
   }
 
@@ -272,6 +271,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   cancelLogin() {
+    sessionStorage.removeItem('username');
+    sessionStorage.removeItem('userId');
     this.pane = 'left';
   }
 }
