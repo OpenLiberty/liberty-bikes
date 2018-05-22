@@ -9,7 +9,7 @@ import { environment } from './../../environments/environment';
 import { Player } from '../entity/player';
 import { Obstacle } from '../entity/obstacle';
 import { PlayerTooltip } from '../entity/player.tooltip';
-import { Shape, Stage, Text } from 'createjs-module';
+import { Shape, Stage, Shadow, Text } from 'createjs-module';
 import { Constants } from './constants';
 
 @Component({
@@ -40,6 +40,7 @@ export class GameComponent implements OnInit, OnDestroy {
   trailsCanvas: HTMLCanvasElement;
   trailsContext: CanvasRenderingContext2D;
   obstaclesShape: Shape;
+  obstaclePulseUp: boolean = true;
 
   constructor(private meta: Meta,
     private router: Router,
@@ -160,8 +161,21 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   updateObstacles(obstacles: any) {
-    for (let obstacle of obstacles) {
-      this.obstaclesShape.graphics.beginFill(Obstacle.COLOR).rect(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE, obstacle.width * Constants.BOX_SIZE, obstacle.height * Constants.BOX_SIZE);
+    if (this.obstaclesShape.shadow) {
+      // give that shadow a pulsating effect by oscillating the blur between 10-50
+      let blur: number = this.obstaclesShape.shadow.blur;
+      blur += this.obstaclePulseUp ? 2 : -2;
+      if (blur >= 50)
+        this.obstaclePulseUp = false;
+      if (blur <= 10)
+        this.obstaclePulseUp = true;
+      this.obstaclesShape.shadow.blur = blur;
+    } else {
+      for (let obstacle of obstacles) {
+        this.obstaclesShape.shadow = new Shadow(Obstacle.COLOR, 0, 0, 20);
+        this.obstaclesShape.graphics.beginFill(Obstacle.COLOR)
+                                    .rect(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE, obstacle.width * Constants.BOX_SIZE, obstacle.height * Constants.BOX_SIZE);
+      }
     }
   }
 
