@@ -277,7 +277,7 @@ export class GameComponent implements OnInit, OnDestroy {
     	    console.log(`Will requeue to round ${nextRoundID} in 5 seconds.`);
     	    setTimeout(() => {
           this.processRequeue(nextRoundID);
-    	    }, 5000);
+    	    }, 60000);
       } else {
     	    this.processRequeue(nextRoundID);
       }
