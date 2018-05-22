@@ -1,14 +1,10 @@
 package org.libertybikes.game.bot;
 
-import java.util.Random;
-
 import org.libertybikes.game.core.DIRECTION;
 import org.libertybikes.game.core.GameBoard;
 import org.libertybikes.game.maps.GameMap;
 
 public class Wally extends AIPlayer {
-
-    static final Random ran = new Random();
 
     private DIRECTION direction;
 
