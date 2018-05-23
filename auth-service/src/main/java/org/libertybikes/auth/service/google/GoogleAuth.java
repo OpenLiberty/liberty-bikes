@@ -1,4 +1,4 @@
-package org.libertybikes.auth.service;
+package org.libertybikes.auth.service.google;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.libertybikes.auth.service.ConfigBean;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.http.HttpTransport;
@@ -24,16 +24,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 public class GoogleAuth {
 
     @Inject
-    @ConfigProperty(name = "googleOAuthConsumerKey")
-    String key;
-
-    @Inject
-    @ConfigProperty(name = "googleOAuthConsumerSecret")
-    String secret;
-
-    @Inject
-    @ConfigProperty(name = "auth_url", defaultValue = AuthApp.HTTPS_AUTH_SERVICE)
-    String authUrl;
+    ConfigBean config;
 
     @GET
     public Response getAuthURL(@Context HttpServletRequest request) {
@@ -41,13 +32,13 @@ public class GoogleAuth {
         JsonFactory jsonFactory = new JacksonFactory();
         HttpTransport httpTransport = new NetHttpTransport();
 
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow(httpTransport, jsonFactory, key, secret, Arrays
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow(httpTransport, jsonFactory, config.google_key, config.google_secret, Arrays
                         .asList("https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"));
 
         try {
             // google will tell the users browser to go to this address once
             // they are done authing.
-            String callbackURL = authUrl + "/GoogleCallback";
+            String callbackURL = config.authUrl + "/GoogleCallback";
             request.getSession().setAttribute("google", flow);
 
             String authorizationUrl = flow.newAuthorizationUrl().setRedirectUri(callbackURL).build();

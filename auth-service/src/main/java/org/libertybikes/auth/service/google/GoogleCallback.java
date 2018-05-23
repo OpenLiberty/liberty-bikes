@@ -1,4 +1,4 @@
-package org.libertybikes.auth.service;
+package org.libertybikes.auth.service.google;
 
 import java.io.IOException;
 import java.net.URI;
@@ -19,7 +19,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.libertybikes.auth.service.ConfigBean;
+import org.libertybikes.auth.service.JwtAuth;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
@@ -36,12 +37,7 @@ public class GoogleCallback extends JwtAuth {
     private static final Jsonb jsonb = JsonbBuilder.create();
 
     @Inject
-    @ConfigProperty(name = "frontend_url", defaultValue = AuthApp.FRONTEND_URL)
-    String frontendUrl;
-
-    @Inject
-    @ConfigProperty(name = "auth_url", defaultValue = AuthApp.HTTPS_AUTH_SERVICE)
-    String authUrl;
+    ConfigBean config;
 
     public static class GoogleUser {
         public String name;
@@ -101,7 +97,7 @@ public class GoogleCallback extends JwtAuth {
         String code = request.getParameter("code");
 
         //now we need to invoke the access_token endpoint to swap the code for a token.
-        String callbackURL = authUrl + "/GoogleCallback";
+        String callbackURL = config.authUrl + "/GoogleCallback";
 
         GoogleTokenResponse gResponse;
         Map<String, String> claims = new HashMap<String, String>();
@@ -114,10 +110,10 @@ public class GoogleCallback extends JwtAuth {
 
         // if auth key was no longer valid, we won't build a JWT. Redirect back to start.
         if (!"true".equals(claims.get("valid"))) {
-            return Response.temporaryRedirect(new URI(frontendUrl)).build();
+            return Response.temporaryRedirect(new URI(config.frontendUrl)).build();
         } else {
             String newJwt = createJwt(claims);
-            return Response.temporaryRedirect(new URI(frontendUrl + "/" + newJwt)).build();
+            return Response.temporaryRedirect(new URI(config.frontendUrl + "/" + newJwt)).build();
         }
     }
 }
