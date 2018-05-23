@@ -40,10 +40,12 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.meta.addTag({name: 'viewport', content: `width=${viewWidth}, height=${viewHeight}, initial-scale=1.0`}, true);
 
     this.route.params.subscribe( params =>  {
-      sessionStorage.setItem("jwt", params['jwt']);
+    	  if (params['jwt'])
+        sessionStorage.setItem("jwt", params['jwt']);
     });
-    if (sessionStorage.getItem('jwt')) {
-      this.loginThroughGoogle();
+    let jwt = sessionStorage.getItem('jwt');
+    if (jwt) {
+      this.getPlayerId(jwt);
     }
 
     this.player.status = "none";
@@ -221,8 +223,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.pane = 'right';
   }
 
-  async loginThroughGoogle() {
-    let jwt = sessionStorage.getItem("jwt");
+  async getPlayerId(jwt: string) {
     let user: any = await this.http.get(`${environment.API_URL_PLAYERS}/getJWTInfo`, { responseType: 'json', headers: new HttpHeaders({
         'Content-Type':  'application/json',
         'Authorization': 'Bearer ' + `${jwt}`
