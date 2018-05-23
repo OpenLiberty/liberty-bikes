@@ -175,7 +175,7 @@ public class GameRound implements Runnable {
         sendToClient(s, new OutboundMessage.PlayerList(getPlayers()));
         sendToClient(s, board);
         beginHeartbeat();
-        //  beginLobbyCountdown(s, false);
+        beginLobbyCountdown(s, false);
     }
 
     public void addCallback(LifecycleCallback callback) {
