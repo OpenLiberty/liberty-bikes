@@ -75,6 +75,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginGithub() {
       window.location.href = `${environment.API_URL_AUTH}/auth-service/GitHubAuth`;
   }
+  
+  loginTwitter() {
+      window.location.href = `${environment.API_URL_AUTH}/auth-service/TwitterAuth`;
+  }
 
   async quickJoin() {
     // First get an unstarted round ID
