@@ -1,4 +1,4 @@
-package org.libertybikes.auth.service;
+package org.libertybikes.auth.service.google;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -12,6 +12,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.libertybikes.auth.service.AuthApp;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.http.HttpTransport;

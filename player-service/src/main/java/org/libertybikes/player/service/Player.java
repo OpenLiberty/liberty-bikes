@@ -9,7 +9,8 @@ public class Player {
 
     public static enum DOMAIN {
         BASIC,
-        GMAIL;
+        GMAIL,
+        GITHUB;
 
         @Override
         public String toString() {
@@ -59,10 +60,11 @@ public class Player {
 
     @JsonbTransient
     public DOMAIN getDomain() {
-        if (id.startsWith(DOMAIN.GMAIL.toString()))
-            return DOMAIN.GMAIL;
-        else
-            return DOMAIN.BASIC;
+        for (DOMAIN d : DOMAIN.values()) {
+            if (id.startsWith(d.toString()))
+                return d;
+        }
+        return DOMAIN.BASIC;
     }
 
     @Override

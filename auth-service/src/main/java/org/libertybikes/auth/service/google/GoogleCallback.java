@@ -1,4 +1,4 @@
-package org.libertybikes.auth.service;
+package org.libertybikes.auth.service.google;
 
 import java.io.IOException;
 import java.net.URI;
@@ -20,6 +20,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.libertybikes.auth.service.AuthApp;
+import org.libertybikes.auth.service.JwtAuth;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
