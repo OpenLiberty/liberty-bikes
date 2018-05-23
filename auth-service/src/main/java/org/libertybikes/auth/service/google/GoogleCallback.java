@@ -56,7 +56,6 @@ public class GoogleCallback extends JwtAuth {
         Map<String, String> results = new HashMap<String, String>();
 
         Credential credential = flow.createAndStoreCredential(gResponse, null);
-        System.out.println(credential.toString());
 
         try {
             // ask google to verify the response from the auth string

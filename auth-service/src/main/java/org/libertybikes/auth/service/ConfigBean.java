@@ -17,8 +17,8 @@ import org.libertybikes.auth.service.twitter.TwitterAuth;
 public class ConfigBean {
 
     // REQUIRED GOOGLE SETTINGS
-    public static final String GOOGLE_KEY = "googleOAuthConsumerKey";
-    public static final String GOOGLE_SECRET = "googleOAuthConsumerSecret";
+    public static final String GOOGLE_KEY = "google_key";
+    public static final String GOOGLE_SECRET = "google_secret";
 
     // REQUIRED GITHUB SETTINGS
     public static final String GITHUB_KEY = "github_key";
