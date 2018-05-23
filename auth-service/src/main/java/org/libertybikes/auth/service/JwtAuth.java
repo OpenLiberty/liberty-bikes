@@ -33,10 +33,6 @@ public abstract class JwtAuth {
     @ConfigProperty(name = "jwtKeyStoreAlias", defaultValue = "bike")
     String keyStoreAlias;
 
-    @Inject
-    @ConfigProperty(name = "auth_url", defaultValue = AuthApp.HTTPS_AUTH_SERVICE)
-    String authUrl;
-
     protected static Key signingKey = null;
 
     /**

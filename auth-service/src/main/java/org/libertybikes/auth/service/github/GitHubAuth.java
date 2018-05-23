@@ -11,8 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.libertybikes.auth.service.AuthApp;
+import org.libertybikes.auth.service.ConfigBean;
 
 @Path("/GitHubAuth")
 @ApplicationScoped
@@ -21,12 +20,7 @@ public class GitHubAuth {
     private final static String GITHUB_AUTH_URL = "https://github.com/login/oauth/authorize";
 
     @Inject
-    @ConfigProperty(name = "github_key")
-    String key;
-
-    @Inject
-    @ConfigProperty(name = "auth_url", defaultValue = AuthApp.HTTPS_AUTH_SERVICE)
-    String authUrl;
+    ConfigBean config;
 
     @GET
     public Response getAuthURL(@Context HttpServletRequest request) {
@@ -35,10 +29,10 @@ public class GitHubAuth {
             request.getSession().setAttribute("github", randomCode);
 
             // GitHub will tell the users browser to go to this address once they are done authing.
-            String callbackURL = authUrl + "/GitHubCallback";
+            String callbackURL = config.authUrl + "/GitHubCallback";
 
             // send the user to GitHub to be authenticated
-            String redirectURL = GITHUB_AUTH_URL + "?client_id=" + key + "&redirect_url=" + callbackURL + "&scope=user:email&state=" + randomCode;
+            String redirectURL = GITHUB_AUTH_URL + "?client_id=" + config.github_key + "&redirect_url=" + callbackURL + "&scope=user:email&state=" + randomCode;
             return Response.temporaryRedirect(new URI(redirectURL)).build();
         } catch (Exception e) {
             e.printStackTrace();

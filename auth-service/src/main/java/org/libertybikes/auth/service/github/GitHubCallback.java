@@ -1,8 +1,6 @@
 package org.libertybikes.auth.service.github;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -15,15 +13,13 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import javax.validation.Valid;
 import javax.validation.Validator;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.libertybikes.auth.service.AuthApp;
+import org.libertybikes.auth.service.ConfigBean;
 import org.libertybikes.auth.service.JwtAuth;
 import org.libertybikes.auth.service.github.GitHubOAuthAPI.GithubTokenResponse;
 import org.libertybikes.auth.service.github.GitHubUserAPI.EmailData;
@@ -39,37 +35,10 @@ public class GitHubCallback extends JwtAuth {
     GitHubUserAPI githubUserAPI;
 
     @Inject
-    @ConfigProperty(name = "github_key")
-    String key;
-
-    @Inject
-    @ConfigProperty(name = "github_secret")
-    String secret;
-
-    @Inject
-    @ConfigProperty(name = "frontend_url", defaultValue = AuthApp.FRONTEND_URL)
-    String frontendUrl;
-
-    @Inject
-    @ConfigProperty(name = "auth_url", defaultValue = AuthApp.HTTPS_AUTH_SERVICE)
-    String authUrl;
+    ConfigBean config;
 
     @Inject
     Validator validator;
-
-    @GET
-    @Path("/test")
-    @Valid
-    public GithubTokenResponse testToken() {
-        for (Method m : getClass().getMethods()) {
-            System.out.println("@AGG found method: " + m.getName());
-            for (Annotation a : m.getAnnotations())
-                System.out.println("  anno=" + a);
-        }
-        GithubTokenResponse badToken = new GithubTokenResponse();
-        badToken.access_token = "bogus";
-        return badToken;
-    }
 
     // TODO: need to manually validate return types because the @Valid annotation on our MP Rest Client interface
     // is getting lost when the instance is injected into this class.
@@ -87,15 +56,10 @@ public class GitHubCallback extends JwtAuth {
             String githubCode = request.getParameter("code");
             String randomCode = (String) request.getSession().getAttribute("github");
 
-            String thisURL = authUrl + "/GitHubCallback";
+            String thisURL = config.authUrl + "/GitHubCallback";
 
             // First send the user through GitHub OAuth to get permission to read their email address
-            GithubTokenResponse response = githubOAuthAPI.accessToken(key, secret, githubCode, thisURL, randomCode);
-//            for (Method m : githubOAuthAPI.getClass().getMethods()) {
-//                System.out.println("@AGG found method: " + m.getName());
-//                for (Annotation a : m.getAnnotations())
-//                    System.out.println("  anno=" + a);
-//            }
+            GithubTokenResponse response = githubOAuthAPI.accessToken(config.github_key, config.github_secret, githubCode, thisURL, randomCode);
             validate(response);
             System.out.println("GitHub access token: " + response.access_token);
 
@@ -118,7 +82,7 @@ public class GitHubCallback extends JwtAuth {
             claims.put("id", "GITHUB:" + primaryEmail);
             claims.put("upn", primaryEmail);
             claims.put("email", primaryEmail);
-            return Response.temporaryRedirect(new URI(frontendUrl + "/" + createJwt(claims))).build();
+            return Response.temporaryRedirect(new URI(config.frontendUrl + "/" + createJwt(claims))).build();
         } catch (Exception e) {
             e.printStackTrace();
             return fail();
@@ -126,6 +90,6 @@ public class GitHubCallback extends JwtAuth {
     }
 
     private Response fail() throws URISyntaxException {
-        return Response.temporaryRedirect(new URI(frontendUrl)).build();
+        return Response.temporaryRedirect(new URI(config.frontendUrl)).build();
     }
 }
