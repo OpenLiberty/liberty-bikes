@@ -41,12 +41,10 @@ public class GameRoundWebsocket {
     @OnOpen
     public void onOpen(@PathParam("roundId") String roundId, Session session) {
         log(roundId, "Opened a session");
-        checkIdleTimeout(session, roundId);
     }
 
     @OnClose
     public void onClose(@PathParam("roundId") String roundId, Session session) {
-        checkIdleTimeout(session, roundId);
         log(roundId, "Closed a session");
         try {
             GameRound round = gameSvc.getRound(roundId);
@@ -60,14 +58,13 @@ public class GameRoundWebsocket {
 
     @OnMessage
     public void onMessage(@PathParam("roundId") final String roundId, String message, Session session) {
-        checkIdleTimeout(session, roundId);
         try {
             final InboundMessage msg = jsonb.fromJson(message, InboundMessage.class);
             final GameRound round = gameSvc.getRound(roundId);
             if (round == null || round.gameState == State.FINISHED) {
                 log(roundId, "[onMessage] Received message for round that did not exist or has completed.  Closing this websocket connection.");
                 if (round == null)
-                    sendToClient(session, new OutboundMessage.ErrorEvent("Round " + roundId + " did not exist"));
+                    sendToClient(session, new OutboundMessage.ErrorEvent("Round " + roundId + " did not exist."));
                 // don't immediately boot out players that may keep sending messages a few seconds after the game is done
                 else if (!round.isPlayer(session))
                     sendToClient(session, new OutboundMessage.ErrorEvent("Round " + roundId + " has already completed."));
@@ -82,7 +79,9 @@ public class GameRoundWebsocket {
                 round.updatePlayerDirection(session, msg);
             } else if (msg.playerJoinedId != null) {
                 org.libertybikes.restclient.Player playerResponse = playerSvc.getPlayerById(msg.playerJoinedId);
-                round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard);
+                if (!round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard))
+                    sendToClient(session, new OutboundMessage.ErrorEvent("Unable to add player " + playerResponse.name
+                                                                         + " to game. This is probably because someone else with the same name is already in the game."));
             } else if (Boolean.TRUE == msg.isSpectator) {
                 round.addSpectator(session);
             } else {
@@ -114,17 +113,6 @@ public class GameRoundWebsocket {
 
     private static void log(String roundId, String msg) {
         System.out.println("[websocket-" + roundId + "]  " + msg);
-    }
-
-    // TODO: remove this method once we find out if session timeout is being altered on cloud env
-    private static void checkIdleTimeout(Session session, String roundId) {
-        // See if we can catch a reason why sessions timeout in cloud env
-        if (session.getMaxIdleTimeout() > 0) {
-            log(roundId, "WARNING: Session idle timeout is: " + session.getMaxIdleTimeout());
-        }
-        if (session.getContainer().getDefaultMaxSessionIdleTimeout() > 0) {
-            log(roundId, "WARNING: Default session idle timeout is: " + session.getContainer().getDefaultMaxSessionIdleTimeout());
-        }
     }
 
 }

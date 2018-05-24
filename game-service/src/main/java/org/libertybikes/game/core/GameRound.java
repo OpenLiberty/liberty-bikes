@@ -126,13 +126,19 @@ public class GameRound implements Runnable {
             c.player.setDirection(msg.direction);
     }
 
-    public void addPlayer(Session s, String playerId, String playerName, Boolean hasGameBoard) {
+    public boolean addPlayer(Session s, String playerId, String playerName, Boolean hasGameBoard) {
         // Front end should be preventing a player joining a full game but
         // defensive programming
         if (!isOpen()) {
             log("Cannot add player " + playerId + " to game because game has already started.");
-            return;
+            return false;
         }
+
+        for (Client c : clients.values())
+            if (c.player.id.equals(playerId)) {
+                log("Cannot add player " + playerId + " to game because a player with that ID is already in the game.");
+                return false;
+            }
 
         if (getPlayers().size() + 1 >= Player.MAX_PLAYERS) {
             gameState = State.FULL;
@@ -153,6 +159,7 @@ public class GameRound implements Runnable {
         broadcastGameBoard();
         beginHeartbeat();
         beginLobbyCountdown(s, isPhone);
+        return true;
     }
 
     public void addAI() {
