@@ -71,7 +71,7 @@ public class GameRoundWebsocket {
                 session.close();
                 return;
             }
-            // System.out.println("[onMessage] roundId=" + roundId + "  msg=" + message);
+            // log(roundId, "[onMessage] msg=" + message);
 
             if (GameEvent.GAME_START == msg.event) {
                 round.startGame();
