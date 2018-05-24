@@ -122,8 +122,7 @@ public class GameRound implements Runnable {
 
     public void updatePlayerDirection(Session playerSession, InboundMessage msg) {
         Client c = clients.get(playerSession);
-        if (c.isPlayer())
-            c.player.setDirection(msg.direction);
+        c.player.ifPresent((p) -> p.setDirection(msg.direction));
     }
 
     public boolean addPlayer(Session s, String playerId, String playerName, Boolean hasGameBoard) {
@@ -134,8 +133,13 @@ public class GameRound implements Runnable {
             return false;
         }
 
+        if (playerId == null || playerId.isEmpty()) {
+            log("Player must have a valid ID to join a round, but was null/empty.");
+            return false;
+        }
+
         for (Client c : clients.values())
-            if (c.player.id.equals(playerId)) {
+            if (c.player.isPresent() && playerId.equals(c.player.get().id)) {
                 log("Cannot add player " + playerId + " to game because a player with that ID is already in the game.");
                 return false;
             }
@@ -207,7 +211,7 @@ public class GameRound implements Runnable {
     @JsonbTransient
     public boolean isPlayer(Session s) {
         Client c = clients.get(s);
-        return c != null && c.isPlayer();
+        return c != null && c.player.isPresent();
     }
 
     private void removePlayer(Player p) {
@@ -231,8 +235,8 @@ public class GameRound implements Runnable {
 
     public int removeClient(Session client) {
         Client c = clients.remove(client);
-        if (c != null && c.player != null)
-            removePlayer(c.player);
+        if (c != null && c.player.isPresent())
+            removePlayer(c.player.get());
         return clients.size();
     }
 

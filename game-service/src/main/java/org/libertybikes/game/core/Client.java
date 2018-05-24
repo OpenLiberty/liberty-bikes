@@ -1,14 +1,13 @@
-/**
- *
- */
 package org.libertybikes.game.core;
+
+import java.util.Optional;
 
 import javax.websocket.Session;
 
 public class Client {
 
     public final Session session;
-    public final Player player;
+    public final Optional<Player> player;
     public final boolean autoRequeue;
     public boolean isPhone = false;
 
@@ -28,12 +27,8 @@ public class Client {
 
     private Client(Session s, Player p, boolean autoReque) {
         session = s;
-        player = p;
+        player = Optional.ofNullable(p);
         this.autoRequeue = autoReque;
-    }
-
-    public boolean isPlayer() {
-        return player != null;
     }
 
 }
