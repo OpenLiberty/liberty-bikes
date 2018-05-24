@@ -10,7 +10,8 @@ public class Player {
     public static enum DOMAIN {
         BASIC,
         GMAIL,
-        GITHUB;
+        GITHUB,
+        TWITTER;
 
         @Override
         public String toString() {

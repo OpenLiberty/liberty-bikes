@@ -1,6 +1,5 @@
 package org.libertybikes.auth.service.github;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -51,7 +50,7 @@ public class GitHubCallback extends JwtAuth {
     }
 
     @GET
-    public Response getAuthURL(@Context HttpServletRequest request) throws IOException, URISyntaxException {
+    public Response getAuthURL(@Context HttpServletRequest request) throws URISyntaxException {
         try {
             String githubCode = request.getParameter("code");
             String randomCode = (String) request.getSession().getAttribute("github");
