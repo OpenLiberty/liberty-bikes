@@ -147,7 +147,7 @@ export class GameComponent implements OnInit, OnDestroy {
   // Event handlers
   handleGameError(errorMessage: any) {
     console.log('Received error message from server: ' + errorMessage);
-    alert('Your connection to the game server has been closed. You will be redirected to the login page.');
+    alert(errorMessage + ' Your connection to the game server has been closed. You will be redirected to the login page.');
     this.ngZone.run(() => {
       this.router.navigate(['/login']);
     });
