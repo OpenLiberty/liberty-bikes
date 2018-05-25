@@ -2,7 +2,7 @@ export class Ranking {
   public rank: number;
   public name: string;
   public numWins: number;
-  public winLossRatio: string;
+  public winLossRatio: number;
   public totalGames: number;
   public rating: number;
 
@@ -11,7 +11,7 @@ export class Ranking {
     this.name = name;
     this.numWins = numWins;
     this.totalGames = totalGames;
-    this.winLossRatio = totalGames === 0 ? '--' : Number((numWins / totalGames) * 100).toFixed();
+    this.winLossRatio = totalGames === 0 ? 0 : (numWins / totalGames) * 100;
     this.rating = rating;
   }
 }
