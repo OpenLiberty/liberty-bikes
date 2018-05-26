@@ -46,9 +46,9 @@ export class ControlsComponent implements OnInit, OnDestroy {
   }
 
   constructor(private router: Router,
-		      private ngZone: NgZone,
-		      private http: HttpClient,
-		      private gameService: GameService) {
+          private ngZone: NgZone,
+          private http: HttpClient,
+          private gameService: GameService) {
     gameService.messages.subscribe((msg) => {
       const json = msg as any;
       console.log(`received: ${JSON.stringify(json)}`);
@@ -63,14 +63,14 @@ export class ControlsComponent implements OnInit, OnDestroy {
         this.gameService.send({ keepAlive: true });
       }
       if (json.gameStatus === 'FINISHED') {
-    	    console.log(`Round ${this.roundId} has finished.`);
-    	    if (confirm('Game is over, requeue to next round?')) {
-    	    	  this.requeue();
-    	    } else {
+        console.log(`Round ${this.roundId} has finished.`);
+        if (confirm('Game is over, requeue to next round?')) {
+          this.requeue();
+        } else {
           this.ngZone.run(() => {
             this.router.navigate(['/login']);
           });
-    	    }
+        }
       }
     }, (err) => {
       console.log(err);
@@ -351,7 +351,10 @@ export class ControlsComponent implements OnInit, OnDestroy {
     let partyId: string = sessionStorage.getItem('partyId');
     if (partyId === null) {
         let roundId: string = sessionStorage.getItem('roundId');
-        let nextRoundID: any = await this.http.get(`${environment.API_URL_GAME_ROUND}/${roundId}/requeue?isPlayer=true`, { responseType: 'text' }).toPromise();
+        let nextRoundID: any = await this.http.get(
+          `${environment.API_URL_GAME_ROUND}/${roundId}/requeue?isPlayer=true`,
+          { responseType: 'text' }
+        ).toPromise();
         this.processRequeue(nextRoundID);
     } else {
       let queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${partyId}/queue`, {});
@@ -371,10 +374,10 @@ export class ControlsComponent implements OnInit, OnDestroy {
         } else {
           console.log('Error: unrecognized message ' + msg.data);
         }
-      }
+      };
       queueCallback.onerror = msg => {
         console.log('Error showing queue position: ' + JSON.stringify(msg.data));
-      }
+      };
     }
   }
 
@@ -387,8 +390,8 @@ export class ControlsComponent implements OnInit, OnDestroy {
 
   verifyOpen() {
     if (!this.gameService.isOpen()) {
-    	  console.log('GameService socket not open');
-    	  this.ngZone.run(() => {
+      console.log('GameService socket not open');
+      this.ngZone.run(() => {
         this.router.navigate(['/login']);
       });
     }

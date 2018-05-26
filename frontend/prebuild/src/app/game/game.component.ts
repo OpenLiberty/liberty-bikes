@@ -34,13 +34,13 @@ export class GameComponent implements OnInit, OnDestroy {
   context: CanvasRenderingContext2D;
   stage: Stage;
 
-  players: Map<string,Player> = new Map<string,Player>();
+  players: Map<string, Player> = new Map<string, Player>();
   obstacles: Obstacle[];
   trailsShape: Shape;
   trailsCanvas: HTMLCanvasElement;
   trailsContext: CanvasRenderingContext2D;
   obstaclesShape: Shape;
-  obstaclePulseUp: boolean = true;
+  obstaclePulseUp = true;
 
   constructor(private meta: Meta,
     private router: Router,
@@ -74,7 +74,7 @@ export class GameComponent implements OnInit, OnDestroy {
           this.updatePlayerList(json.playerlist);
         }
         if (json.players) {
-        	  this.updatePlayerStatus(json.players);
+          this.updatePlayerStatus(json.players);
         }
         this.stage.update();
       }, (err) => {
@@ -165,16 +165,24 @@ export class GameComponent implements OnInit, OnDestroy {
       // give that shadow a pulsating effect by oscillating the blur between 10-50
       let blur: number = this.obstaclesShape.shadow.blur;
       blur += this.obstaclePulseUp ? 2 : -2;
-      if (blur >= 50)
+      if (blur >= 50) {
         this.obstaclePulseUp = false;
-      if (blur <= 10)
+      }
+
+      if (blur <= 10) {
         this.obstaclePulseUp = true;
+      }
+
       this.obstaclesShape.shadow.blur = blur;
     } else {
       for (let obstacle of obstacles) {
         this.obstaclesShape.shadow = new Shadow(Obstacle.COLOR, 0, 0, 20);
-        this.obstaclesShape.graphics.beginFill(Obstacle.COLOR)
-                                    .rect(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE, obstacle.width * Constants.BOX_SIZE, obstacle.height * Constants.BOX_SIZE);
+        this.obstaclesShape.graphics.beginFill(Obstacle.COLOR).rect(
+          obstacle.x * Constants.BOX_SIZE,
+          obstacle.y * Constants.BOX_SIZE,
+          obstacle.width * Constants.BOX_SIZE,
+          obstacle.height * Constants.BOX_SIZE
+        );
       }
     }
   }
@@ -200,18 +208,24 @@ export class GameComponent implements OnInit, OnDestroy {
       // Otherwise, just update the shape positions
       movingObstacles.forEach((obstacle, i) => {
         this.obstacles[i].update(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE);
-        this.trailsContext.clearRect(obstacle.x * Constants.BOX_SIZE, obstacle.y * Constants.BOX_SIZE, obstacle.width * Constants.BOX_SIZE, obstacle.height * Constants.BOX_SIZE);
+        this.trailsContext.clearRect(
+          obstacle.x * Constants.BOX_SIZE,
+          obstacle.y * Constants.BOX_SIZE,
+          obstacle.width * Constants.BOX_SIZE,
+          obstacle.height * Constants.BOX_SIZE
+        );
       });
     }
   }
 
   updatePlayerList(playerlist: any) {
-    let oldPlayers: Map<string,Player> = new Map<string,Player>(this.players);
+    let oldPlayers: Map<string, Player> = new Map<string, Player>(this.players);
     this.players.clear();
     for (let playerInfo of playerlist) {
       // Don't add generic bot players (used to pad out the playerlist)
-      if (playerInfo.id === "")
+      if (playerInfo.id === '') {
         continue;
+      }
 
       let newPlayer = oldPlayers.get(playerInfo.id);
 
@@ -226,7 +240,11 @@ export class GameComponent implements OnInit, OnDestroy {
 
       this.players.set(playerInfo.id, newPlayer);
 
-      newPlayer.update(playerInfo.x * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE, playerInfo.y * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE, playerInfo.direction);
+      newPlayer.update(
+        playerInfo.x * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE,
+        playerInfo.y * Constants.BOX_SIZE + (playerInfo.width / 2) * Constants.BOX_SIZE,
+        playerInfo.direction
+      );
 
       this.stage.addChild(newPlayer.object);
     }
@@ -237,21 +255,30 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   updatePlayerStatus(players: any) {
-    let noneAlive: boolean = true;
-    let playersMoved: boolean = false;
+    let noneAlive = true;
+    let playersMoved = false;
     players.forEach((player, i) => {
       const playerEntity = this.players.get(player.id);
       if (player.status === 'Alive') {
         noneAlive = false;
 
-        if (playerEntity.update(player.x * Constants.BOX_SIZE + (player.width / 2) * Constants.BOX_SIZE, player.y * Constants.BOX_SIZE + (player.height / 2) * Constants.BOX_SIZE, player.direction)) {
+        if (playerEntity.update(
+          player.x * Constants.BOX_SIZE + (player.width / 2) * Constants.BOX_SIZE,
+          player.y * Constants.BOX_SIZE + (player.height / 2) * Constants.BOX_SIZE,
+          player.direction)
+        ) {
           playersMoved = true;
         }
         // Stamp down player on trails canvas so it can be erased properly when obstacles roll over it
         this.trailsContext.shadowBlur = 20;
         this.trailsContext.shadowColor = player.color;
         this.trailsContext.fillStyle = player.color;
-        this.trailsContext.fillRect(Constants.BOX_SIZE * player.x + (player.width / 2) * Constants.BOX_SIZE - Constants.BOX_SIZE / 2, Constants.BOX_SIZE * player.y + (player.height / 2) * Constants.BOX_SIZE - Constants.BOX_SIZE / 2, Constants.BOX_SIZE, Constants.BOX_SIZE);
+        this.trailsContext.fillRect(
+          Constants.BOX_SIZE * player.x + (player.width / 2) * Constants.BOX_SIZE - Constants.BOX_SIZE / 2,
+          Constants.BOX_SIZE * player.y + (player.height / 2) * Constants.BOX_SIZE - Constants.BOX_SIZE / 2,
+          Constants.BOX_SIZE,
+          Constants.BOX_SIZE
+        );
       } else if (!player.alive) {
         // Ensure tooltip is hidden in case player dies before it fades out
         playerEntity.tooltip.visible(false);
@@ -261,10 +288,11 @@ export class GameComponent implements OnInit, OnDestroy {
       playerEntity.setStatus(player.status);
     });
 
-    if (playersMoved)
+    if (playersMoved) {
       this.trailsShape.graphics.clear()
         .beginBitmapFill(this.trailsCanvas, 'no-repeat')
         .drawRect(0, 0, Constants.BOARD_SIZE, Constants.BOARD_SIZE);
+    }
 
     if (noneAlive) {
       this.players.forEach((player: Player, id: string) => {
@@ -276,7 +304,7 @@ export class GameComponent implements OnInit, OnDestroy {
 
   // Game actions
   startGame() {
-	this.verifyOpen();
+  this.verifyOpen();
     this.gameService.send({ message: 'GAME_START' });
   }
 
@@ -285,15 +313,18 @@ export class GameComponent implements OnInit, OnDestroy {
     let isSpectator: boolean = sessionStorage.getItem('isSpectator') === 'true' ? true : false;
     if (isSpectator || partyId === null) {
       let roundId: string = sessionStorage.getItem('roundId');
-      let nextRoundID: any = await this.http.get(`${environment.API_URL_GAME_ROUND}/${roundId}/requeue?isPlayer=${!isSpectator}`, { responseType: 'text' }).toPromise();
+      let nextRoundID: any = await this.http.get(
+        `${environment.API_URL_GAME_ROUND}/${roundId}/requeue?isPlayer=${!isSpectator}`,
+        { responseType: 'text' }
+      ).toPromise();
       // if a spectator, wait 5s before moving to next round to let people look at the final state of the board a bit
       if (isSpectator) {
-    	    console.log(`Will requeue to round ${nextRoundID} in 5 seconds.`);
-    	    setTimeout(() => {
+        console.log(`Will requeue to round ${nextRoundID} in 5 seconds.`);
+        setTimeout(() => {
           this.processRequeue(nextRoundID);
-    	    }, 5000);
+        }, 5000);
       } else {
-    	    this.processRequeue(nextRoundID);
+        this.processRequeue(nextRoundID);
       }
     } else {
       let queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${partyId}/queue`, {});
@@ -313,10 +344,10 @@ export class GameComponent implements OnInit, OnDestroy {
         } else {
           console.log('Error: unrecognized message ' + msg.data);
         }
-      }
+      };
       queueCallback.onerror = msg => {
         console.log('Error showing queue position: ' + JSON.stringify(msg.data));
-      }
+      };
     }
   }
 
@@ -352,8 +383,8 @@ export class GameComponent implements OnInit, OnDestroy {
 
   verifyOpen() {
     if (!this.gameService.isOpen()) {
-    	  console.log('GameService socket not open');
-    	  this.ngZone.run(() => {
+      console.log('GameService socket not open');
+      this.ngZone.run(() => {
         this.router.navigate(['/login']);
       });
     }

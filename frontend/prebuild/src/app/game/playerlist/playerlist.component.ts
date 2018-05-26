@@ -16,7 +16,7 @@ export class PlayerListComponent implements OnInit {
       const json = msg as any;
       if (json.playerlist) {
         const newPlayers = new Array();
-        //console.log(`Got playerlist ${JSON.stringify(json.playerlist)}`);
+        // console.log(`Got playerlist ${JSON.stringify(json.playerlist)}`);
         for (let player of json.playerlist) {
           const newPlayer = new Player();
           newPlayer.name = player.name;

@@ -7,13 +7,13 @@ export class PlayerTooltip {
   static readonly tooltipDistance = Constants.BOX_SIZE * 5;
 
   public tooltipShape: Container;
-  public lifetime: number = 30;
+  public lifetime = 30;
 
   showAbove: boolean;
   playerVertical: boolean;
-  lastX: number = 0;
-  lastY: number = 0; // track if player is moving up or down
-  lastDirection: string = 'NONE';
+  lastX = 0;
+  lastY = 0; // track if player is moving up or down
+  lastDirection = 'NONE';
 
   constructor(public player: Player) {
     if (!this.player.color) {
@@ -41,7 +41,8 @@ export class PlayerTooltip {
     let verticalMargin = PlayerTooltip.tooltipDistance;
 
     // positioning
-    if (this.player.y > Constants.BOARD_SIZE - (this.player.image.getTransformedBounds().height / 2 + verticalMargin + tooltipBounds.height)) {
+    let mimumRequiredDistance = this.player.image.getTransformedBounds().height / 2 + verticalMargin + tooltipBounds.height;
+    if (this.player.y > Constants.BOARD_SIZE - mimumRequiredDistance) {
       this.showAbove = true;
     } else if (this.player.y <= (this.player.image.getTransformedBounds().height / 2 + verticalMargin + tooltipBounds.height)) {
       this.showAbove = false;

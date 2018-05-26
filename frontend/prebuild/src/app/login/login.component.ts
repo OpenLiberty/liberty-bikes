@@ -15,12 +15,13 @@ import { Player } from '../entity/player';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  static queueCallback: EventSourcePolyfill;
+
   pane: PaneType = sessionStorage.getItem('username') === null ? 'left' : 'right';
   username: string;
   party: string;
   queuePosition: number;
   player = new Player();
-  static queueCallback: EventSourcePolyfill;
   isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
   constructor(
@@ -40,15 +41,16 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.meta.addTag({name: 'viewport', content: `width=${viewWidth}, height=${viewHeight}, initial-scale=1.0`}, true);
 
     this.route.params.subscribe( params =>  {
-    	  if (params['jwt'])
-        sessionStorage.setItem("jwt", params['jwt']);
+      if (params['jwt']) {
+        sessionStorage.setItem('jwt', params['jwt']);
+      }
     });
     let jwt = sessionStorage.getItem('jwt');
     if (jwt) {
       this.getPlayerId(jwt);
     }
 
-    this.player.status = "none";
+    this.player.status = 'none';
 
     if (sessionStorage.getItem('username') !== null) {
       this.username = sessionStorage.getItem('username');
@@ -57,9 +59,9 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     // If a player has participated in a game and requeued and the next round is full, they will be redirected back to the login page.
     // Re-use the EventSource initiated on the game page, but change the onMessage() function to match the context of this page
-    var queuePosition = sessionStorage.getItem('queuePosition');
+    let queuePosition = sessionStorage.getItem('queuePosition');
     if (queuePosition) {
-      sessionStorage.removeItem('queuePosition')
+      sessionStorage.removeItem('queuePosition');
       console.log(`User already associated with party, entering queue`);
       this.setQueueOnMessage();
       this.showQueue(queuePosition);
@@ -73,11 +75,11 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginGoogle() {
        window.location.href = `${environment.API_URL_AUTH}/auth-service/GoogleAuth`;
   }
-  
+
   loginGithub() {
       window.location.href = `${environment.API_URL_AUTH}/auth-service/GitHubAuth`;
   }
-  
+
   loginTwitter() {
       window.location.href = `${environment.API_URL_AUTH}/auth-service/TwitterAuth`;
   }
@@ -92,7 +94,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   async joinParty() {
     let roundID: any = await this.http.get(`${environment.API_URL_PARTY}/${this.party}/round`, { responseType: 'text' }).toPromise();
     console.log(`Got roundID=${roundID} for partyID=${this.party}`);
-    if(!roundID) {
+    if (!roundID) {
       alert(`Party ${this.party} does not exist.`);
       return;
     }
@@ -124,10 +126,11 @@ export class LoginComponent implements OnInit, OnDestroy {
 
       if (data.gameState !== 'OPEN') {
         if (this.party === null) {
-          if (data.gameState === 'FULL')
+          if (data.gameState === 'FULL') {
             alert('All games are full!  Try again in a few seconds.');
-          else
+          } else {
             alert('Game has already begun!  Try again later.');
+          }
         } else {
           this.enterQueue();
         }
@@ -172,7 +175,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   showGuestLogin() {
     this.pane = 'center';
-    document.getElementById("signin").innerHTML="Sign In As Guest";
+    document.getElementById('signin').innerHTML = 'Sign In As Guest';
   }
 
   setQueueOnMessage() {
@@ -187,18 +190,19 @@ export class LoginComponent implements OnInit, OnDestroy {
       } else {
         console.log('Error: unrecognized message  ' + msg.data);
       }
-    }
+    };
   }
 
   enterQueue() {
     console.log(`enering queue for party ${this.party}`);
-    if (LoginComponent.queueCallback)
+    if (LoginComponent.queueCallback) {
       LoginComponent.queueCallback.close();
+    }
     LoginComponent.queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${this.party}/queue`, {});
     this.setQueueOnMessage();
     LoginComponent.queueCallback.onerror = msg => {
       console.log('Error showing queue position: ' + JSON.stringify(msg.data));
-    }
+    };
   }
 
   showQueue(queuePosition) {
@@ -210,17 +214,18 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   cancelQueue() {
-	if (LoginComponent.queueCallback)
-	  try {
-	    LoginComponent.queueCallback.close();
-	    this.pane = 'right';
-	  } catch (ignore) {
-	  }
+    if (LoginComponent.queueCallback) {
+      try {
+        LoginComponent.queueCallback.close();
+        this.pane = 'right';
+      } catch (ignore) { }
+    }
   }
 
   async loginAsGuest(username: string) {
-    if (await this.createUser(username, sessionStorage.getItem('userId')))
+    if (await this.createUser(username, sessionStorage.getItem('userId'))) {
       this.pane = 'right';
+    }
   }
 
   async getPlayerId(jwt: string) {
@@ -231,11 +236,11 @@ export class LoginComponent implements OnInit, OnDestroy {
     sessionStorage.setItem('userId', user.id);
     if (user.exists === 'true') {
       sessionStorage.setItem('username', user.username);
-	  this.player.name = user.username;
-	  this.pane = 'right';
+      this.player.name = user.username;
+      this.pane = 'right';
     } else {
       this.pane = 'center';
-      document.getElementById("signin").innerHTML="register username";
+      document.getElementById('signin').innerHTML = 'register username';
     }
   }
 
