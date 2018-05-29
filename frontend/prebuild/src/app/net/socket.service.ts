@@ -20,8 +20,9 @@ export class SocketService {
   set url(newUrl: string) {
     console.log(`Setting url to ${newUrl}`);
     if (this.socketOpen) {
-    	  this.close();
+      this.close();
     }
+
     if (this.socketUrl !== newUrl) {
       this.open = false;
       this.hasUrl = false;
@@ -50,7 +51,7 @@ export class SocketService {
     }
     return this.subject;
   }
-  
+
   public close() {
     this.open = false;
     this.ws.close();
@@ -67,17 +68,17 @@ export class SocketService {
         this.subject.next(this.messageBuffer.shift() as any);
       }
     };
-    
+
     this.ws.onclose = () => {
-    	  console.log('Socket closed');
-    	  this.open = false;
-    }
+      console.log('Socket closed');
+      this.open = false;
+    };
 
     const observable = Observable.create(
       (obs: Observer<MessageEvent>) => {
-    	    this.ws.onmessage = obs.next.bind(obs);
-    	    this.ws.onerror = obs.error.bind(obs);
-    	    this.ws.onclose = obs.complete.bind(obs);
+        this.ws.onmessage = obs.next.bind(obs);
+        this.ws.onerror = obs.error.bind(obs);
+        this.ws.onclose = obs.complete.bind(obs);
 
         return this.ws.close.bind(this.ws);
       }

@@ -32,19 +32,20 @@ export class PlayerComponent implements OnInit {
   }
 
   get statusImage() {
-    var status = this.player.status.toLowerCase();
+    let status = this.player.status.toLowerCase();
     if (status === 'none') {
       return '';
     }
 
-	  if (status === 'connected') {
+    if (status === 'connected') {
       status = 'alive';
     }
-	  
-	if (status === 'alive')
+
+    if (status === 'alive') {
       return `/assets/images/bike_full.png`;
-	else
+    } else {
       return `/assets/images/status_${status}.png`;
+    }
   }
 
   backgroundColor(color: string): string {

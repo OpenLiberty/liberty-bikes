@@ -3,14 +3,16 @@ import { PlayerTooltip } from './player.tooltip';
 import { Assets } from '../game/assets';
 
 export class Player {
+  static audioLoaded = false;
+
   displayObject: Container;
 
   get object() {
     return this.displayObject;
   }
 
-  static audioLoaded: boolean = false;
-  childrenLoaded: boolean = false;
+
+  childrenLoaded = false;
 
   public name: string;
   public status: string;
@@ -24,7 +26,7 @@ export class Player {
   direction: string;
 
   public update(x: number, y: number, direction: string) {
-    //console.log(`[Player-${this.name}]  x=${x}  y=${y}  direction=${direction}`);
+    // console.log(`[Player-${this.name}]  x=${x}  y=${y}  direction=${direction}`);
     let playerMoved: boolean = this.x !== x || this.y !== y || this.direction !== direction;
     this.x = x;
     this.y = y;

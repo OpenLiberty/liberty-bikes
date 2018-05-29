@@ -1,4 +1,4 @@
-import { Text, Shape, Container } from "createjs-module";
+import { Text, Shape, Container } from 'createjs-module';
 
 export class Tooltip {
   displayObject: Container;
@@ -31,8 +31,16 @@ export class Tooltip {
     this.label.y += paddingy;
 
     this.background = new Shape();
-    this.background.graphics.beginFill(backgroundColor).drawRoundRect(0,0, this.label.getBounds().width + (2 * paddingx), this.label.getBounds().height + (2 * paddingy), 10);
-    this.background.setBounds(0,0, this.label.getBounds().width + (2 * paddingx), this.label.getBounds().height + (2 * paddingy));
+
+    this.background.graphics.beginFill(backgroundColor).drawRoundRect(
+      0,
+      0,
+      this.label.getBounds().width + (2 * paddingx),
+      this.label.getBounds().height + (2 * paddingy),
+      10
+    );
+
+    this.background.setBounds(0, 0, this.label.getBounds().width + (2 * paddingx), this.label.getBounds().height + (2 * paddingy));
 
     this.displayObject = new Container();
     this.displayObject.addChild(this.background);

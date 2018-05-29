@@ -6,7 +6,7 @@ import { timer } from 'rxjs/observable/timer';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
-  selector: 'rank-list',
+  selector: 'app-rank-list',
   templateUrl: './leaderboard.component.html',
   styleUrls: ['./leaderboard.component.scss'],
   animations: [
@@ -42,7 +42,7 @@ export class LeaderboardComponent implements OnInit {
 
   ngOnInit() {
     this.getLeaders();
-    let leaderboardTimer = timer(0, 12* 1000);
+    let leaderboardTimer = timer(0, 12 * 1000);
     leaderboardTimer.subscribe((t) => this.nextLeaderboard(t));
   }
 
