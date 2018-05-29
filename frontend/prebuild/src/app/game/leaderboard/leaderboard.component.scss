@@ -49,7 +49,6 @@
   align-items: center;
 
   margin-bottom: 5px;
-  padding-left: 15px;
 
   font-size: 1.5em;
   color: #fff;
@@ -58,6 +57,10 @@
 .row span {
   margin: 0;
   padding: 0;
+}
+
+.row .rank {
+  padding-left: 15px;
 }
 
 .header {
@@ -70,8 +73,56 @@
   flex: 1;
 }
 
+.first {
+  border: 1px solid;
+  border-left: 5px solid;
+  border-color: #f7df69;
+  color: #f7df69;
+}
+
+.second {
+  border: 1px solid;
+  border-left: 5px solid;
+  border-color: #e7e7e7;
+  color: #e7e7e7;
+}
+
+.third {
+  border: 1px solid;
+  border-left: 5px solid;
+  border-color: #d68432;
+  color: #d68432;
+}
+
 .rank {
   flex: 1;
+}
+
+.first .rank {
+  background-image: url("../../../assets/images/first.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: -10px 0%;
+  background-origin: content-box;
+  color: #00000000;
+}
+
+.second .rank {
+  background-image: url("../../../assets/images/second.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: -10px 0%;
+  background-origin: content-box;
+  color: #00000000;
+}
+
+.third .rank {
+  background-image: url("../../../assets/images/third.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: -10px 0%;
+  background-origin: content-box;
+  color: #00000000;
 }
 
 .player {
@@ -85,6 +136,18 @@
 @media screen and (max-height: 799px) {
   .row {
     font-size: 1em;
+  }
+
+  .first .rank {
+    background-position: -5px 0%;
+  }
+
+  .second .rank {
+    background-position: -5px 0%;
+  }
+
+  .third .rank {
+    background-position: -5px 0%;
   }
 }
 
