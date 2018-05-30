@@ -64,7 +64,9 @@
 }
 
 .header {
-  margin-left: -10px;
+  border-left: 5px solid rgba(0, 0, 0, 0);
+  // margin-left: -10px;
+  // width: calc(100% - 10px);
 }
 
 .body {
@@ -104,7 +106,9 @@
   background-size: contain;
   background-position: -10px 0%;
   background-origin: content-box;
-  color: #00000000;
+
+  // Use RGBA to hide the text; Edge doesn't like alpha in hex
+  color: rgba(0, 0, 0, 0);
 }
 
 .second .rank {
@@ -113,7 +117,9 @@
   background-size: contain;
   background-position: -10px 0%;
   background-origin: content-box;
-  color: #00000000;
+
+  // Use RGBA to hide the text; Edge doesn't like alpha in hex
+  color: rgba(0, 0, 0, 0);
 }
 
 .third .rank {
@@ -122,7 +128,9 @@
   background-size: contain;
   background-position: -10px 0%;
   background-origin: content-box;
-  color: #00000000;
+
+  // Use RGBA to hide the text; Edge doesn't like alpha in hex
+  color: rgba(0, 0, 0, 0);
 }
 
 .player {
