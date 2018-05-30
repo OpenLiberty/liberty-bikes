@@ -1,3 +1,10 @@
+$first-color:  #f7df69;
+$second-color: #e7e7e7;
+$third-color: #d68432;
+
+// Use RGBA to make elements invisible; Edge doesn't like alpha in hex
+$invisible: rgba(0, 0, 0, 0);
+
 :host {
   display: grid;
   grid-template-rows: 100%;
@@ -64,9 +71,7 @@
 }
 
 .header {
-  border-left: 5px solid rgba(0, 0, 0, 0);
-  // margin-left: -10px;
-  // width: calc(100% - 10px);
+  border-left: 5px solid $invisible;
 }
 
 .body {
@@ -75,62 +80,55 @@
   flex: 1;
 }
 
-.first {
+%leader {
   border: 1px solid;
   border-left: 5px solid;
-  border-color: #f7df69;
-  color: #f7df69;
+}
+
+.first {
+  @extend %leader;
+  border-color: $first-color;
+  color: $first-color;
 }
 
 .second {
-  border: 1px solid;
-  border-left: 5px solid;
-  border-color: #e7e7e7;
-  color: #e7e7e7;
+  @extend %leader;
+  border-color: $second-color;
+  color: $second-color;
 }
 
 .third {
-  border: 1px solid;
-  border-left: 5px solid;
-  border-color: #d68432;
-  color: #d68432;
+  @extend %leader;
+  border-color: $third-color;
+  color: $third-color;
 }
 
 .rank {
   flex: 1;
 }
 
-.first .rank {
-  background-image: url("../../../assets/images/first.png");
+%leader-rank {
   background-repeat: no-repeat;
   background-size: contain;
   background-position: -10px 0%;
   background-origin: content-box;
 
-  // Use RGBA to hide the text; Edge doesn't like alpha in hex
-  color: rgba(0, 0, 0, 0);
+  color: $invisible;
+}
+
+.first .rank {
+  @extend %leader-rank;
+  background-image: url("../../../assets/images/first.png");
 }
 
 .second .rank {
+  @extend %leader-rank;
   background-image: url("../../../assets/images/second.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: -10px 0%;
-  background-origin: content-box;
-
-  // Use RGBA to hide the text; Edge doesn't like alpha in hex
-  color: rgba(0, 0, 0, 0);
 }
 
 .third .rank {
+  @extend %leader-rank;
   background-image: url("../../../assets/images/third.png");
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: -10px 0%;
-  background-origin: content-box;
-
-  // Use RGBA to hide the text; Edge doesn't like alpha in hex
-  color: rgba(0, 0, 0, 0);
 }
 
 .player {
