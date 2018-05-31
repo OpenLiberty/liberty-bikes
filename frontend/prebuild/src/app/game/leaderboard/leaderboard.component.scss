@@ -1,3 +1,10 @@
+$first-color:  #f7df69;
+$second-color: #e7e7e7;
+$third-color: #d68432;
+
+// Use RGBA to make elements invisible; Edge doesn't like alpha in hex
+$invisible: rgba(0, 0, 0, 0);
+
 :host {
   display: grid;
   grid-template-rows: 100%;
@@ -49,7 +56,6 @@
   align-items: center;
 
   margin-bottom: 5px;
-  padding-left: 15px;
 
   font-size: 1.5em;
   color: #fff;
@@ -60,8 +66,12 @@
   padding: 0;
 }
 
+.row .rank {
+  padding-left: 15px;
+}
+
 .header {
-  margin-left: -10px;
+  border-left: 5px solid $invisible;
 }
 
 .body {
@@ -70,8 +80,55 @@
   flex: 1;
 }
 
+%leader {
+  border: 1px solid;
+  border-left: 5px solid;
+}
+
+.first {
+  @extend %leader;
+  border-color: $first-color;
+  color: $first-color;
+}
+
+.second {
+  @extend %leader;
+  border-color: $second-color;
+  color: $second-color;
+}
+
+.third {
+  @extend %leader;
+  border-color: $third-color;
+  color: $third-color;
+}
+
 .rank {
   flex: 1;
+}
+
+%leader-rank {
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: -10px 0%;
+  background-origin: content-box;
+
+  color: $invisible;
+}
+
+.first .rank {
+  @extend %leader-rank;
+  background-image: url("../../../assets/images/first.png");
+}
+
+.second .rank {
+  @extend %leader-rank;
+  background-image: url("../../../assets/images/second.png");
+}
+
+.third .rank {
+  @extend %leader-rank;
+  background-image: url("../../../assets/images/third.png");
 }
 
 .player {
@@ -85,6 +142,18 @@
 @media screen and (max-height: 799px) {
   .row {
     font-size: 1em;
+  }
+
+  .first .rank {
+    background-position: -5px 0%;
+  }
+
+  .second .rank {
+    background-position: -5px 0%;
+  }
+
+  .third .rank {
+    background-position: -5px 0%;
   }
 }
 

@@ -9,7 +9,13 @@
       <span class="player">Player</span>
       <span class="value">Wins</span>
     </div>
-    <div *ngFor="let r of winsRankings, let i = index" [ngClass]="'row body'">
+    <div *ngFor="let r of winsRankings, let i = index" [ngClass]="{
+      row: true,
+      body: true,
+      first: i === 0,
+      second: i === 1,
+      third: i === 2
+    }">
       <span class="rank">{{i + 1}}</span>
       <span class="player">{{r.name}}</span>
       <span class="value">{{r.numWins}}</span>
@@ -22,7 +28,13 @@
       <span class="player">Player</span>
       <span class="value">Games</span>
     </div>
-    <div *ngFor="let r of gamesRankings, let i = index" [ngClass]="'row body'">
+    <div *ngFor="let r of gamesRankings, let i = index" [ngClass]="{
+      row: true,
+      body: true,
+      first: i === 0,
+      second: i === 1,
+      third: i === 2
+    }">
       <span class="rank">{{i + 1}}</span>
       <span class="player">{{r.name}}</span>
       <span class="value">{{r.totalGames}}</span>
@@ -33,13 +45,19 @@
     <div class="row header">
       <span class="rank">Rank</span>
       <span class="player">Player</span>
-      <span class="value">Ratio</span>
+      <span class="value">Win Rate</span>
     </div>
-    <div *ngFor="let r of ratioRankings, let i = index" [ngClass]="'row body'">
+    <div *ngFor="let r of ratioRankings, let i = index" [ngClass]="{
+      row: true,
+      body: true,
+      first: i === 0,
+      second: i === 1,
+      third: i === 2
+    }">
       <span class="rank">{{i + 1}}</span>
       <span class="player">{{r.name}}</span>
       <!-- Format is minimum one place before decimal, min and max 2 places after decimal. -->
-      <span class="value">{{r.winLossRatio | number: '1.2-2'}}</span>
+      <span class="value">{{r.winLossRatio | number: '1.2-2'}}%</span>
     </div>
   </div>
 
@@ -49,7 +67,13 @@
       <span class="player">Player</span>
       <span class="value">Rating</span>
     </div>
-    <div *ngFor="let r of ratingRankings, let i = index" [ngClass]="'row body'">
+    <div *ngFor="let r of ratingRankings, let i = index" [ngClass]="{
+      row: true,
+      body: true,
+      first: i === 0,
+      second: i === 1,
+      third: i === 2
+    }">
       <span class="rank">{{i + 1}}</span>
       <span class="player">{{r.name}}</span>
       <span class="value">{{r.rating}}</span>
