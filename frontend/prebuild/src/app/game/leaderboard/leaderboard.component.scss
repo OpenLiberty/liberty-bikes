@@ -139,6 +139,18 @@ $invisible: rgba(0, 0, 0, 0);
   flex: 1;
 }
 
+.body:nth-child(2) {
+  background-color: rgba(250,255,0, 0.4);
+}
+
+.body:nth-child(3) {
+  background-color: rgba(192,192,192, 0.4);
+}
+
+.body:nth-child(4) {
+  background-color: rgba(160,82,45, 0.4);
+}
+
 @media screen and (max-height: 799px) {
   .row {
     font-size: 1em;
