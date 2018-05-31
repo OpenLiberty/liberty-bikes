@@ -1,6 +1,7 @@
 import { Bitmap, Container } from 'createjs-module';
 import { PlayerTooltip } from './player.tooltip';
 import { Assets } from '../game/assets';
+import { Constants } from '../game/constants';
 
 export class Player {
   static audioLoaded = false;
@@ -38,9 +39,26 @@ export class Player {
       this.tooltip = new PlayerTooltip(this);
       this.displayObject.addChild(this.tooltip.tooltipShape);
 
-      this.image = Assets.PLAYER_BITMAP.clone();
-      this.image.scaleX = 1 / 60;
-      this.image.scaleY = 1 / 60;
+      switch (this.color.toLowerCase()) {
+        case Constants.GREEN_COLOR:
+          this.image = Assets.PLAYER_GREEN_BITMAP.clone();
+          break;
+        case Constants.BLUE_COLOR:
+          this.image = Assets.PLAYER_BLUE_BITMAP.clone();
+          break;
+        case Constants.ORANGE_COLOR:
+          this.image = Assets.PLAYER_ORANGE_BITMAP.clone();
+          break;
+        case Constants.PURPLE_COLOR:
+          this.image = Assets.PLAYER_PURPLE_BITMAP.clone();
+          break;
+        default:
+          console.warn("Player color did not match available images. Defaulting to green.");
+          this.image = Assets.PLAYER_GREEN_BITMAP.clone();
+          break;
+      }
+      this.image.scaleX = 5 / 6;
+      this.image.scaleY = 5 / 6;
       // Set the center point of the player image to be the front 1/3 of the area
       this.image.regX = this.image.getBounds().width / 2;
       this.image.regY = this.image.getBounds().height / 3;
