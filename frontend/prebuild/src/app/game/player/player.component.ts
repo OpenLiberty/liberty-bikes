@@ -1,5 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Player } from '../../entity/player';
+import { Constants } from '../constants';
+import { Assets } from '../assets';
 
 @Component({
   selector: 'app-player',
@@ -42,7 +44,26 @@ export class PlayerComponent implements OnInit {
     }
 
     if (status === 'alive') {
-      return `/assets/images/bike_full.png`;
+      let filename: string;
+      switch (this.player.color.toLowerCase()) {
+        case Constants.GREEN_COLOR:
+          filename = Constants.GREEN_FILENAME;
+          break;
+        case Constants.BLUE_COLOR:
+          filename = Constants.BLUE_FILENAME;
+          break;
+        case Constants.ORANGE_COLOR:
+          filename = Constants.ORANGE_FILENAME;
+          break;
+        case Constants.PURPLE_COLOR:
+          filename = Constants.PURPLE_FILENAME;
+          break;
+        default:
+          console.warn("Player color did not match available images. Defaulting to green.");
+          filename = Constants.GREEN_FILENAME;
+          break;
+      }
+      return `/assets/images/${filename}`;
     } else {
       return `/assets/images/status_${status}.png`;
     }
