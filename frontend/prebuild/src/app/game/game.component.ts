@@ -9,8 +9,11 @@ import { environment } from './../../environments/environment';
 import { Player } from '../entity/player';
 import { Obstacle } from '../entity/obstacle';
 import { PlayerTooltip } from '../entity/player.tooltip';
-import { Shape, Stage, Shadow, Text } from 'createjs-module';
+import { Shape, Stage, Shadow, Text, Ticker, Container, Tween, CSSPlugin, Ease } from 'createjs-module';
 import { Constants } from './constants';
+import { Card } from '../entity/card';
+import { bindCallback } from 'rxjs';
+import { Bar } from '../entity/bar';
 
 @Component({
   selector: 'app-game',
@@ -34,6 +37,13 @@ export class GameComponent implements OnInit, OnDestroy {
   context: CanvasRenderingContext2D;
   stage: Stage;
 
+  overlayCanvas: HTMLCanvasElement;
+  overlayContext: CanvasRenderingContext2D;
+  overlayStage: Stage;
+
+  card: Card;
+  bar: Bar;
+
   players: Map<string, Player> = new Map<string, Player>();
   obstacles: Obstacle[];
   trailsShape: Shape;
@@ -56,6 +66,10 @@ export class GameComponent implements OnInit, OnDestroy {
         }
         if (json.countdown) {
           this.ngZone.run(() => this.startingCountdown(json.countdown));
+        }
+        if (json.awaitplayerscountdown) {
+          console.log(`Got countdown value of ${json.awaitplayerscountdown}`);
+          this.ngZone.run(() => this.waitForPlayers(json.awaitplayerscountdown));
         }
         if (json.keepAlive) {
           this.gameService.send({ keepAlive: true });
@@ -104,6 +118,10 @@ export class GameComponent implements OnInit, OnDestroy {
     this.canvas = <HTMLCanvasElement> document.getElementById('gameCanvas');
     this.context = this.canvas.getContext('2d');
     this.stage = new Stage(this.canvas);
+
+    this.overlayCanvas = <HTMLCanvasElement> document.getElementById('overlayCanvas');
+    this.overlayContext = this.overlayCanvas.getContext('2d');
+    this.overlayStage = new Stage(this.overlayCanvas);
 
     this.trailsShape = new Shape();
     this.trailsShape.x = 0;
@@ -375,10 +393,48 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   startingCountdown(seconds) {
-    this.showLoader = true;
-    setTimeout(() => {
-      this.showLoader = false;
-    }, (1000 * seconds));
+    this.overlayStage.removeAllChildren();
+  }
+
+  waitForPlayers(seconds) {
+    const contentContainer = new Container();
+    const content = new Text(
+      'waiting for players',
+      'small-caps 28px -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
+      'rgba(255, 255, 255, 1)'
+    );
+
+    this.bar = new Bar(150);
+    content.x = this.bar.width / 2 - content.getBounds().width / 2;
+    content.y = 5;
+    this.bar.contentContainer.addChild(content);
+
+    this.overlayStage.addChild(this.bar.displayObject);
+    this.overlayStage.update();
+
+    Ticker.on('tick', (evt) => this.updateOverlay(evt));
+    Ticker.framerate = 60;
+    this.bar.show();
+
+    // this.card = new Card(960, 150);
+    // content.x = this.card.contentWidth / 2 - content.getBounds().width / 2;
+    // content.y = 20;
+    // this.card.contents.addChild(content);
+
+    // this.card.displayObject.x = Constants.BOARD_SIZE / 2 - this.card.width / 2;
+    // this.card.displayObject.y = Constants.BOARD_SIZE / 2 - this.card.height / 2;
+
+    // // this.overlayStage.addChild(background);
+    // this.overlayStage.addChild(this.card.displayObject);
+    // this.overlayStage.update();
+
+    // Ticker.on('tick', (evt) => this.updateOverlay(evt));
+    // Ticker.framerate = 60;
+    // this.card.show();
+  }
+
+  updateOverlay(event) {
+    this.overlayStage.update(event);
   }
 
   verifyOpen() {
