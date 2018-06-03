@@ -393,8 +393,24 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   startingCountdown(seconds) {
-    this.waitCard.hide();
     this.waitingSub.unsubscribe();
+
+    this.waitCard.headerString = 'Get Ready';
+    this.waitCard.bodyString = '';
+
+    this.waitingTimer = timer(0, 1000);
+    this.waitingSub = this.waitingTimer.subscribe((t) => {
+      if (t < seconds - 1) {
+        this.waitCard.bodyString = `${seconds - (t + 1)}`;
+      } else if (t === seconds - 1) {
+        this.waitCard.bodyString = 'GO!';
+        this.waitCard.hide(500);
+      } else if (t >= seconds) {
+        this.ngZone.run((t) => {
+          this.waitingSub.unsubscribe();
+        });
+      }
+    });
   }
 
   waitForPlayers(seconds) {
@@ -413,7 +429,7 @@ export class GameComponent implements OnInit, OnDestroy {
       const margin = 50;
       this.waitCard = new Card(width, "waiting for players", `${seconds}`, true);
       const card = this.waitCard.displayObject;
-      card.x = (Constants.BOARD_SIZE / 2) - (width / 2);
+      card.x = (Constants.BOARD_SIZE / 2) - (this.waitCard.width / 2);
       card.y = (Constants.BOARD_SIZE / 2) - (this.waitCard.height / 2);
 
       this.overlayStage.addChild(card);

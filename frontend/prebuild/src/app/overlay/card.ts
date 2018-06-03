@@ -46,7 +46,7 @@ export class Card {
   }
 
   set headerString(newString: string) {
-    this.headerText.text = newString;
+    this.headerText.text = newString.toLocaleLowerCase();
   }
 
   bodyText = new Text();
@@ -134,20 +134,20 @@ export class Card {
     Tween.get(this.bodyText).to({x: bodyX}, Card.DURATION, Ease.quadOut);
   }
 
-  public hide() {
-    Tween.get(this.backgroundCommand).to({w: 0}, Card.DURATION, Ease.quadOut);
-    Tween.get(this.background).to({alpha: 0}, Card.DURATION, Ease.quadOut);
+  public hide(delay = 0) {
+    Tween.get(this.backgroundCommand).wait(delay).to({w: 0}, Card.DURATION, Ease.quadOut);
+    Tween.get(this.background).wait(delay).to({alpha: 0}, Card.DURATION, Ease.quadOut);
 
-    Tween.get(this.colorLayerCommand).to({w: 0}, Card.DURATION, Ease.quadOut);
-    Tween.get(this.colorLayer).to({alpha: 0}, Card.DURATION, Ease.quadOut);
+    Tween.get(this.colorLayerCommand).wait(delay).to({w: 0}, Card.DURATION, Ease.quadOut);
+    Tween.get(this.colorLayer).wait(delay).to({alpha: 0}, Card.DURATION, Ease.quadOut);
 
-    Tween.get(this.accentCommand).to({h: 0}, Card.DURATION, Ease.quadOut);
-    Tween.get(this.accent).to({y: this.height}, Card.DURATION, Ease.quadOut);
+    Tween.get(this.accentCommand).wait(delay).to({h: 0}, Card.DURATION, Ease.quadOut);
+    Tween.get(this.accent).wait(delay).to({y: this.height}, Card.DURATION, Ease.quadOut);
 
-    Tween.get(this.headerText).to({alpha: 0}, Card.DURATION, Ease.quadOut);
-    Tween.get(this.headerText).to({x: -this.width}, Card.DURATION, Ease.quadOut);
+    Tween.get(this.headerText).wait(delay).to({alpha: 0}, Card.DURATION, Ease.quadOut);
+    Tween.get(this.headerText).wait(delay).to({x: -this.width}, Card.DURATION, Ease.quadOut);
 
-    Tween.get(this.bodyText).to({alpha: 0}, Card.DURATION, Ease.quadOut);
-    Tween.get(this.bodyText).to({x: -this.width}, Card.DURATION, Ease.quadOut);
+    Tween.get(this.bodyText).wait(delay).to({alpha: 0}, Card.DURATION, Ease.quadOut);
+    Tween.get(this.bodyText).wait(delay).to({x: -this.width}, Card.DURATION, Ease.quadOut);
   }
 }
