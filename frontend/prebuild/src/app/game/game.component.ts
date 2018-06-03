@@ -13,7 +13,6 @@ import { Shape, Stage, Shadow, Text, Ticker, Container, Tween, CSSPlugin, Ease }
 import { Constants } from './constants';
 import { Card } from '../overlay/card';
 import { bindCallback, timer, Observable, Subscription } from 'rxjs';
-import { Bar } from '../overlay/bar';
 
 @Component({
   selector: 'app-game',
@@ -44,7 +43,6 @@ export class GameComponent implements OnInit, OnDestroy {
   waitCard: Card;
   waitingTimer: Observable<number>;
   waitingSub: Subscription;
-  bar: Bar;
 
   players: Map<string, Player> = new Map<string, Player>();
   obstacles: Obstacle[];
