@@ -11,9 +11,9 @@ import { Obstacle } from '../entity/obstacle';
 import { PlayerTooltip } from '../entity/player.tooltip';
 import { Shape, Stage, Shadow, Text, Ticker, Container, Tween, CSSPlugin, Ease } from 'createjs-module';
 import { Constants } from './constants';
-import { Card } from '../entity/card';
-import { bindCallback } from 'rxjs';
-import { Bar } from '../entity/bar';
+import { Card } from '../overlay/card';
+import { bindCallback, timer, Observable, Subscription } from 'rxjs';
+import { Bar } from '../overlay/bar';
 
 @Component({
   selector: 'app-game',
@@ -41,7 +41,9 @@ export class GameComponent implements OnInit, OnDestroy {
   overlayContext: CanvasRenderingContext2D;
   overlayStage: Stage;
 
-  card: Card;
+  waitCard: Card;
+  waitingTimer: Observable<number>;
+  waitingSub: Subscription;
   bar: Bar;
 
   players: Map<string, Player> = new Map<string, Player>();
@@ -393,44 +395,39 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   startingCountdown(seconds) {
-    this.overlayStage.removeAllChildren();
+    this.waitCard.hide();
+    this.waitingSub.unsubscribe();
   }
 
   waitForPlayers(seconds) {
-    const contentContainer = new Container();
-    const content = new Text(
-      'waiting for players',
-      'small-caps 28px -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-      'rgba(255, 255, 255, 1)'
-    );
+    if (this.waitingSub) {
+      this.waitingSub.unsubscribe();
+    }
+    this.waitingTimer = timer(0, 1000);
+    this.waitingSub = this.waitingTimer.subscribe((t) => {
+      if (this.waitCard) {
+        this.waitCard.bodyString = `${seconds - t}`;
+      }
+    });
 
-    this.bar = new Bar(150);
-    content.x = this.bar.width / 2 - content.getBounds().width / 2;
-    content.y = 5;
-    this.bar.contentContainer.addChild(content);
+    if (!this.waitCard) {
+      const width = 400;
+      const margin = 50;
+      this.waitCard = new Card(width, "waiting for players", `${seconds}`, true);
+      const card = this.waitCard.displayObject;
+      card.x = (Constants.BOARD_SIZE / 2) - (width / 2);
+      card.y = (Constants.BOARD_SIZE / 2) - (this.waitCard.height / 2);
 
-    this.overlayStage.addChild(this.bar.displayObject);
-    this.overlayStage.update();
+      this.overlayStage.addChild(card);
+      this.overlayStage.update();
 
-    Ticker.on('tick', (evt) => this.updateOverlay(evt));
-    Ticker.framerate = 60;
-    this.bar.show();
+      Ticker.on('tick', (evt) => this.updateOverlay(evt));
+      Ticker.framerate = 60;
+      this.waitCard.show();
 
-    // this.card = new Card(960, 150);
-    // content.x = this.card.contentWidth / 2 - content.getBounds().width / 2;
-    // content.y = 20;
-    // this.card.contents.addChild(content);
-
-    // this.card.displayObject.x = Constants.BOARD_SIZE / 2 - this.card.width / 2;
-    // this.card.displayObject.y = Constants.BOARD_SIZE / 2 - this.card.height / 2;
-
-    // // this.overlayStage.addChild(background);
-    // this.overlayStage.addChild(this.card.displayObject);
-    // this.overlayStage.update();
-
-    // Ticker.on('tick', (evt) => this.updateOverlay(evt));
-    // Ticker.framerate = 60;
-    // this.card.show();
+    } else {
+      this.waitCard.bodyString = `${seconds}`;
+    }
   }
 
   updateOverlay(event) {
