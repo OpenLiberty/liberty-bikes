@@ -84,16 +84,16 @@ export class LeaderboardComponent implements OnInit {
   nextLeaderboard(board: number) {
     switch (board % 4) {
       case 0:
-        this.currentBoard = 'wins';
+        this.currentBoard = 'rating';
         break;
       case 1:
-        this.currentBoard = 'totalGames';
-        break;
-      case 2:
         this.currentBoard = 'winLossRatio';
         break;
+      case 2:
+        this.currentBoard = 'wins';
+        break;
       default:
-        this.currentBoard = 'rating';
+        this.currentBoard = 'totalGames';
         break;
     }
   }
