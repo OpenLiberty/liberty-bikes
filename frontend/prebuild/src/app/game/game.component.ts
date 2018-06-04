@@ -411,7 +411,19 @@ export class GameComponent implements OnInit, OnDestroy {
     this.waitingSub.unsubscribe();
 
     this.waitCard.headerString = 'Get Ready';
-    this.waitCard.bodyString = '';
+    this.waitCard.bodyString = `${seconds}`;
+    this.waitCard.emphasizeBody = true;
+
+    const card = this.waitCard.displayObject;
+
+    const scaleFactor = 1.5;
+
+    Tween.get(card).to({
+      scaleX: scaleFactor,
+      scaleY: scaleFactor,
+      x: (Constants.BOARD_SIZE / 2) - ((this.waitCard.width * scaleFactor) / 2),
+      y: (Constants.BOARD_SIZE / 2) - ((this.waitCard.height * scaleFactor) / 2)
+    }, 100);
 
     this.waitingTimer = timer(0, 1000);
     this.waitingSub = this.waitingTimer.subscribe((t) => {

@@ -11,7 +11,10 @@ export class Card {
   private static readonly BODY_TEXT_FONT = '64px "Avenir-Black", "Arial Black", "Roboto Black", sans-serif';
   private static readonly BODY_TEXT_COLOR = 'rgba(255, 255, 255, 1)';
 
-  object = new Container();
+  private static readonly NORMAL_SCALE = 1.0;
+  private static readonly EMPHASIS_SCALE = 1.5;
+
+  private object = new Container();
 
   get displayObject(): DisplayObject {
     return this.object;
@@ -39,7 +42,7 @@ export class Card {
 
   mask = new Shape();
 
-  headerText = new Text();
+  private headerText = new Text();
 
   get headerString(): string {
     return this.headerText.text;
@@ -49,7 +52,7 @@ export class Card {
     this.headerText.text = newString.toLocaleLowerCase();
   }
 
-  bodyText = new Text();
+  private bodyText = new Text();
 
   get bodyString(): string {
     return this.bodyText.text;
@@ -57,6 +60,19 @@ export class Card {
 
   set bodyString(newString: string) {
     this.bodyText.text = newString;
+    if (this.emphasize) {
+      Tween.get(this.bodyText).to({scaleX: Card.EMPHASIS_SCALE, scaleY: Card.EMPHASIS_SCALE}).to({scaleX: Card.NORMAL_SCALE, scaleY: Card.NORMAL_SCALE}, 250);
+    }
+  }
+
+  private emphasize = false;
+
+  get emphasizeBody(): boolean {
+    return this.emphasize;
+  }
+
+  set emphasizeBody(emp: boolean) {
+    this.emphasize = emp;
   }
 
   constructor(width: number, header: string, body: string,  centerHorizontal = false, color = 'rgba(255, 255, 255, 1)') {
@@ -108,7 +124,7 @@ export class Card {
 
   public show() {
     Tween.get(this.backgroundCommand).to({w: this.width}, Card.DURATION, Ease.quadOut);
-    Tween.get(this.background).to({alpha: 0.7}, Card.DURATION, Ease.quadOut);
+    Tween.get(this.background).to({alpha: 0.9}, Card.DURATION, Ease.quadOut);
 
     Tween.get(this.colorLayerCommand).to({w: this.width}, Card.DURATION, Ease.quadOut);
     Tween.get(this.colorLayer).to({alpha: 0.18}, Card.DURATION, Ease.quadOut);
