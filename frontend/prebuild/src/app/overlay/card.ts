@@ -60,8 +60,18 @@ export class Card {
 
   set bodyString(newString: string) {
     this.bodyText.text = newString;
+    let scale = Card.NORMAL_SCALE;
+
+    if (newString.length > 10) {
+      // Scale text down to fit
+      scale = scale / 1.5;
+    }
+
+    this.bodyText.scaleX = scale;
+    this.bodyText.scaleY = scale;
+
     if (this.emphasize) {
-      Tween.get(this.bodyText).to({scaleX: Card.EMPHASIS_SCALE, scaleY: Card.EMPHASIS_SCALE}).to({scaleX: Card.NORMAL_SCALE, scaleY: Card.NORMAL_SCALE}, 250);
+      Tween.get(this.bodyText).to({scaleX: Card.EMPHASIS_SCALE, scaleY: Card.EMPHASIS_SCALE}).to({scaleX: scale, scaleY: scale}, 250);
     }
   }
 
@@ -84,7 +94,7 @@ export class Card {
       this.headerText.textAlign = 'center';
     }
 
-    this.headerText.text = header;
+    this.headerString = header;
     this.headerText.font = Card.HEADER_TEXT_FONT;
     this.headerText.color = Card.HEADER_TEXT_COLOR;
     this.headerText.x = -(this.headerText.getBounds().width);
@@ -96,7 +106,7 @@ export class Card {
       this.bodyText.textAlign = 'center';
     }
 
-    this.bodyText.text = body;
+    this.bodyString = body;
     this.bodyText.font = Card.BODY_TEXT_FONT;
     this.bodyText.color = Card.BODY_TEXT_COLOR;
     this.bodyText.x = -(this.bodyText.getBounds().width);
