@@ -96,6 +96,7 @@ body {
 #game-board {
   background-color: black;
   color: white;
+  position: relative;
 }
 
 #players {
@@ -117,10 +118,23 @@ body {
   font-size: 2em;
 }
 
+#overlayCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
 #gameCanvas {
   display: block;
   width: 100%;
   height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
 
   background: url('../../assets/images/game_floor.jpg');
 }
@@ -154,9 +168,9 @@ $animationStyle:cubic-bezier(.23,.78,.69,.84);
 	background:transparent;
 	border:$loaderBorderSize solid;
 	border-color:
-		$loaderPrimaryColor 
-		$loaderPrimaryColor 
-		$loaderPrimaryColor 
+		$loaderPrimaryColor
+		$loaderPrimaryColor
+		$loaderPrimaryColor
 		darken($loaderPrimaryColor, 30);
 	border-radius:50%;
 	transition:all $animationTime $animationStyle;
@@ -174,10 +188,10 @@ $animationStyle:cubic-bezier(.23,.78,.69,.84);
 	-o-transition: opacity $animationTime $animationStyle;
 	-webkit-transition: opacity $animationTime $animationStyle;
 	transition: opacity $animationTime $animationStyle;
-	
+
 	&.ng-hide {
 		opacity: 0;
-		
+
 		.spin-loader.shrink {
 			top: calc(25% + #{($loaderHeightWidth/2)});
 			margin-left:0;

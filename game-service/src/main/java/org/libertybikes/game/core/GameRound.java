@@ -44,7 +44,7 @@ public class GameRound implements Runnable {
 
     private static final int GAME_TICK_SPEED_DEFAULT = 50; // ms
     private static final int DELAY_BETWEEN_ROUNDS = 5; //ticks
-    private static final int STARTING_COUNTDOWN = 3; // seconds
+    private static final int STARTING_COUNTDOWN = 4; // seconds
     private static final int MAX_TIME_BETWEEN_ROUNDS_DEFAULT = 20; // seconds
     private static final int FULL_GAME_TIME_BETWEEN_ROUNDS = 5; //seconds
     private static final Random r = new Random();

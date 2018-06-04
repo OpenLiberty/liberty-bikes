@@ -9,8 +9,10 @@ import { environment } from './../../environments/environment';
 import { Player } from '../entity/player';
 import { Obstacle } from '../entity/obstacle';
 import { PlayerTooltip } from '../entity/player.tooltip';
-import { Shape, Stage, Shadow, Text } from 'createjs-module';
+import { Shape, Stage, Shadow, Text, Ticker, Container, Tween, CSSPlugin, Ease } from 'createjs-module';
 import { Constants } from './constants';
+import { Card } from '../overlay/card';
+import { bindCallback, timer, Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-game',
@@ -34,6 +36,14 @@ export class GameComponent implements OnInit, OnDestroy {
   context: CanvasRenderingContext2D;
   stage: Stage;
 
+  overlayCanvas: HTMLCanvasElement;
+  overlayContext: CanvasRenderingContext2D;
+  overlayStage: Stage;
+
+  waitCard: Card;
+  waitingTimer: Observable<number>;
+  waitingSub: Subscription;
+
   players: Map<string, Player> = new Map<string, Player>();
   obstacles: Obstacle[];
   trailsShape: Shape;
@@ -56,6 +66,10 @@ export class GameComponent implements OnInit, OnDestroy {
         }
         if (json.countdown) {
           this.ngZone.run(() => this.startingCountdown(json.countdown));
+        }
+        if (json.awaitplayerscountdown) {
+          console.log(`Got countdown value of ${json.awaitplayerscountdown}`);
+          this.ngZone.run(() => this.waitForPlayers(json.awaitplayerscountdown));
         }
         if (json.keepAlive) {
           this.gameService.send({ keepAlive: true });
@@ -104,6 +118,10 @@ export class GameComponent implements OnInit, OnDestroy {
     this.canvas = <HTMLCanvasElement> document.getElementById('gameCanvas');
     this.context = this.canvas.getContext('2d');
     this.stage = new Stage(this.canvas);
+
+    this.overlayCanvas = <HTMLCanvasElement> document.getElementById('overlayCanvas');
+    this.overlayContext = this.overlayCanvas.getContext('2d');
+    this.overlayStage = new Stage(this.overlayCanvas);
 
     this.trailsShape = new Shape();
     this.trailsShape.x = 0;
@@ -298,6 +316,21 @@ export class GameComponent implements OnInit, OnDestroy {
       this.players.forEach((player: Player, id: string) => {
         player.tooltip.alpha = 1;
         player.tooltip.visible(true);
+
+        if (player.status.toLocaleLowerCase() === 'winner') {
+          const winnerCard = new Card(400, "winner!", player.name, true, player.color);
+          const card = winnerCard.displayObject;
+          card.x = (Constants.BOARD_SIZE / 2) - (winnerCard.width / 2);
+          card.y = (Constants.BOARD_SIZE / 2) - (winnerCard.height / 2);
+
+          this.overlayStage.removeAllChildren();
+          this.overlayStage.addChild(card);
+          this.overlayStage.update();
+
+          Ticker.on('tick', (evt) => this.updateOverlay(evt));
+          Ticker.framerate = 60;
+          winnerCard.show();
+        }
       });
     }
   }
@@ -375,10 +408,71 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   startingCountdown(seconds) {
-    this.showLoader = true;
-    setTimeout(() => {
-      this.showLoader = false;
-    }, (1000 * seconds));
+    this.waitingSub.unsubscribe();
+
+    this.waitCard.headerString = 'Get Ready';
+    this.waitCard.bodyString = `${seconds}`;
+    this.waitCard.emphasizeBody = true;
+
+    const card = this.waitCard.displayObject;
+
+    const scaleFactor = 1.5;
+
+    Tween.get(card).to({
+      scaleX: scaleFactor,
+      scaleY: scaleFactor,
+      x: (Constants.BOARD_SIZE / 2) - ((this.waitCard.width * scaleFactor) / 2),
+      y: (Constants.BOARD_SIZE / 2) - ((this.waitCard.height * scaleFactor) / 2)
+    }, 100);
+
+    this.waitingTimer = timer(0, 1000);
+    this.waitingSub = this.waitingTimer.subscribe((t) => {
+      if (t < seconds - 1) {
+        this.waitCard.bodyString = `${seconds - (t + 1)}`;
+      } else if (t === seconds - 1) {
+        this.waitCard.bodyString = 'GO!';
+        this.waitCard.hide(500);
+      } else if (t >= seconds) {
+        this.ngZone.run((t) => {
+          this.waitingSub.unsubscribe();
+        });
+      }
+    });
+  }
+
+  waitForPlayers(seconds) {
+    if (this.waitingSub) {
+      this.waitingSub.unsubscribe();
+    }
+    this.waitingTimer = timer(0, 1000);
+    this.waitingSub = this.waitingTimer.subscribe((t) => {
+      if (this.waitCard) {
+        this.waitCard.bodyString = `${seconds - t}`;
+      }
+    });
+
+    if (!this.waitCard) {
+      const width = 400;
+      const margin = 50;
+      this.waitCard = new Card(width, "waiting for players", `${seconds}`, true);
+      const card = this.waitCard.displayObject;
+      card.x = (Constants.BOARD_SIZE / 2) - (this.waitCard.width / 2);
+      card.y = (Constants.BOARD_SIZE / 2) - (this.waitCard.height / 2);
+
+      this.overlayStage.addChild(card);
+      this.overlayStage.update();
+
+      Ticker.on('tick', (evt) => this.updateOverlay(evt));
+      Ticker.framerate = 60;
+      this.waitCard.show();
+
+    } else {
+      this.waitCard.bodyString = `${seconds}`;
+    }
+  }
+
+  updateOverlay(event) {
+    this.overlayStage.update(event);
   }
 
   verifyOpen() {
