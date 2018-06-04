@@ -316,6 +316,21 @@ export class GameComponent implements OnInit, OnDestroy {
       this.players.forEach((player: Player, id: string) => {
         player.tooltip.alpha = 1;
         player.tooltip.visible(true);
+
+        if (player.status.toLocaleLowerCase() === 'winner') {
+          const winnerCard = new Card(400, "winner!", player.name, true, player.color);
+          const card = winnerCard.displayObject;
+          card.x = (Constants.BOARD_SIZE / 2) - (winnerCard.width / 2);
+          card.y = (Constants.BOARD_SIZE / 2) - (winnerCard.height / 2);
+
+          this.overlayStage.removeAllChildren();
+          this.overlayStage.addChild(card);
+          this.overlayStage.update();
+
+          Ticker.on('tick', (evt) => this.updateOverlay(evt));
+          Ticker.framerate = 60;
+          winnerCard.show();
+        }
       });
     }
   }
