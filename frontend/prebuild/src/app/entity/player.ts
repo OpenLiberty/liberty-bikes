@@ -4,8 +4,6 @@ import { Assets } from '../game/assets';
 import { Constants } from '../game/constants';
 
 export class Player {
-  static audioLoaded = false;
-
   displayObject: Container;
 
   get object() {
@@ -103,11 +101,6 @@ export class Player {
       this.explosionImage.x = this.image.x;
       this.explosionImage.y = this.image.y;
       this.displayObject.addChild(this.explosionImage);
-      if (!Player.audioLoaded) {
-        Player.audioLoaded = true;
-        Assets.BAM.load();
-      }
-      Assets.BAM.play();
     }
     this.status = status;
   }
