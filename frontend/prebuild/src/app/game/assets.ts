@@ -9,5 +9,4 @@ export class Assets {
   static readonly PLAYER_ORANGE_BITMAP = new Bitmap('../../assets/images/bike_orange.png');
   static readonly PLAYER_PURPLE_BITMAP = new Bitmap('../../assets/images/bike_purple.png');
   static readonly PLAYER_DEAD_BITMAP = new Bitmap('../../assets/images/status_dead.png');
-  static readonly BAM = new Audio('../../assets/sound/bam.wav');
 }

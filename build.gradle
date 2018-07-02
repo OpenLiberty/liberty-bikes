@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.3'
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.4.+'
     }
 }
 
@@ -23,7 +23,7 @@ subprojects {
             mavenCentral()
         }
         dependencies {
-            classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.3'
+            classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.4.+'
         }
     }
 
@@ -37,6 +37,7 @@ subprojects {
         testCompile group: 'junit', name: 'junit', version: '4.+'
         testCompile group: 'org.eclipse', name: 'yasson', version: '1.0.1'
         testCompile group: 'org.glassfish', name: 'javax.json', version: '1.1.+'
+        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '[18.0.0.2,)'
     }
     
     eclipse {
@@ -55,7 +56,6 @@ subprojects {
         install {
             // use 1 liberty install for the whole repo
             baseDir = rootProject.buildDir
-            runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2018.5.0.0.zip"
         }
     }
 
