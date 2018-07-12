@@ -7,6 +7,10 @@ buildscript {
     }
 }
 
+plugins {
+    id 'com.avast.gradle.docker-compose' version "0.8.0"
+}
+
 task clean(type: Delete) {
   subprojects.each { dependsOn("${it.name}:clean") };
   delete 'build'
@@ -26,6 +30,16 @@ NetworkInterface.getNetworkInterfaces()
       // ${it} is in the format /<IP>, so only use http:/ instead of http://
     }
   }
+}
+
+task dockerStart {
+    dependsOn 'composeUp'
+}
+
+composeUp {
+    subprojects.each {
+        dependsOn("${it.name}:libertyPackage")
+    }
 }
 
 subprojects {
