@@ -1,0 +1,22 @@
+version: '2'
+services:
+  frontend:
+    build: frontend
+    image: lb-frontend
+    ports:
+     - "12000:12000"
+  auth:
+    build: auth-service
+    image: lb-auth
+    ports:
+     - "8082:8082"
+  game:
+    build: game-service
+    image: lb-game
+    ports:
+     - "8080:8080"
+  player:
+    build: player-service
+    image: lb-player
+    ports:
+     - "8081:8081"
