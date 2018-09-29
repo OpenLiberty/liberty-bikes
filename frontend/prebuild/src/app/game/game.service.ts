@@ -19,7 +19,6 @@ export class GameService {
     socketService.url = `${environment.API_URL_GAME_WS}/${this.roundId}`;
     this.messages = <Subject<Object>>socketService.socket
     .pipe(map((response: MessageEvent): any => {
-      //console.log(`Game service handling message: ${response.data}`);
       return JSON.parse(response.data);
     }));
   }

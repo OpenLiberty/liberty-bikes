@@ -59,7 +59,7 @@ export class PlayerComponent implements OnInit {
           filename = Constants.PURPLE_FILENAME;
           break;
         default:
-          console.warn("Player color did not match available images. Defaulting to green.");
+          console.warn('Player color did not match available images. Defaulting to green.');
           filename = Constants.GREEN_FILENAME;
           break;
       }

@@ -34,13 +34,14 @@ export class LoginComponent implements OnInit, OnDestroy {
   party: string;
   queuePosition: number;
   player = new Player();
+
   isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   isQuickPlayAllowed: boolean = this.isFullDevice;
-  isSingleParty: boolean = false;
-  isSsoCheckComplete: boolean = false;
-  isGoogleConfigured: boolean = false;
-  isGithubConfigured: boolean = false;
-  isTwitterConfigured: boolean = false;
+  isSingleParty = false;
+  isSsoCheckComplete = false;
+  isGoogleConfigured = false;
+  isGithubConfigured = false;
+  isTwitterConfigured = false;
 
   constructor(
     private router: Router,

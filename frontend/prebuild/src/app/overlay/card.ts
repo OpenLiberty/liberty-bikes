@@ -1,11 +1,19 @@
-import { Container, DisplayObject, Shape, Tween, Ease, Text, ColorFilter } from "createjs-module";
+import { Container, DisplayObject, Shape, Tween, Ease, Text, ColorFilter } from 'createjs-module';
 
 export class Card {
   private static readonly ACCENT_WIDTH = 10;
   private static readonly MARGIN = 20;
   private static readonly DURATION = 500;
 
-  private static readonly HEADER_TEXT_FONT = 'small-caps 36px -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+  private static readonly HEADER_TEXT_FONT = 'small-caps 36px '
+                                              + '-apple-system,'
+                                              + 'system-ui,'
+                                              + 'BlinkMacSystemFont,'
+                                              + '"Segoe UI",'
+                                              + 'Roboto,'
+                                              + '"Helvetica Neue",'
+                                              + 'Arial,'
+                                              + 'sans-serif';
   private static readonly HEADER_TEXT_COLOR = 'rgba(255, 255, 255, 1)';
 
   private static readonly BODY_TEXT_FONT = '64px "Avenir-Black", "Arial Black", "Roboto Black", sans-serif';
@@ -99,7 +107,7 @@ export class Card {
     this.headerText.color = Card.HEADER_TEXT_COLOR;
     this.headerText.x = -(this.headerText.getBounds().width);
     this.headerText.y = Card.MARGIN;
-    this.headerText.alpha = 0
+    this.headerText.alpha = 0;
     this.headerText.mask = this.mask;
 
     if (this.center) {
@@ -112,7 +120,7 @@ export class Card {
     this.bodyText.x = -(this.bodyText.getBounds().width);
     this.bodyText.y = this.headerText.y + this.headerText.getBounds().height;
 
-    this.bodyText.alpha = 0
+    this.bodyText.alpha = 0;
     this.bodyText.mask = this.mask;
 
     this.accentCommand = this.accent.graphics.beginFill(color).rect(0, 0, Card.ACCENT_WIDTH, 0).command;
