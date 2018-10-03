@@ -82,6 +82,7 @@ liberty {
 		name = 'frontendServer'
 		apps = [war]
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort, 'application.name': applicationName]
+		configDirectory = file('src/main/liberty/config')
 	}
 }
 
