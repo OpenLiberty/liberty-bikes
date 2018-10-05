@@ -1,7 +1,7 @@
-FROM websphere-liberty:beta
-ADD build/libs/player-service.zip /
-RUN unzip player-service.zip
-RUN mv wlp/usr/servers/player-service/* /config/
-RUN rm -rf wlp/
+FROM openliberty/open-liberty:microProfile1
+ADD build/libs/player-service.war /config/dropins
+COPY src/main/liberty/config /config/
+RUN printf 'httpPort=8081\n\
+httpsPort=8444' > /config/bootstrap.properties
 
-EXPOSE 8081
+EXPOSE 8081 8444

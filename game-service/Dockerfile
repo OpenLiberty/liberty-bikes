@@ -1,9 +1,11 @@
-FROM websphere-liberty:beta
-ADD build/libs/game-service.zip /
-RUN unzip game-service.zip
-RUN echo "-Dorg.libertybikes.restclient.PlayerService/mp-rest/url=\
-http://lb-player:8081/" > wlp/usr/servers/game-service/jvm.options
-RUN mv wlp/usr/servers/game-service/* /config/
-RUN rm -rf wlp/
+FROM openliberty/open-liberty:microProfile1
+ADD build/libs/game-service.war /config/dropins
+COPY src/main/liberty/config /config/
+RUN printf 'httpPort=8080\n\
+httpsPort=8443' > /config/bootstrap.properties
+#RUN printf -- "-Dorg.libertybikes.restclient.PlayerService/mp-rest/url=\
+#http://lb-player:8081/" > /config/jvm.options
+ENV org.libertybikes.restclient.PlayerService/mp-rest/url=http://lb-player:8081
 
-EXPOSE 8080
+
+EXPOSE 8080 8443
