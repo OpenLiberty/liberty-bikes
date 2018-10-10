@@ -3,8 +3,13 @@ package org.libertybikes.game.core;
 import static org.libertybikes.game.round.service.GameRoundWebsocket.sendToClient;
 import static org.libertybikes.game.round.service.GameRoundWebsocket.sendToClients;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.Key;
+import java.security.KeyStore;
 import java.time.Instant;
 import java.util.ArrayDeque;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
@@ -30,6 +35,10 @@ import javax.websocket.Session;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.Player.STATUS;
 import org.libertybikes.restclient.PlayerService;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 @JsonbPropertyOrder({ "id", "gameState", "board", "nextRoundId" })
 public class GameRound implements Runnable {
@@ -66,7 +75,17 @@ public class GameRound implements Runnable {
     private LobbyCountdown lobbyCountdown;
     private AtomicBoolean lobbyCountdownStarted = new AtomicBoolean();
 
+    private String jwt = null;
+
     private int ticksFromGameEnd = 0;
+
+    protected static Key signingKey = null;
+
+    protected String keyStore;
+
+    String keyStorePW;
+
+    String keyStoreAlias;
 
     // Get a string of 4 random uppercase letters (A-Z)
     private static String getRandomId() {
@@ -266,16 +285,93 @@ public class GameRound implements Runnable {
 
     private void updatePlayerStats() {
         if (gameState != State.FINISHED)
-            throw new IllegalStateException("Canot update player stats while game is still running.");
+            throw new IllegalStateException("Cannot update player stats while game is still running.");
 
         PlayerService playerSvc = CDI.current().select(PlayerService.class, RestClient.LITERAL).get();
         int rank = 1;
         for (Player p : playerRanks) {
             log("Player " + p.name + " came in place " + rank);
-            if (p.isRealPlayer())
-                playerSvc.recordGame(p.id, rank);
+            if (p.isRealPlayer()) {
+                String jwt = createJWT();
+                String authHeader = "Bearer " + jwt;
+                playerSvc.recordGame(p.id, rank, authHeader);
+            }
             rank++;
         }
+    }
+
+    private String createJWT() {
+        if (jwt != null)
+            return jwt;
+        if (signingKey == null) {
+            try {
+                getKeyStoreInfo();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            Claims onwardsClaims = Jwts.claims();
+
+            onwardsClaims.put("upn", "game-service");
+            onwardsClaims.put("groups", "admin");
+            // Set the subject using the "id" field from our claims map.
+            onwardsClaims.setSubject(id);
+
+            onwardsClaims.setId(id);
+
+            // We'll use this claim to know this is a user token
+            onwardsClaims.setAudience("client");
+
+            onwardsClaims.setIssuer("https://game-service-libertybikes.mybluemix.net");
+            // we set creation time to 24hrs ago, to avoid timezone issues in the
+            // browser verification of the jwt.
+            Calendar calendar1 = Calendar.getInstance();
+            calendar1.add(Calendar.HOUR, -24);
+            onwardsClaims.setIssuedAt(calendar1.getTime());
+
+            // client JWT has 24 hrs validity from now.
+            Calendar calendar2 = Calendar.getInstance();
+            calendar2.add(Calendar.HOUR, 48);
+            onwardsClaims.setExpiration(calendar2.getTime());
+
+            // finally build the new jwt, using the claims we just built, signing it
+            // with our signing key, and adding a key hint as kid to the encryption header,
+            // which is optional, but can be used by the receivers of the jwt to know which
+            // key they should verify it with.
+            jwt = Jwts.builder()
+                            .setHeaderParam("kid", "bike")
+                            .setHeaderParam("alg", "RS256")
+                            .setClaims(onwardsClaims)
+                            .signWith(SignatureAlgorithm.RS256, signingKey)
+                            .compact();
+            return jwt;
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return "bad";
+    }
+
+    private synchronized void getKeyStoreInfo() throws IOException {
+        if (signingKey != null)
+            return;
+        try {
+            // load up the keystore
+
+            keyStore = InitialContext.doLookup("jwtKeyStore");
+            keyStorePW = InitialContext.doLookup("jwtKeyStorePassword");
+            keyStoreAlias = InitialContext.doLookup("jwtKeyStoreAlias");
+
+            FileInputStream is = new FileInputStream(keyStore);
+
+            KeyStore signingKeystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            signingKeystore.load(is, keyStorePW.toCharArray());
+            signingKey = signingKeystore.getKey(keyStoreAlias, keyStorePW.toCharArray());
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+
     }
 
     private void gameTick() {
