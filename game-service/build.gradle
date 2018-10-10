@@ -13,7 +13,8 @@ liberty {
 		dropins = [war]
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
 		configDirectory = file('src/main/liberty/config')
-		jvmOptions = ['-Dorg.libertybikes.restclient.PlayerService/mp-rest/url=http://localhost:8081/']
+		jvmOptions = ['-Dorg.libertybikes.restclient.PlayerService/mp-rest/url=http://localhost:8081/',
+		              '-DsingleParty=' + System.getProperty('singleParty', 'false')]
 	}
 }
 

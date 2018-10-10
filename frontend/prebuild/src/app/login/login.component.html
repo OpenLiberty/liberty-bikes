@@ -60,11 +60,11 @@
             </div>
           </div>
           <div class="form-group">
-            <div *ngIf="isFullDevice" class="form-item">
+            <div *ngIf="isQuickPlayAllowed" class="form-item">
               <button type="button" (click)="quickJoin()">Play Now</button>
             </div>
 
-            <h2 *ngIf="isFullDevice" class="section-header" style="margin-bottom: 0">or</h2>
+            <h2 *ngIf="isQuickPlayAllowed" class="section-header" style="margin-bottom: 0">or</h2>
             <div class="form-item">
               <label>Party Code</label>
               <input type="text" id="roundid" name="roundid" [(ngModel)]="party" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">

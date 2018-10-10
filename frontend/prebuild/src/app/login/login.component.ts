@@ -23,6 +23,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   queuePosition: number;
   player = new Player();
   isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  isQuickPlayAllowed: boolean = this.isFullDevice;
 
   constructor(
     private router: Router,
@@ -66,6 +67,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.setQueueOnMessage();
       this.showQueue(queuePosition);
     }
+    
+    this.checkForQuickPlay();
   }
 
   ngOnDestroy() {
@@ -82,6 +85,27 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   loginTwitter() {
       window.location.href = `${environment.API_URL_AUTH}/auth-service/TwitterAuth`;
+  }
+  
+  async checkForQuickPlay() {
+    if (this.isQuickPlayAllowed) {
+    	  console.log('Quick play is supported -- skipping party service check');
+    	  return;
+    }
+    
+    let data: any = await this.http.get(`${environment.API_URL_PARTY}/describe`).toPromise();
+    if (data == null) {
+    	  console.log('WARNING: Unable to contact party service to determine if quick play is allowed');
+    }
+    
+    if (data.isSingleParty === true) {
+    	  console.log('Quick play is supported');
+    	  this.ngZone.run(() => {
+        this.isQuickPlayAllowed = true;
+    	  });
+    } else {
+      console.log('Quick play is NOT supported');
+    }
   }
 
   async quickJoin() {
