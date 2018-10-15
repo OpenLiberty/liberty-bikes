@@ -24,6 +24,9 @@ export class LoginComponent implements OnInit, OnDestroy {
   player = new Player();
   isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   isQuickPlayAllowed: boolean = this.isFullDevice;
+  isGoogleConfigured: boolean = false; 
+  isGithubConfigured: boolean = false;
+  isTwitterConfigured: boolean = false;
 
   constructor(
     private router: Router,
@@ -69,6 +72,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
     
     this.checkForQuickPlay();
+    this.checkSsoOptions();
   }
 
   ngOnDestroy() {
@@ -87,6 +91,27 @@ export class LoginComponent implements OnInit, OnDestroy {
       window.location.href = `${environment.API_URL_AUTH}/auth-service/TwitterAuth`;
   }
   
+  async checkSsoOptions() {
+    let data: any = await this.http.get(`${environment.API_URL_AUTH}/auth-service`).toPromise();
+    if (data == null) {
+    	  console.log('WARNING: Unable to contact auth service to determine SSO options');
+    	  return;
+    }
+    
+    console.log('Configured auth schemes: ' + JSON.stringify(data));  
+    this.ngZone.run(() => {
+	    if (data.indexOf('TwitterAuth') > -1) {
+	    	  this.isTwitterConfigured = true;
+	    }
+	    if (data.indexOf('GoogleAuth') > -1) {
+	  	  this.isGoogleConfigured = true;
+	    }
+	    if (data.indexOf('GitHubAuth') > -1) {
+	  	  this.isGithubConfigured = true;
+	    }
+    }
+  }
+  
   async checkForQuickPlay() {
     if (this.isQuickPlayAllowed) {
     	  console.log('Quick play is supported -- skipping party service check');
@@ -96,6 +121,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     let data: any = await this.http.get(`${environment.API_URL_PARTY}/describe`).toPromise();
     if (data == null) {
     	  console.log('WARNING: Unable to contact party service to determine if quick play is allowed');
+    	  return;
     }
     
     if (data.isSingleParty === true) {
