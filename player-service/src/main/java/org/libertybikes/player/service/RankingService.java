@@ -5,9 +5,11 @@ import java.util.Collections;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -68,8 +70,13 @@ public class RankingService {
     }
 
     @POST
+    @RolesAllowed({ "admin" })
     @Path("/{playerId}/recordGame")
-    public void recordGame(@PathParam("playerId") String id, @QueryParam("place") int place) {
+    public void recordGame(@PathParam("playerId") String id, @QueryParam("place") int place, @HeaderParam("Authorization") String token) {
+        recordGame(id, place);
+    }
+
+    public void recordGame(String id, int place) {
         if (place < 0 || place > 4) {
             System.out.println("Invalid place (" + place + "), must be 0-4");
             return;
