@@ -16,13 +16,13 @@
               <button type="button" (click)="showGuestLogin()">Play as Guest</button>
             </div>
             <div class="form-item">
-              <button type="button" (click)="loginGoogle()">Sign in with Google</button>
+              <button type="button" (click)="loginGoogle()" [disabled]="!isGoogleConfigured">Sign in with Google</button>
             </div>
             <div class="form-item">
-              <button type="button" (click)="loginGithub()">Sign in with GitHub</button>
+              <button type="button" (click)="loginGithub()" [disabled]="!isGithubConfigured">Sign in with GitHub</button>
             </div>
             <div class="form-item">
-              <button type="button" (click)="loginTwitter()">Sign in with Twitter</button>
+              <button type="button" (click)="loginTwitter()" [disabled]="!isTwitterConfigured">Sign in with Twitter</button>
             </div>
             <h2 *ngIf="isFullDevice" class="section-header">or</h2>
             <div *ngIf="isFullDevice" class="form-item">
