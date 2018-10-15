@@ -139,6 +139,13 @@ export class GameComponent implements OnInit, OnDestroy {
     this.obstaclesShape.y = 0;
 
     this.stage.addChild(this.obstaclesShape);
+    
+    // Create a red border around the game board
+    let BORDER_WIDTH = 3;
+    this.addBorder(0, 0, Constants.BOARD_SIZE, BORDER_WIDTH); // top
+    this.addBorder(0, Constants.BOARD_SIZE-BORDER_WIDTH, Constants.BOARD_SIZE, BORDER_WIDTH); // bottom
+    this.addBorder(0, 0, BORDER_WIDTH, Constants.BOARD_SIZE); // left
+    this.addBorder(Constants.BOARD_SIZE-BORDER_WIDTH, 0, BORDER_WIDTH, Constants.BOARD_SIZE); // right
 
     this.stage.update();
 
@@ -482,6 +489,13 @@ export class GameComponent implements OnInit, OnDestroy {
         this.router.navigate(['/login']);
       });
     }
+  }
+  
+  addBorder(x, y, w, h) {
+	let shape: Shape = new Shape();
+  	shape.shadow = new Shadow(Obstacle.COLOR, 0, 0, 20);
+  	shape.graphics.beginFill(Obstacle.COLOR).rect(x,y,w,h);
+	this.stage.addChild(shape);
   }
 
 }
