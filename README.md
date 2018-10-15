@@ -14,6 +14,11 @@ Builds all microservice applications and deploys them to locally running liberty
 ./gradlew start frontend:open
 ```
 
+For a local setting, use single-party mode:
+```
+./gradlew start frontend:open -DsingleParty=true
+```
+
 Any code changes that are made in an eclipse environment with auto-build enabled will automatically publish content to the loose application, meaning no server restarts should be required between code changes.
 
 To stop all liberty servers, issue the command:

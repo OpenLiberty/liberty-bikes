@@ -5,14 +5,17 @@ package org.libertybikes.game.round.service;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.CDI;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -23,28 +26,54 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.libertybikes.game.party.Party;
 
 @Path("/party")
 @ApplicationScoped
+@Produces(MediaType.APPLICATION_JSON)
 public class PartyService {
 
     // Map of PartyID to current RoundID
     private final Map<String, Party> allParties = new ConcurrentHashMap<>();
 
+    @Inject
+    @ConfigProperty(name = "singleParty", defaultValue = "false")
+    private boolean isSingleParty;
+
     @Resource
     private ManagedScheduledExecutorService exec;
 
+    @PostConstruct
+    public void createSingletonParty() {
+        if (!isSingleParty)
+            return;
+
+        Party p = CDI.current().select(Party.class).get();
+        allParties.put(p.id, p);
+        System.out.println("Created singleton party " + p.id);
+    }
+
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     public Collection<Party> listParties() {
         return Collections.unmodifiableCollection(allParties.values());
     }
 
+    @GET
+    @Path("/describe")
+    public Map<String, Object> describe() {
+        Map<String, Object> config = new HashMap<>();
+        config.put("isSingleParty", this.isSingleParty);
+        return config;
+    }
+
     @POST
     @Path("/create")
-    @Produces(MediaType.APPLICATION_JSON)
     public Party createParty() {
+        if (isSingleParty) {
+            return allParties.values().iterator().next();
+        }
+
         Party p = CDI.current().select(Party.class).get();
         allParties.put(p.id, p);
         // Put a max lifetime of 12 hours on a party
@@ -54,7 +83,6 @@ public class PartyService {
 
     @GET
     @Path("/{partyId}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Party getParty(@PathParam("partyId") String partyId) {
         if (partyId == null) {
             System.out.println("WARN: got null partyId request");
