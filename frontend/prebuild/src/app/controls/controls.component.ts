@@ -357,7 +357,8 @@ export class ControlsComponent implements OnInit, OnDestroy {
         ).toPromise();
         this.processRequeue(nextRoundID);
     } else {
-      let queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${partyId}/queue`, {});
+      let playerId = sessionStorage.getItem('userId');
+      let queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${partyId}/queue?playerId=${playerId}`, {});
       queueCallback.onmessage = msg => {
         let queueMsg = JSON.parse(msg.data);
         if (queueMsg.queuePosition) {
