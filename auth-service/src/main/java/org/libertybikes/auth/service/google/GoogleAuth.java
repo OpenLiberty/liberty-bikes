@@ -27,7 +27,7 @@ public class GoogleAuth {
     ConfigBean config;
 
     @GET
-    public Response getAuthURL(@Context HttpServletRequest request) {
+    public Response getGoogleCallbackURL(@Context HttpServletRequest request) {
 
         JsonFactory jsonFactory = new JacksonFactory();
         HttpTransport httpTransport = new NetHttpTransport();

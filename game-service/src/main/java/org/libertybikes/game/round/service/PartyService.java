@@ -65,13 +65,13 @@ public class PartyService {
     @Path("/describe")
     public Map<String, Object> describe() {
         Map<String, Object> config = new HashMap<>();
-        config.put("isSingleParty", this.isSingleParty);
-        config.put("partyId", allParties.values().iterator().next().id);
+        config.put("isSingleParty", isSingleParty);
+        if (isSingleParty)
+            config.put("partyId", allParties.values().iterator().next().id);
         return config;
     }
 
     @POST
-    @Path("/create")
     public Party createParty() {
         if (isSingleParty) {
             return allParties.values().iterator().next();

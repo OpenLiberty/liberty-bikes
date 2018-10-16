@@ -235,7 +235,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     let ngZone = this.ngZone;
     let router = this.router;
     try {
-      let party: any = await this.http.post(`${environment.API_URL_PARTY}/create`, '', { responseType: 'json' }).toPromise();
+      let party: any = await this.http.post(`${environment.API_URL_PARTY}`, '', { responseType: 'json' }).toPromise();
 
       console.log(`Created round with id=${party}`);
       sessionStorage.setItem('isSpectator', 'true');
@@ -333,7 +333,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     username = username.trim();
 
     // register a new user
-    let createdUserId: any = await this.http.post(`${environment.API_URL_PLAYERS}/create?name=${username}&id=${userid}`, '', {
+    let createdUserId: any = await this.http.post(`${environment.API_URL_PLAYERS}?name=${username}&id=${userid}`, '', {
       responseType: 'text'
     }).toPromise();
     console.log('Created player: ' + JSON.stringify(createdUserId));

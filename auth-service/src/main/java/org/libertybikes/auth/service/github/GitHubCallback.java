@@ -50,7 +50,7 @@ public class GitHubCallback extends JwtAuth {
     }
 
     @GET
-    public Response getAuthURL(@Context HttpServletRequest request) throws URISyntaxException {
+    public Response getGitHubCallbackURL(@Context HttpServletRequest request) throws URISyntaxException {
         try {
             String githubCode = request.getParameter("code");
             String randomCode = (String) request.getSession().getAttribute("github");

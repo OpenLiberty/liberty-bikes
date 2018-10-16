@@ -36,7 +36,6 @@ public class GameRoundService {
     }
 
     @POST
-    @Path("/create")
     public String createRound() {
         GameRound p = new GameRound();
         allRounds.put(p.id, p);
@@ -48,7 +47,6 @@ public class GameRoundService {
     }
 
     @POST
-    @Path("/create")
     public GameRound createRoundById(@QueryParam("gameId") String gameId) {
         GameRound newRound = new GameRound(gameId);
         GameRound existingRound = allRounds.putIfAbsent(gameId, newRound);

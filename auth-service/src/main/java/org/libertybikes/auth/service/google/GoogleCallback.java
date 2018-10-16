@@ -14,7 +14,6 @@ import javax.json.bind.JsonbBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -86,8 +85,7 @@ public class GoogleCallback extends JwtAuth {
     }
 
     @GET
-    @Produces()
-    public Response getAuthURL(@Context HttpServletRequest request) throws IOException, URISyntaxException {
+    public Response getGoogleAuthURL(@Context HttpServletRequest request) throws IOException, URISyntaxException {
         // google calls us back at this app when a user has finished authing with them.
         // when it calls us back here, it passes an oauth_verifier token that we
         // can exchange for a google access token.

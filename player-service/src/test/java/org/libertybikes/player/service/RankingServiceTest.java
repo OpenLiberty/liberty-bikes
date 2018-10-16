@@ -30,7 +30,7 @@ public class RankingServiceTest {
     public void duplicateName() {
         assertEquals("123", players.createPlayer("Andy", "123"));
         assertEquals("456", players.createPlayer("Andy", "456"));
-        ranks.recordGame("123", 1);
+        ranks.recordGameInternal("123", 1);
 
         Player p1 = players.getPlayerById("123");
         assertNotNull(p1);
@@ -48,7 +48,7 @@ public class RankingServiceTest {
     @Test
     public void sameDomains() {
         assertEquals("BASIC:Andy", players.createPlayer("Andy", "BASIC:Andy"));
-        ranks.recordGame("BASIC:Andy", 1);
+        ranks.recordGameInternal("BASIC:Andy", 1);
         assertEquals("BASIC:Andy", players.createPlayer("Andy", "BASIC:Andy"));
 
         Player p = players.getPlayerById("BASIC:Andy");
@@ -61,9 +61,9 @@ public class RankingServiceTest {
     @Test
     public void separateDomains() {
         assertEquals("BASIC:Andy", players.createPlayer("Andy", "BASIC:Andy"));
-        ranks.recordGame("BASIC:Andy", 1);
+        ranks.recordGameInternal("BASIC:Andy", 1);
         assertEquals("GMAIL:Andy", players.createPlayer("Andy", "GMAIL:Andy"));
-        ranks.recordGame("GMAIL:Andy", 4);
+        ranks.recordGameInternal("GMAIL:Andy", 4);
 
         Player p1 = players.getPlayerById("BASIC:Andy");
         assertNotNull(p1);
@@ -89,28 +89,28 @@ public class RankingServiceTest {
         assertEquals(expRating, p.stats.rating);
 
         expRating += ratingChange(1);
-        ranks.recordGame("BASIC:Andy", 1);
+        ranks.recordGameInternal("BASIC:Andy", 1);
         p = players.getPlayerById("BASIC:Andy");
         assertNotNull(p);
         assertEquals(1, p.stats.numWins);
         assertEquals(expRating, p.stats.rating);
 
         expRating += ratingChange(3);
-        ranks.recordGame("BASIC:Andy", 3);
+        ranks.recordGameInternal("BASIC:Andy", 3);
         p = players.getPlayerById("BASIC:Andy");
         assertNotNull(p);
         assertEquals(1, p.stats.numWins);
         assertEquals(expRating, p.stats.rating);
 
         expRating += ratingChange(2);
-        ranks.recordGame("BASIC:Andy", 2);
+        ranks.recordGameInternal("BASIC:Andy", 2);
         p = players.getPlayerById("BASIC:Andy");
         assertNotNull(p);
         assertEquals(1, p.stats.numWins);
         assertEquals(expRating, p.stats.rating);
 
         expRating += ratingChange(1);
-        ranks.recordGame("BASIC:Andy", 1);
+        ranks.recordGameInternal("BASIC:Andy", 1);
         p = players.getPlayerById("BASIC:Andy");
         assertNotNull(p);
         assertEquals(2, p.stats.numWins);

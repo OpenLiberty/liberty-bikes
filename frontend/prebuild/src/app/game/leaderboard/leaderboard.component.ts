@@ -48,7 +48,7 @@ export class LeaderboardComponent implements OnInit {
 
   async getLeaders() {
     try {
-      let data = await this.http.get(`${environment.API_URL_RANKS}/top/10`).toPromise();
+      let data = await this.http.get(`${environment.API_URL_RANKS}?limit=10`).toPromise();
       console.log(`Got leaders: ${JSON.stringify(data)}`);
       const json = data as any;
       const rankingsArr = new Array();
