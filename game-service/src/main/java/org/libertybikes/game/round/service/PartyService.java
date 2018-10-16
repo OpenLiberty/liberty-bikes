@@ -64,6 +64,7 @@ public class PartyService {
     public Map<String, Object> describe() {
         Map<String, Object> config = new HashMap<>();
         config.put("isSingleParty", this.isSingleParty);
+        config.put("partyId", allParties.values().iterator().next().id);
         return config;
     }
 

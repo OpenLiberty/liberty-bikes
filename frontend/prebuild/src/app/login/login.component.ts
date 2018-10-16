@@ -24,6 +24,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   player = new Player();
   isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   isQuickPlayAllowed: boolean = this.isFullDevice;
+  isSingleParty: boolean = false;
   isGoogleConfigured: boolean = false; 
   isGithubConfigured: boolean = false;
   isTwitterConfigured: boolean = false;
@@ -71,7 +72,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.showQueue(queuePosition);
     }
     
-    this.checkForQuickPlay();
+    this.checkForSingleParty();
     this.checkSsoOptions();
   }
 
@@ -109,32 +110,36 @@ export class LoginComponent implements OnInit, OnDestroy {
 	    if (data.indexOf('GitHubAuth') > -1) {
 	  	  this.isGithubConfigured = true;
 	    }
-    }
+    });
   }
   
-  async checkForQuickPlay() {
-    if (this.isQuickPlayAllowed) {
-    	  console.log('Quick play is supported -- skipping party service check');
-    	  return;
+  async checkForSingleParty() {
+    if (this.isSingleParty) {
+      return;
     }
     
     let data: any = await this.http.get(`${environment.API_URL_PARTY}/describe`).toPromise();
     if (data == null) {
-    	  console.log('WARNING: Unable to contact party service to determine if quick play is allowed');
-    	  return;
+      console.log('WARNING: Unable to contact party service to determine if single party mode is enabled');
+      return;
     }
     
     if (data.isSingleParty === true) {
-    	  console.log('Quick play is supported');
-    	  this.ngZone.run(() => {
-        this.isQuickPlayAllowed = true;
-    	  });
+      console.log('Single party mode enabled');
+      this.party = data.partyId;
+      this.ngZone.run(() => {
+        this.isSingleParty = true;
+      });
     } else {
-      console.log('Quick play is NOT supported');
+      console.log('Single party mode disabled');
     }
   }
 
   async quickJoin() {
+	if (this.isSingleParty) {
+      this.joinParty();
+      return;
+	}
     // First get an unstarted round ID
     let roundID = await this.http.get(`${environment.API_URL_GAME_ROUND}/available`, { responseType: 'text' }).toPromise();
     // Then join the round
