@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +22,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.sse.Sse;
@@ -110,10 +112,13 @@ public class PartyService {
     @GET
     @Path("/{partyId}/queue")
     @Produces(MediaType.SERVER_SENT_EVENTS)
-    public void joinQueue(@PathParam("partyId") String partyId, @Context SseEventSink sink, @Context Sse sse) {
+    public void joinQueue(@PathParam("partyId") String partyId,
+                          @QueryParam("playerId") String playerId,
+                          @Context SseEventSink sink, @Context Sse sse) {
+        Objects.requireNonNull(playerId, "Client attemted to queue for a party without providing playerId");
         Party p = getParty(partyId);
         if (p != null)
-            p.enqueueClient(sink, sse);
+            p.enqueueClient(playerId, sink, sse);
     }
 
 }

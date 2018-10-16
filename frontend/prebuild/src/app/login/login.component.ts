@@ -253,7 +253,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (LoginComponent.queueCallback) {
       LoginComponent.queueCallback.close();
     }
-    LoginComponent.queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${this.party}/queue`, {});
+    let playerId = sessionStorage.getItem('userId');
+    LoginComponent.queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${this.party}/queue?playerId=${playerId}`, {});
     this.setQueueOnMessage();
     LoginComponent.queueCallback.onerror = msg => {
       console.log('Error showing queue position: ' + JSON.stringify(msg.data));

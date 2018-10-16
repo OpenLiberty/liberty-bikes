@@ -44,8 +44,8 @@ public class Party {
         return this.currentRound;
     }
 
-    public void enqueueClient(SseEventSink sink, Sse sse) {
-        queue.add(sink, sse);
+    public void enqueueClient(String playerId, SseEventSink sink, Sse sse) {
+        queue.add(playerId, sink, sse);
     }
 
     public void close() {

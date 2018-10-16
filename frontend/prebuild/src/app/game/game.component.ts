@@ -367,7 +367,8 @@ export class GameComponent implements OnInit, OnDestroy {
         this.processRequeue(nextRoundID);
       }
     } else {
-      let queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${partyId}/queue`, {});
+      let playerId = sessionStorage.getItem('userId');
+      let queueCallback = new EventSourcePolyfill(`${environment.API_URL_PARTY}/${partyId}/queue?playerId=${playerId}`, {});
       queueCallback.onmessage = msg => {
         let queueMsg = JSON.parse(msg.data);
         if (queueMsg.queuePosition) {
@@ -454,6 +455,7 @@ export class GameComponent implements OnInit, OnDestroy {
     this.waitingTimer = timer(0, 1000);
     this.waitingSub = this.waitingTimer.subscribe((t) => {
       if (this.waitCard) {
+        this.verifyOpen();
         this.waitCard.bodyString = `${seconds - t}`;
       }
     });
@@ -483,6 +485,7 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   verifyOpen() {
+	  console.log('@AGG verify open');
     if (!this.gameService.isOpen()) {
       console.log('GameService socket not open');
       this.ngZone.run(() => {

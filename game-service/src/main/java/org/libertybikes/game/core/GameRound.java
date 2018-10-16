@@ -521,7 +521,7 @@ public class GameRound implements Runnable {
         // Give players a 10s grace period before they are removed from a finished game
         if (exec != null)
             exec.schedule(() -> {
-                for (Session s : clients.keySet())
+                for (Session s : new HashSet<Session>(clients.keySet()))
                     removeClient(s);
             }, 10, TimeUnit.SECONDS);
     }
