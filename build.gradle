@@ -38,7 +38,7 @@ task dockerStart {
 
 composeUp {
     subprojects.each {
-        dependsOn("${it.name}:libertyPackage")
+        dependsOn("${it.name}:war")
     }
 }
 
