@@ -19,6 +19,7 @@ ext {
 	httpPort = 12000
 	httpsPort = 12005
 	applicationName = "${war.archiveName}"
+	appUrl = "http://localhost:${httpPort}/"
 }
 
 war {
@@ -84,14 +85,4 @@ liberty {
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort, 'application.name': applicationName]
 		configDirectory = file('src/main/liberty/config')
 	}
-}
-
-libertyStart.doLast {
-	println "Application available at: http://localhost:${httpPort}/"
-}
-
-task open {
-    doLast {
-        java.awt.Desktop.desktop.browse "http://localhost:${httpPort}/".toURI()
-    }
 }

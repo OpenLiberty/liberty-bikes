@@ -8,6 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @RegisterRestClient
@@ -15,7 +16,6 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 public interface GitHubUserAPI {
 
     public static class EmailData {
-        @Email
         public String email;
         public boolean primary;
     }
@@ -23,7 +23,7 @@ public interface GitHubUserAPI {
     @GET
     @Path("/emails")
     @Produces(MediaType.APPLICATION_JSON)
-    @Valid // TODO: beanval isn't being called here when rest client instance is injected
+    @Operation(hidden = true) // hide operation from OpenAPI    
     public EmailData[] getEmail(@QueryParam("access_token") String accessToken);
 
 }

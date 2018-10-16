@@ -9,6 +9,7 @@
         <feature>mpConfig-1.2</feature>
         <feature>mpRestClient-1.0</feature>
         <feature>mpJwt-1.0</feature>
+        <feature>mpOpenAPI-1.0</feature>
         <feature>websocket-1.1</feature>
     </featureManager>
 
