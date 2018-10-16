@@ -35,7 +35,11 @@ button {
   transition: all 0.3s ease-in-out;
 }
 
-button:hover {
+button:disabled {
+  opacity: 0.5;
+}
+
+button:hover:enabled {
   text-shadow: 0 0 5px #fff;
 }
 

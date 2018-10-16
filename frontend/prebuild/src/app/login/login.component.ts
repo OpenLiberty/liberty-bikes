@@ -12,7 +12,19 @@ import { Player } from '../entity/player';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'],
+  animations: [
+    trigger('sso', [
+      transition(':enter', [
+        style({height: '0', opacity: 0, 'padding-bottom': 0}),
+        animate('300ms', style({height: '*', opacity: 1, 'padding-bottom': '*'}))
+      ]),
+      transition(':leave', [
+        style({height: '*', opacity: 1, 'padding-bottom' : '*'}),
+        animate('300ms', style({height: '0', opacity: 0, 'padding-bottom': 0}))
+      ])
+    ])
+  ]
 })
 export class LoginComponent implements OnInit, OnDestroy {
   static queueCallback: EventSourcePolyfill;
@@ -25,7 +37,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   isQuickPlayAllowed: boolean = this.isFullDevice;
   isSingleParty: boolean = false;
-  isGoogleConfigured: boolean = false; 
+  isSsoCheckComplete: boolean = false;
+  isGoogleConfigured: boolean = false;
   isGithubConfigured: boolean = false;
   isTwitterConfigured: boolean = false;
 
@@ -71,7 +84,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.setQueueOnMessage();
       this.showQueue(queuePosition);
     }
-    
+
     this.checkForSingleParty();
     this.checkSsoOptions();
   }
@@ -91,39 +104,47 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginTwitter() {
       window.location.href = `${environment.API_URL_AUTH}/auth-service/TwitterAuth`;
   }
-  
+
   async checkSsoOptions() {
+    // Delay to give users enough time to read the check text
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     let data: any = await this.http.get(`${environment.API_URL_AUTH}/auth-service`).toPromise();
     if (data == null) {
-    	  console.log('WARNING: Unable to contact auth service to determine SSO options');
-    	  return;
+      console.log('WARNING: Unable to contact auth service to determine SSO options');
+      this.ngZone.run(() => {
+        this.isSsoCheckComplete = true;
+      });
+      return;
     }
-    
-    console.log('Configured auth schemes: ' + JSON.stringify(data));  
+
+    console.log('Configured auth schemes: ' + JSON.stringify(data));
     this.ngZone.run(() => {
-	    if (data.indexOf('TwitterAuth') > -1) {
-	    	  this.isTwitterConfigured = true;
-	    }
-	    if (data.indexOf('GoogleAuth') > -1) {
-	  	  this.isGoogleConfigured = true;
-	    }
-	    if (data.indexOf('GitHubAuth') > -1) {
-	  	  this.isGithubConfigured = true;
-	    }
+      if (data.indexOf('TwitterAuth') > -1) {
+        this.isTwitterConfigured = true;
+      }
+      if (data.indexOf('GoogleAuth') > -1) {
+        this.isGoogleConfigured = true;
+      }
+      if (data.indexOf('GitHubAuth') > -1) {
+        this.isGithubConfigured = true;
+      }
+
+      this.isSsoCheckComplete = true;
     });
   }
-  
+
   async checkForSingleParty() {
     if (this.isSingleParty) {
       return;
     }
-    
+
     let data: any = await this.http.get(`${environment.API_URL_PARTY}/describe`).toPromise();
     if (data == null) {
       console.log('WARNING: Unable to contact party service to determine if single party mode is enabled');
       return;
     }
-    
+
     if (data.isSingleParty === true) {
       console.log('Single party mode enabled');
       this.party = data.partyId;
@@ -136,10 +157,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   async quickJoin() {
-	if (this.isSingleParty) {
+    if (this.isSingleParty) {
       this.joinParty();
       return;
-	}
+    }
     // First get an unstarted round ID
     let roundID = await this.http.get(`${environment.API_URL_GAME_ROUND}/available`, { responseType: 'text' }).toPromise();
     // Then join the round
