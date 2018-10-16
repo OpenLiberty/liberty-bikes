@@ -67,4 +67,14 @@ subprojects {
     task debug { dependsOn 'libertyDebug' }
     task start { dependsOn 'libertyStart' }
     task stop  { dependsOn 'libertyStop'  }
+    
+    libertyStart.doLast {
+        println "Application available at: ${appUrl}"
+    }
+    
+    task open {
+        doLast {
+            java.awt.Desktop.desktop.browse "${appUrl}".toURI()
+        }
+    }
 }

@@ -40,6 +40,7 @@ To stop all liberty servers, issue the command:
   - Config (auth-service, game-service, player-service)
   - JWT (auth-service, game-service, player-service)
   - [Rest Client](#microprofile-rest-client) (game-service)
+  - [OpenAPI](#microprofile-openapi) (auth-service, game-service, player-service)
 - Angular 6 (frontend)
 - Gradle build
   - [Liberty Gradle Plugin](#liberty-gradle-plugin)
@@ -148,6 +149,14 @@ liberty {
   }
 }
 ```
+
+## Microprofile OpenAPI
+
+Especially while developing new Rest APIs locally, it is useful to inspect the exposed APIs and test them out manually. Simply by enabling the `mpOpenAPI-1.0` feature in server.xml (no application changes needed), all JAX-RS endpoints will be exposed in an interactive web UI.
+
+Here is a snapshot of what the player-service view looks like:
+
+![Image of MP OpenAPI web ui](https://user-images.githubusercontent.com/5427967/47033512-a87ef100-d13a-11e8-827d-375e0f1c4cae.png)
 
 ## EE Concurrency
 

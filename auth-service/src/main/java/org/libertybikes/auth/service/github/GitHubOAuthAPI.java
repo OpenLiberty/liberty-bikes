@@ -8,6 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @RegisterRestClient
@@ -15,14 +16,13 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 public interface GitHubOAuthAPI {
 
     public static class GithubTokenResponse {
-        @NotNull
         public String access_token;
     }
 
     @GET
     @Path("/access_token")
     @Produces(MediaType.APPLICATION_JSON)
-    @Valid // TODO: beanval isn't being honored here when used with MP Rest client
+    @Operation(hidden = true) // hide operation from OpenAPI
     public GithubTokenResponse accessToken(@QueryParam("client_id") String key,
                                            @QueryParam("client_secret") String secret,
                                            @QueryParam("code") String code,

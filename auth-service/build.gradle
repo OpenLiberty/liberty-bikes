@@ -1,7 +1,7 @@
 ext {
 	httpPort = 8082
 	httpsPort = 8482
-	appUrl = "http://localhost:${httpPort}/${war.baseName}" 
+	appUrl = "http://localhost:${httpPort}/openapi/ui"
 }
 
 liberty {
@@ -18,15 +18,4 @@ dependencies {
     compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
     compile group: 'com.google.api-client', name: 'google-api-client', version: '1.23.0'
     compile group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.+'
-}
-
-
-libertyStart.doLast {
-	println "Application available at: ${appUrl}"
-}
-
-task open {
-    doLast {
-        java.awt.Desktop.desktop.browse "${appUrl}/token".toURI()
-    }
 }
