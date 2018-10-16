@@ -150,6 +150,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.party = data.partyId;
       this.ngZone.run(() => {
         this.isSingleParty = true;
+        this.isQuickPlayAllowed = true;
       });
     } else {
       console.log('Single party mode disabled');
