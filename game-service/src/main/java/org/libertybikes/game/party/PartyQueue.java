@@ -67,7 +67,6 @@ public class PartyQueue {
         }
 
         public int queuePosition() {
-            int i = 0;
             int position = 1;
             for (QueuedClient c : PartyQueue.this.waitingPlayers) {
                 if (this.equals(c))

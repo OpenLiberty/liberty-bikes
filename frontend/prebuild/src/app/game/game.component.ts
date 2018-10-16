@@ -455,8 +455,12 @@ export class GameComponent implements OnInit, OnDestroy {
     this.waitingTimer = timer(0, 1000);
     this.waitingSub = this.waitingTimer.subscribe((t) => {
       if (this.waitCard) {
-        this.verifyOpen();
         this.waitCard.bodyString = `${seconds - t}`;
+        // If we have gotten down to -2, a connection was probably interrupted
+        if (-1 > (seconds - t)) {
+          this.waitingSub.unsubscribe();
+          this.connectionInterrupted();
+        }
       }
     });
 
@@ -485,13 +489,16 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   verifyOpen() {
-	  console.log('@AGG verify open');
     if (!this.gameService.isOpen()) {
-      console.log('GameService socket not open');
-      this.ngZone.run(() => {
-        this.router.navigate(['/login']);
-      });
+      this.connectionInterrupted();
     }
+  }
+  
+  connectionInterrupted() {
+    alert('Connection to game-service interrrupted. Re-directing to login page.');
+    this.ngZone.run(() => {
+      this.router.navigate(['/login']);
+    });
   }
   
   addBorder(x, y, w, h) {
