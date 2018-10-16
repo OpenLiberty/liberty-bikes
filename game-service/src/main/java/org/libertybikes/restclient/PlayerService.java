@@ -25,7 +25,7 @@ public interface PlayerService {
     public Player getPlayerById(@PathParam("playerId") String id);
 
     @POST
-    @Path("/rank/{playerId}/recordGame")
+    @Path("/rank/{playerId}")
     @Operation(hidden = true) // hide operation from OpenAPI
     public void recordGame(@PathParam("playerId") String id, @QueryParam("place") int place, @HeaderParam("Authorization") String token);
 

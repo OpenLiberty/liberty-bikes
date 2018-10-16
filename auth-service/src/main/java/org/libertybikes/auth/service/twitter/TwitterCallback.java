@@ -31,7 +31,7 @@ public class TwitterCallback extends JwtAuth {
     ConfigBean config;
 
     @GET
-    public Response getAuthURL(@Context HttpServletRequest request) throws URISyntaxException {
+    public Response getTwitterCallbackURL(@Context HttpServletRequest request) throws URISyntaxException {
         try {
             Twitter twitter = (Twitter) request.getSession().getAttribute("twitter");
             RequestToken reqToken = (RequestToken) request.getSession().getAttribute("twitter_token");

@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -38,23 +39,15 @@ public class RankingService {
         for (int i = 0; i < 10; i++) {
             String id = playerSvc.createPlayer("SamplePlayer-" + i, null);
             for (int j = 0; j < 3; j++)
-                recordGame(id, r.nextInt(4) + 1);
+                recordGameInternal(id, r.nextInt(4) + 1);
             for (int j = 0; j < 10; j++)
-                recordGame(id, 4);
+                recordGameInternal(id, 4);
         }
     }
 
     @GET
-    @Path("/top")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<Player> topFivePlayers() {
-        return topNPlayers(5);
-    }
-
-    @GET
-    @Path("/top/{numPlayers}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Collection<Player> topNPlayers(@PathParam("numPlayers") Integer numPlayers) {
+    public Collection<Player> topNPlayers(@QueryParam("limit") @DefaultValue("5") Integer numPlayers) {
         if (numPlayers < 0)
             return Collections.emptySet();
         if (numPlayers > 100)
@@ -71,14 +64,14 @@ public class RankingService {
 
     @POST
     @RolesAllowed({ "admin" })
-    @Path("/{playerId}/recordGame")
+    @Path("/{playerId}")
     public void recordGame(@PathParam("playerId") String id, @QueryParam("place") int place, @HeaderParam("Authorization") String token) {
-        recordGame(id, place);
+        recordGameInternal(id, place);
     }
 
-    public void recordGame(String id, int place) {
-        if (place < 0 || place > 4) {
-            System.out.println("Invalid place (" + place + "), must be 0-4");
+    void recordGameInternal(String id, int place) {
+        if (place < 1 || place > 4) {
+            System.out.println("Invalid place (" + place + "), must be 1-4");
             return;
         }
         Player p = playerSvc.getPlayerById(id);

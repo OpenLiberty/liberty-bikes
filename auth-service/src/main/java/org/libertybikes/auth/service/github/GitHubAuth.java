@@ -23,7 +23,7 @@ public class GitHubAuth {
     ConfigBean config;
 
     @GET
-    public Response getAuthURL(@Context HttpServletRequest request) {
+    public Response getGitHubAuthURL(@Context HttpServletRequest request) {
         try {
             String randomCode = UUID.randomUUID().toString();
             request.getSession().setAttribute("github", randomCode);

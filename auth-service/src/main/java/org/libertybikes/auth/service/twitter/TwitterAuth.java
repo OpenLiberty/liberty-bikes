@@ -25,7 +25,7 @@ public class TwitterAuth {
     ConfigBean config;
 
     @GET
-    public Response getAuthURL(@Context HttpServletRequest request) {
+    public Response getTwitterAuthURL(@Context HttpServletRequest request) {
 
         ConfigurationBuilder c = new ConfigurationBuilder()
                         .setOAuthConsumerKey(config.twitter_key)

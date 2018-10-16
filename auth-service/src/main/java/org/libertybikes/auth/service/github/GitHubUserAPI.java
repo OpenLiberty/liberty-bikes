@@ -1,7 +1,5 @@
 package org.libertybikes.auth.service.github;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Email;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -23,7 +21,7 @@ public interface GitHubUserAPI {
     @GET
     @Path("/emails")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(hidden = true) // hide operation from OpenAPI    
+    @Operation(hidden = true) // hide operation from OpenAPI
     public EmailData[] getEmail(@QueryParam("access_token") String accessToken);
 
 }
