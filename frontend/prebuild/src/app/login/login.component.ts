@@ -42,6 +42,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   isGoogleConfigured = false;
   isGithubConfigured = false;
   isTwitterConfigured = false;
+  isPerformingSsoRedirect = false;
 
   constructor(
     private router: Router,
@@ -95,15 +96,24 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   loginGoogle() {
-       window.location.href = `${environment.API_URL_AUTH}/auth-service/GoogleAuth`;
+    this.doSsoLogin(`${environment.API_URL_AUTH}/auth-service/GoogleAuth`);
   }
 
   loginGithub() {
-      window.location.href = `${environment.API_URL_AUTH}/auth-service/GitHubAuth`;
+    this.doSsoLogin(`${environment.API_URL_AUTH}/auth-service/GitHubAuth`);
   }
 
   loginTwitter() {
-      window.location.href = `${environment.API_URL_AUTH}/auth-service/TwitterAuth`;
+    this.doSsoLogin(`${environment.API_URL_AUTH}/auth-service/TwitterAuth`);
+  }
+
+  async doSsoLogin(href) {
+    this.isPerformingSsoRedirect = true;
+
+    // Delay to let the animation complete
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    window.location.href = href;
   }
 
   async checkSsoOptions() {
