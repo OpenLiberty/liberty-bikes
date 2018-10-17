@@ -35,7 +35,9 @@ body {
 }
 
 .navbar button {
-  width: calc(50% - 5px);
+  flex: 1;
+  margin-left: 2px;
+  margin-right: 2px;
   height: 100%;
   background-color: rgba(0, 0, 20, 0.2);
 
@@ -141,12 +143,7 @@ body {
 
 #footer {
   grid-area: 4 / 2;
-
   border-top: $navbar-border;
-}
-
-#footer .btn {
-  width: calc(50% - 10px);
 }
 
 $loaderHeightWidth:120px;

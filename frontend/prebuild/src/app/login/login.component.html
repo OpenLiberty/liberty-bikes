@@ -74,12 +74,12 @@
               <button type="button" (click)="quickJoin()">Play Now</button>
             </div>
 
-            <h2 *ngIf="isQuickPlayAllowed" class="section-header" style="margin-bottom: 0">or</h2>
-            <div class="form-item">
+            <h2 *ngIf="isQuickPlayAllowed && !isSingleParty" class="section-header" style="margin-bottom: 0">or</h2>
+            <div *ngIf="!isSingleParty" class="form-item">
               <label>Party Code</label>
               <input type="text" id="roundid" name="roundid" [(ngModel)]="party" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
-            <div class="form-item">
+            <div *ngIf="!isSingleParty" class="form-item">
               <button type="button" (click)="joinParty()">Join Party</button>
             </div>
           </div>

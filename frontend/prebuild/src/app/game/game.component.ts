@@ -25,6 +25,9 @@ export class GameComponent implements OnInit, OnDestroy {
   serverHost: string;
   serverPort: string;
 
+  isSpectator: boolean;
+  isSingleParty: boolean;
+
   partyId: string;
   showPartyId = false;
   showLoader = false;
@@ -100,7 +103,10 @@ export class GameComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.roundId = sessionStorage.getItem('roundId');
 
-    if (sessionStorage.getItem('isSpectator') === 'true') {
+    this.isSpectator = sessionStorage.getItem('isSpectator') === 'true';
+    this.isSingleParty = sessionStorage.getItem('isSingleParty') === 'true';
+
+    if (this.isSpectator) {
       console.log('is a spectator... showing game id');
       // Set the Party ID and make visible
       this.partyId = sessionStorage.getItem('partyId');

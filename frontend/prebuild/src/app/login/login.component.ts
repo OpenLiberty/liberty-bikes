@@ -137,6 +137,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   async checkForSingleParty() {
     if (this.isSingleParty) {
+      sessionStorage.setItem('isSingleParty', String(this.isSingleParty));
       return;
     }
 
@@ -156,6 +157,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     } else {
       console.log('Single party mode disabled');
     }
+
+    sessionStorage.setItem('isSingleParty', String(this.isSingleParty));
   }
 
   async quickJoin() {
