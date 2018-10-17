@@ -139,13 +139,13 @@ export class GameComponent implements OnInit, OnDestroy {
     this.obstaclesShape.y = 0;
 
     this.stage.addChild(this.obstaclesShape);
-    
+
     // Create a red border around the game board
-    let BORDER_WIDTH = 3;
+    const BORDER_WIDTH = 3;
     this.addBorder(0, 0, Constants.BOARD_SIZE, BORDER_WIDTH); // top
-    this.addBorder(0, Constants.BOARD_SIZE-BORDER_WIDTH, Constants.BOARD_SIZE, BORDER_WIDTH); // bottom
+    this.addBorder(0, Constants.BOARD_SIZE - BORDER_WIDTH, Constants.BOARD_SIZE, BORDER_WIDTH); // bottom
     this.addBorder(0, 0, BORDER_WIDTH, Constants.BOARD_SIZE); // left
-    this.addBorder(Constants.BOARD_SIZE-BORDER_WIDTH, 0, BORDER_WIDTH, Constants.BOARD_SIZE); // right
+    this.addBorder(Constants.BOARD_SIZE - BORDER_WIDTH, 0, BORDER_WIDTH, Constants.BOARD_SIZE); // right
 
     this.stage.update();
 
@@ -325,7 +325,7 @@ export class GameComponent implements OnInit, OnDestroy {
         player.tooltip.visible(true);
 
         if (player.status.toLocaleLowerCase() === 'winner') {
-          const winnerCard = new Card(400, "winner!", player.name, true, player.color);
+          const winnerCard = new Card(400, 'winner!', player.name, true, player.color);
           const card = winnerCard.displayObject;
           card.x = (Constants.BOARD_SIZE / 2) - (winnerCard.width / 2);
           card.y = (Constants.BOARD_SIZE / 2) - (winnerCard.height / 2);
@@ -441,7 +441,7 @@ export class GameComponent implements OnInit, OnDestroy {
         this.waitCard.bodyString = 'GO!';
         this.waitCard.hide(500);
       } else if (t >= seconds) {
-        this.ngZone.run((t) => {
+        this.ngZone.run(() => {
           this.waitingSub.unsubscribe();
         });
       }
@@ -467,7 +467,7 @@ export class GameComponent implements OnInit, OnDestroy {
     if (!this.waitCard) {
       const width = 400;
       const margin = 50;
-      this.waitCard = new Card(width, "waiting for players", `${seconds}`, true);
+      this.waitCard = new Card(width, 'waiting for players', `${seconds}`, true);
       const card = this.waitCard.displayObject;
       card.x = (Constants.BOARD_SIZE / 2) - (this.waitCard.width / 2);
       card.y = (Constants.BOARD_SIZE / 2) - (this.waitCard.height / 2);
@@ -493,19 +493,19 @@ export class GameComponent implements OnInit, OnDestroy {
       this.connectionInterrupted();
     }
   }
-  
+
   connectionInterrupted() {
     alert('Connection to game-service interrrupted. Re-directing to login page.');
     this.ngZone.run(() => {
       this.router.navigate(['/login']);
     });
   }
-  
+
   addBorder(x, y, w, h) {
-	let shape: Shape = new Shape();
-  	shape.shadow = new Shadow(Obstacle.COLOR, 0, 0, 20);
-  	shape.graphics.beginFill(Obstacle.COLOR).rect(x,y,w,h);
-	this.stage.addChild(shape);
+    let shape: Shape = new Shape();
+    shape.shadow = new Shadow(Obstacle.COLOR, 0, 0, 20);
+    shape.graphics.beginFill(Obstacle.COLOR).rect(x, y, w, h);
+    this.stage.addChild(shape);
   }
 
 }
