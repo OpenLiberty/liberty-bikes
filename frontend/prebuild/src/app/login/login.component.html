@@ -13,30 +13,35 @@
         <div leftPane>
           <div class="form-group">
             <div class="form-item">
-              <button type="button" (click)="showGuestLogin()">Play as Guest</button>
+              <button type="button" (click)="showGuestLogin()" [disabled]="isPerformingSsoRedirect">Play as Guest</button>
             </div>
             <div class="form-item">
-              <button type="button" (click)="loginGoogle()" [disabled]="!isGoogleConfigured">Sign in with Google</button>
+              <button type="button" (click)="loginGoogle()" [disabled]="isPerformingSsoRedirect || !isGoogleConfigured">Sign in with Google</button>
             </div>
             <div class="form-item">
-              <button type="button" (click)="loginGithub()" [disabled]="!isGithubConfigured">Sign in with GitHub</button>
+              <button type="button" (click)="loginGithub()" [disabled]="isPerformingSsoRedirect || !isGithubConfigured">Sign in with GitHub</button>
             </div>
             <div class="form-item">
-              <button type="button" (click)="loginTwitter()" [disabled]="!isTwitterConfigured">Sign in with Twitter</button>
+              <button type="button" (click)="loginTwitter()" [disabled]="isPerformingSsoRedirect || !isTwitterConfigured">Sign in with Twitter</button>
             </div>
             <div class="caption"
-                  *ngIf="!isSsoCheckComplete"
-                  [@sso]="isSsoCheckComplete">
+                 *ngIf="isPerformingSsoRedirect"
+                 [@sso]="isPerformingSsoRedirect">
+              Authenticating...
+            </div>
+            <div class="caption"
+                  *ngIf="!isPerformingSsoRedirect && !isSsoCheckComplete"
+                  [@sso]="isPerformingSsoRedirect || isSsoCheckComplete">
               Checking for sign-in options...
             </div>
             <div class="caption"
-                  *ngIf="isSsoCheckComplete && (!isGoogleConfigured || !isGithubConfigured || !isTwitterConfigured)"
-                  [@sso]="isSsoCheckComplete">
+                  *ngIf="isSsoCheckComplete && !isPerformingSsoRedirect && (!isGoogleConfigured || !isGithubConfigured || !isTwitterConfigured)"
+                  [@sso]="isPerformingSsoRedirect || isSsoCheckComplete">
               Some sign-in options are unavailable because they have not been configured
             </div>
             <h2 *ngIf="isFullDevice" class="section-header">or</h2>
             <div *ngIf="isFullDevice" class="form-item">
-              <button type="button" (click)="hostRound()">Host Round</button>
+              <button type="button" (click)="hostRound()" [disabled]="isPerformingSsoRedirect">Host Round</button>
             </div>
           </div>
         </div>
@@ -74,12 +79,12 @@
               <button type="button" (click)="quickJoin()">Play Now</button>
             </div>
 
-            <h2 *ngIf="isQuickPlayAllowed" class="section-header" style="margin-bottom: 0">or</h2>
-            <div class="form-item">
+            <h2 *ngIf="isQuickPlayAllowed && !isSingleParty" class="section-header" style="margin-bottom: 0">or</h2>
+            <div *ngIf="!isSingleParty" class="form-item">
               <label>Party Code</label>
               <input type="text" id="roundid" name="roundid" [(ngModel)]="party" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
-            <div class="form-item">
+            <div *ngIf="!isSingleParty" class="form-item">
               <button type="button" (click)="joinParty()">Join Party</button>
             </div>
           </div>
