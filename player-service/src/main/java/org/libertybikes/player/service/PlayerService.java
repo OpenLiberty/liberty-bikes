@@ -33,6 +33,7 @@ public class PlayerService {
     }
 
     @POST
+    @Produces(MediaType.TEXT_HTML)
     public String createPlayer(@QueryParam("name") String name, @QueryParam("id") String id) {
         // Validate player name
         if (name == null)
