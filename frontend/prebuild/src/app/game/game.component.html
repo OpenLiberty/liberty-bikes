@@ -24,6 +24,5 @@
 </div>
 
 <div id="footer" class="navbar">
-  <button type="button" (click)="startGame()">Start Game</button>
-  <button *ngIf="!(this.isSpectator && this.isSingleParty)" type="button" (click)="requeue()">Requeue</button>
+  <button type="button" (click)="gameButtonPressed()" [disabled]="gameButtonDisabled">{{gameButtonText}}</button>
 </div>
