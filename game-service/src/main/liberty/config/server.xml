@@ -20,8 +20,8 @@
     <jndiEntry jndiName="round/map" value="-1"/> <!-- Default = -1 (random map) -->
     <jndiEntry jndiName="round/autoStartCooldown" value="20"/> <!-- Default = 20(sec) -->
     <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}resources/security/validationKeystore.jks"/> 
-    <jndiEntry jndiName="jwtKeyStorePassword" value="secret2"/> 
-    <jndiEntry jndiName="jwtKeyStoreAlias" value="bike2"/> 
+    <jndiEntry jndiName="jwtKeyStorePassword" value="secret"/> 
+    <jndiEntry jndiName="jwtKeyStoreAlias" value="bike"/> 
    
                   
     <applicationManager autoExpand="true"/>
@@ -31,11 +31,11 @@
          keyStoreRef="validationKeystore"
          trustStoreRef="validationKeystore"  />  
     <keyStore id="validationKeystore"
-         password="secret2"
+         password="secret"
          type="jks"
          location="${server.config.dir}resources/security/validationKeystore.jks" /> 
 
-    <keyStore id="defaultKeyStore" password="secret2" />
+    <keyStore id="defaultKeyStore" password="secret" />
     <quickStartSecurity userName="admin" userPassword="admin"/>
 
     <!-- This configuration allows cross-origin HTTP requests, such

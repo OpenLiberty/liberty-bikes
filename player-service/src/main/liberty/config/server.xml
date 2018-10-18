@@ -25,8 +25,8 @@
     <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}resources/security/validationKeystore.jks"/>
            
         <mpJwt id="myMpJwt" 
-           keyName="bike2" 
-           issuer="https://game-service-libertybikes.mybluemix.net" 
+           keyName="rebike" 
+           issuer="https://libertybikes.mybluemix.net" 
            audiences="client"/>
     
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
