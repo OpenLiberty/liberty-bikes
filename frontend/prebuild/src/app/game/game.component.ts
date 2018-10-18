@@ -14,6 +14,12 @@ import { Constants } from './constants';
 import { Card } from '../overlay/card';
 import { bindCallback, timer, Observable, Subscription } from 'rxjs';
 
+enum GameState {
+  Waiting,
+  Playing,
+  Finished,
+}
+
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -31,6 +37,37 @@ export class GameComponent implements OnInit, OnDestroy {
   partyId: string;
   showPartyId = false;
   showLoader = false;
+
+  currentState: GameState;
+
+  get state(): GameState {
+    return this.currentState;
+  }
+
+  set state(newState: GameState) {
+    this.currentState = newState;
+    switch (newState) {
+      case GameState.Waiting: {
+        this.gameButtonText = 'Start Game';
+        this.gameButtonDisabled = false;
+        break;
+      }
+      case GameState.Playing: {
+        this.gameButtonText = 'Start Game';
+        this.gameButtonDisabled = true;
+        break;
+      }
+      case GameState.Finished: {
+        this.gameButtonText = 'Requeue';
+        this.gameButtonDisabled = this.isSpectator;
+        break;
+      }
+
+    }
+  }
+
+  gameButtonText: String;
+  gameButtonDisabled = false;
 
   output: HTMLElement;
   idDisplay: HTMLElement;
@@ -168,6 +205,8 @@ export class GameComponent implements OnInit, OnDestroy {
         this.moveRight();
       }
     };
+
+    this.state = GameState.Waiting;
   }
 
   ngOnDestroy() {
@@ -314,6 +353,10 @@ export class GameComponent implements OnInit, OnDestroy {
         // Ensure tooltip is hidden in case player dies before it fades out
         playerEntity.tooltip.visible(false);
         playerEntity.tooltip.alpha = 1;
+
+        if (this.state !== GameState.Finished && player.id === sessionStorage.getItem('userId')) {
+          this.ngZone.run(() => this.state = GameState.Finished);
+        }
       }
 
       playerEntity.setStatus(player.status);
@@ -326,6 +369,12 @@ export class GameComponent implements OnInit, OnDestroy {
     }
 
     if (noneAlive) {
+      if (this.isSpectator) {
+        this.countdownRequeue(5);
+      } else {
+        this.state = GameState.Finished;
+      }
+
       this.players.forEach((player: Player, id: string) => {
         player.tooltip.alpha = 1;
         player.tooltip.visible(true);
@@ -349,12 +398,29 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   // Game actions
+  gameButtonPressed() {
+    switch (this.state) {
+      case GameState.Waiting: {
+        this.startGame();
+        break;
+      }
+      case GameState.Finished: {
+        this.requeue();
+        break;
+      }
+    }
+  }
+
   startGame() {
-  this.verifyOpen();
+    this.verifyOpen();
     this.gameService.send({ message: 'GAME_START' });
   }
 
   async requeue() {
+    if (!this.isSpectator) {
+      this.gameButtonDisabled = true;
+      this.gameButtonText = 'Requeuing...';
+    }
     let partyId = sessionStorage.getItem('partyId');
     let isSpectator: boolean = sessionStorage.getItem('isSpectator') === 'true' ? true : false;
     if (isSpectator || partyId === null) {
@@ -422,6 +488,7 @@ export class GameComponent implements OnInit, OnDestroy {
   }
 
   startingCountdown(seconds) {
+    this.state = GameState.Playing;
     this.waitingSub.unsubscribe();
 
     this.waitCard.headerString = 'Get Ready';
@@ -454,7 +521,29 @@ export class GameComponent implements OnInit, OnDestroy {
     });
   }
 
+  countdownRequeue(seconds) {
+    if (this.waitingSub) {
+      this.waitingSub.unsubscribe();
+    }
+    this.waitingTimer = timer(0, 1000);
+    this.waitingSub = this.waitingTimer.subscribe((t) => {
+      if (seconds < 1) {
+        this.ngZone.run(() => {
+          this.gameButtonText = `Requeuing...`;
+        });
+
+        this.waitingSub.unsubscribe();
+      } else {
+        this.ngZone.run(() => {
+          this.gameButtonText = `Requeue in ${seconds}...`;
+        });
+      }
+      seconds = seconds - 1;
+    });
+  }
+
   waitForPlayers(seconds) {
+    this.state = GameState.Waiting;
     if (this.waitingSub) {
       this.waitingSub.unsubscribe();
     }
