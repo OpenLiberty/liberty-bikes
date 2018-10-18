@@ -1,6 +1,6 @@
 # Liberty Bikes
 
-![Image of Liberty Bikes game](https://user-images.githubusercontent.com/5427967/40553647-f7ee3c80-6008-11e8-921a-d5295c5a90af.png)
+![Image of Liberty Bikes game](https://user-images.githubusercontent.com/1577201/47185063-0d307c00-d2f2-11e8-87f5-997ecf22c3d4.png)
 
 Publicly hosted on IBM Cloud here: [http://libertybikes.mybluemix.net/](http://libertybikes.mybluemix.net/)
 
