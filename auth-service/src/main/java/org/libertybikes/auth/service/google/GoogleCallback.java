@@ -66,7 +66,7 @@ public class GoogleCallback extends JwtAuth {
             infoRequest.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             String jsonIdentity = infoRequest.execute().parseAsString();
             GoogleUser user = jsonb.fromJson(jsonIdentity, GoogleUser.class);
-            System.out.println("Created user json: " + jsonb.toJson(user));
+            System.out.println("User logged in: " + jsonb.toJson(user));
             Objects.requireNonNull(user.name, "User name was null");
             Objects.requireNonNull(user.email, "User email was null");
 

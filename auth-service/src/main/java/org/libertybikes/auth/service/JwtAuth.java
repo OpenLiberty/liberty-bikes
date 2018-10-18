@@ -78,7 +78,7 @@ public abstract class JwtAuth {
         // We'll use this claim to know this is a user token
         onwardsClaims.setAudience("client");
 
-        onwardsClaims.setIssuer("https://auth-service-libertybikes.mybluemix.net");
+        onwardsClaims.setIssuer("https://libertybikes.mybluemix.net");
         // we set creation time to 24hrs ago, to avoid timezone issues in the
         // browser verification of the jwt.
         Calendar calendar1 = Calendar.getInstance();
