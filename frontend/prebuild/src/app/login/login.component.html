@@ -48,51 +48,56 @@
 
 
         <div centerPane>
-          <div class="form-group">
-            <div class="form-item">
-              <label>Username</label>
-              <input type="text" id="username" name="username" [(ngModel)]="username" />
-            </div>
-            <div class="form-item">
-              <button type="button" id="signin" (click)="loginAsGuest(username)">Sign In As Guest</button>
-            </div>
-            <div class="form-item">
+          <form (submit)="loginAsGuest(username)">
+            <div class="form-group">
+              <div class="form-item">
+                <label>Username</label>
+                <input type="text" id="username" name="username" [(ngModel)]="username" />
+              </div>
+              <div class="form-item">
+                <button type="submit" id="signin" (click)="loginAsGuest(username)">Sign In As Guest</button>
+              </div>
+              <div class="form-item">
                 <button type="button" (click)="cancelLogin()">Cancel</button>
               </div>
-          </div>
+            </div>
+          </form>
         </div>
 
         <div rightPane>
-          <div class="form-group">
-            <div class="form-item" id="player-card">
-              <label>Player</label>
-              <app-player [player]="player"></app-player>
+          <form (submit)="joinParty()">
+            <div class="form-group">
+              <div class="form-item" id="player-card">
+                <label>Player</label>
+                <app-player [player]="player"></app-player>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <div class="form-item">
-              <button type="button" (click)="logout()">Log Out</button>
+            <div class="form-group">
+              <div class="form-item">
+                <button type="button" (click)="logout()">Log Out</button>
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <div *ngIf="isQuickPlayAllowed" class="form-item">
-              <button type="button" (click)="quickJoin()">Play Now</button>
-            </div>
+            <div class="form-group">
+              <div *ngIf="isQuickPlayAllowed" class="form-item">
+                <button type="button" (click)="quickJoin()">Play Now</button>
+              </div>
 
-            <h2 *ngIf="isQuickPlayAllowed && !isSingleParty" class="section-header" style="margin-bottom: 0">or</h2>
-            <div *ngIf="!isSingleParty" class="form-item">
-              <label>Party Code</label>
-              <input type="text" id="roundid" name="roundid" [(ngModel)]="party" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <h2 *ngIf="isQuickPlayAllowed && !isSingleParty" class="section-header" style="margin-bottom: 0">or</h2>
+              <div *ngIf="!isSingleParty" class="form-item">
+                <label>Party Code</label>
+                <input type="text" id="roundid" name="roundid" [(ngModel)]="party" autocomplete="off" autocorrect="off"
+                  autocapitalize="off" spellcheck="false">
+              </div>
+              <div *ngIf="!isSingleParty" class="form-item">
+                <button type="submit" (click)="joinParty()">Join Party</button>
+              </div>
             </div>
-            <div *ngIf="!isSingleParty" class="form-item">
-              <button type="button" (click)="joinParty()">Join Party</button>
+            <div *ngIf="isFullDevice" class="form-group">
+              <div class="form-item">
+                <button type="button" (click)="hostRound()">Host Party</button>
+              </div>
             </div>
-          </div>
-          <div *ngIf="isFullDevice" class="form-group">
-            <div class="form-item">
-              <button type="button" (click)="hostRound()">Host Party</button>
-            </div>
-          </div>
+          </form>
         </div>
 
         <div queuePane>
