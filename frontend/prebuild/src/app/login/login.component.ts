@@ -373,7 +373,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   logout() {
     this.pane = 'left';
     this.username = null;
-    this.party = null;
     this.player = new Player();
     sessionStorage.removeItem('username');
     sessionStorage.removeItem('userId');
