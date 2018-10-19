@@ -372,10 +372,12 @@ export class GameComponent implements OnInit, OnDestroy {
     }
 
     if (noneAlive) {
-      if (this.isSpectator) {
-        this.countdownRequeue(5);
-      } else {
-        this.state = GameState.Finished;
+      if (this.state === GameState.Playing) {
+        if (this.isSpectator) {
+          this.countdownRequeue(5);
+        } else {
+          this.state = GameState.Finished;
+        }
       }
 
       this.players.forEach((player: Player, id: string) => {
