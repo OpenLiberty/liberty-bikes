@@ -1,7 +1,7 @@
 ext {
 	httpPort = 8081
 	httpsPort = 8444
-	appUrl = "http://localhost:${httpPort}/openapi/ui"
+	appUrl = "http://${hostname}:${httpPort}/openapi/ui"
 }
 
 liberty {
