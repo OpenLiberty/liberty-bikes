@@ -6,7 +6,7 @@ dependencies {
 ext {
 	httpPort = 8080
 	httpsPort = 8443
-	appUrl = "http://localhost:${httpPort}/openapi/ui"
+	appUrl = "http://${hostname}:${httpPort}/openapi/ui"
 }
 
 liberty {

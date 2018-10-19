@@ -12,6 +12,22 @@ task clean(type: Delete) {
   delete 'build'
 }
 
+ext.hostname = 'localhost'
+// Find the public IP address for this machine (if one exists)
+NetworkInterface.getNetworkInterfaces()
+.findAll { it.isUp() && !it.isLoopback() && !it.isVirtual() }
+.each {
+  it.getInetAddresses()
+  .findAll { !it.isLoopbackAddress() && it instanceof Inet4Address }
+  .each {
+    if (hostname.equals('localhost')) {
+      def hn = it.toString();
+      hostname = hn.startsWith("/") ? hn.substring(1, hn.length()) : hn;
+      // ${it} is in the format /<IP>, so only use http:/ instead of http://
+    }
+  }
+}
+
 subprojects {
     apply plugin: 'liberty'
     apply plugin: 'war'

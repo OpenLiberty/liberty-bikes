@@ -19,7 +19,7 @@ ext {
 	httpPort = 12000
 	httpsPort = 12005
 	applicationName = "${war.archiveName}"
-	appUrl = "http://localhost:${httpPort}/"
+	appUrl = "http://${hostname}:${httpPort}/"
 }
 
 war {
