@@ -362,7 +362,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (username === undefined || username.trim().length < 1 || username.trim().length > 20) {
       return 'Username must be between 1 and 20 chars';
     }
-    let usernameRegex: RegExp = /^[a-zA-Z0-9 -]{1,20}$/;
+    let usernameRegex: RegExp = /^[\x61-\x7A\x41-\x5A\x30-\x39\xC0-\xFF -]{1,20}$/;
     if (null == username.match(usernameRegex)) {
       return 'Username must consist of characters A-Z, a-z, 0-9, \' \', and \'-\'';
     }
