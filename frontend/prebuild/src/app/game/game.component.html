@@ -1,7 +1,10 @@
 <div id="titlebar" class="navbar">
-  <h1>Liberty Bikes</h1>
-  <div id="game-code-display" *ngIf="showPartyId">
+  <h1 id="logo">Liberty<br />Bikes</h1>
+  <div id="game-code-display" *ngIf="!isSingleParty && showPartyId">
     <h2>code: <span id="game-code">{{partyId}}</span></h2>
+  </div>
+  <div id="game-url-display" *ngIf="isSingleParty && isSpectator">
+    {{window.location.protocol}}//{{window.location.host}}
   </div>
 </div>
 

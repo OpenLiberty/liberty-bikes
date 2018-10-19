@@ -103,7 +103,7 @@
         <div queuePane>
           <div class="form-group">
             <div class="form-item">
-              <h2>The current round for party {{party}} is full! Hang out a bit and you will automatically join the next round.</h2>
+              <h2>The current round <span *ngIf="!this.isSingleParty">for party {{party}} </span>is full! Hang out a bit and you will automatically join the next round.</h2>
               <hr/>
               <!-- TODO: Display the queue number more prominently -->
               <h2>You are number {{queuePosition}} in queue</h2>
