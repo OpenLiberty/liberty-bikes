@@ -56,7 +56,7 @@ body {
   border-bottom: $navbar-border;
 }
 
-#titlebar h1 {
+#logo {
   color: #fff;
   font-size: 1.5em;
   font-weight: 300;
@@ -64,6 +64,9 @@ body {
   text-transform: uppercase;
   margin-left: 10px;
   letter-spacing: .7em;
+
+  flex: 0;
+  text-align: center;
 }
 
 #titlebar h2 {
@@ -73,11 +76,21 @@ body {
 
 #game-code-display {
   font-weight: bolder;
+  flex: 1;
+  text-align: end;
 }
 
 #game-code {
   font-size: 1.5em;
   font-family: "Avenir-Black", "Arial Black", "Roboto Black", sans-serif;
+}
+
+#game-url-display {
+  flex: 1;
+  text-align: end;
+  font-size: 1.5em;
+  line-height: 1em;
+  color: white;
 }
 
 .navbar .btn {

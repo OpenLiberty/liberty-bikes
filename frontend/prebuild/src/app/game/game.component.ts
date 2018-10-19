@@ -40,6 +40,9 @@ export class GameComponent implements OnInit, OnDestroy {
 
   currentState: GameState;
 
+  // Expose window object to template
+  window = window;
+
   get state(): GameState {
     return this.currentState;
   }
