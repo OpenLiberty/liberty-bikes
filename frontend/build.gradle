@@ -78,6 +78,19 @@ npm_start {
 	dependsOn 'libertyStop'
 }
 
+libertyStart.doLast {
+    NetworkInterface.getNetworkInterfaces()
+    .findAll { it.isUp() && !it.isLoopback() && !it.isVirtual() }
+    .each {
+        it.getInetAddresses()
+        .findAll { !it.isLoopbackAddress() && it instanceof Inet4Address }
+        .each {
+            // ${it} is in the format /<IP>, so only use http:/ instead of http://
+            println "Application externally available at: http:/${it}:${httpPort}"
+        }
+    }
+}
+
 liberty {
 	server {
 		name = 'frontendServer'

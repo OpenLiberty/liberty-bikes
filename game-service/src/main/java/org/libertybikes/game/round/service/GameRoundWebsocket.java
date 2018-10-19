@@ -17,6 +17,7 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.GameRound;
 import org.libertybikes.game.core.GameRound.State;
@@ -65,7 +66,7 @@ public class GameRoundWebsocket {
                 log(roundId, "[onMessage] Received message for round that did not exist or has completed.  Closing this websocket connection.");
                 if (round == null)
                     sendToClient(session, new OutboundMessage.ErrorEvent("Round " + roundId + " did not exist."));
-                // don't immediately boot out players that may keep sending messages a few seconds after the game is done
+                // don't boot out players that may keep sending messages a few seconds after the game is done
                 else if (!round.isPlayer(session))
                     sendToClient(session, new OutboundMessage.ErrorEvent("Round " + roundId + " has already completed."));
                 session.close();
@@ -78,7 +79,7 @@ public class GameRoundWebsocket {
             } else if (msg.direction != null) {
                 round.updatePlayerDirection(session, msg);
             } else if (msg.playerJoinedId != null) {
-                org.libertybikes.restclient.Player playerResponse = playerSvc.getPlayerById(msg.playerJoinedId);
+                org.libertybikes.restclient.Player playerResponse = getPlayer(msg.playerJoinedId);
                 if (!round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard))
                     sendToClient(session, new OutboundMessage.ErrorEvent("Unable to add player " + playerResponse.name
                                                                          + " to game. This is probably because someone else with the same name is already in the game."));
@@ -113,6 +114,14 @@ public class GameRoundWebsocket {
 
     private static void log(String roundId, String msg) {
         System.out.println("[websocket-" + roundId + "]  " + msg);
+    }
+
+    // We need to specify an extra helper method here because MP Rest Client does not
+    // yet allow MP Fault Tolerance annotations directly on rest client interfaces
+    // see: https://github.com/eclipse/microprofile-rest-client/issues/5
+    @Retry(maxRetries = 3)
+    private org.libertybikes.restclient.Player getPlayer(String id) {
+        return playerSvc.getPlayerById(id);
     }
 
 }
