@@ -38,7 +38,7 @@ public class PlayerService {
         // Validate player name
         if (name == null)
             return null;
-        name = name.replaceAll("[^a-zA-Z0-9 -]", "").trim();
+        name = name.replaceAll("[^\\x61-\\x7A\\x41-\\x5A\\x30-\\x39\\xC0-\\xFF -]", "").trim();
         if (name.length() == 0)
             return null;
         if (name.length() > 20)
