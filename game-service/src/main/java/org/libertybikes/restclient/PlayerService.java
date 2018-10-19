@@ -1,6 +1,5 @@
 package org.libertybikes.restclient;
 
-import javax.enterprise.context.Dependent;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -13,7 +12,6 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-@Dependent
 @RegisterRestClient
 @Path("/")
 public interface PlayerService {

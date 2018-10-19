@@ -6,9 +6,9 @@
         <feature>jaxrs-2.1</feature>
         <feature>jndi-1.0</feature>
         <feature>jsonb-1.0</feature>
-        <feature>mpConfig-1.2</feature>
-        <feature>mpRestClient-1.0</feature>
-        <feature>mpJwt-1.0</feature>
+        <feature>mpConfig-1.3</feature>
+        <feature>mpFaultTolerance-1.1</feature>
+        <feature>mpRestClient-1.1</feature>
         <feature>mpOpenAPI-1.0</feature>
         <feature>websocket-1.1</feature>
     </featureManager>
@@ -19,11 +19,13 @@
     <jndiEntry jndiName="round/gameSpeed" value="50"/> <!-- Default = 50(ms) -->
     <jndiEntry jndiName="round/map" value="-1"/> <!-- Default = -1 (random map) -->
     <jndiEntry jndiName="round/autoStartCooldown" value="20"/> <!-- Default = 20(sec) -->
-    <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}resources/security/validationKeystore.jks"/> 
-    <jndiEntry jndiName="jwtKeyStorePassword" value="secret"/> 
+    
+    <variable name="jwtKeyStore" value="${server.config.dir}resources/security/validationKeystore.jks"/>
+    <variable name="jwtKeyStorePassword" value="secret"/>
+    <jndiEntry jndiName="jwtKeyStore" value="${jwtKeyStore}"/> 
+    <jndiEntry jndiName="jwtKeyStorePassword" value="${jwtKeyStorePassword}"/> 
     <jndiEntry jndiName="jwtKeyStoreAlias" value="bike"/> 
    
-                  
     <applicationManager autoExpand="true"/>
     
     <sslDefault sslRef="RpSSLConfig" />  
@@ -31,9 +33,9 @@
          keyStoreRef="validationKeystore"
          trustStoreRef="validationKeystore"  />  
     <keyStore id="validationKeystore"
-         password="secret"
+         password="${jwtKeyStorePassword}"
          type="jks"
-         location="${server.config.dir}resources/security/validationKeystore.jks" /> 
+         location="${jwtKeyStore}" /> 
 
     <keyStore id="defaultKeyStore" password="secret" />
     <quickStartSecurity userName="admin" userPassword="admin"/>
