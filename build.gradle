@@ -36,6 +36,10 @@ task dockerStart {
     dependsOn 'composeUp'
 }
 
+task dockerStop {
+    dependsOn 'composeDown'
+}
+
 composeUp {
     subprojects.each {
         dependsOn("${it.name}:war")
