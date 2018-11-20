@@ -2,27 +2,27 @@ version: '2'
 services:
   frontend:
     build: frontend
-    image: lb-frontend
+    image: libertybikes-frontend
     ports:
       - "12000:12000"
   auth:
     build: auth-service
-    image: lb-auth
+    image: libertybikes-auth
     ports:
       - "8082:8082"
     environment:
-      - frontend_url=http://lb-frontend:12000/login
-      - auth_url=https://lb-auth:8082/auth-service
+      - frontend_url=http://frontend:12000/login
+      - auth_url=https://auth:8482/auth-service
   game:
     build: game-service
-    image: lb-game
+    image: libertybikes-game
     ports:
       - "8080:8080"
     environment:
-      - org_libertybikes_restclient_PlayerService_mp_rest_url=http://lb-player:8081
+      - org_libertybikes_restclient_PlayerService_mp_rest_url=http://player:8081
       - singleParty
   player:
     build: player-service
-    image: lb-player
+    image: libertybikes-player
     ports:
       - "8081:8081"
