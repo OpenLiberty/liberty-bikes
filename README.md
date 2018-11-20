@@ -27,6 +27,28 @@ To stop all liberty servers, issue the command:
 ./gradlew stop
 ```
 
+## Run it locally in containers
+
+(Requires docker and docker-compose to be installed. The Docker daemon must be running.)
+
+Builds all microservice applications and the images to run them in, then starts containers from those images.
+
+```
+./gradlew dockerStart
+```
+
+To stop and remove the containers, use:
+
+```
+./gradlew dockerStop
+```
+
+To use single-party mode, set the variable before running `dockerStart`
+
+```
+export singleParty=true
+```
+
 # Technologies used
 
 - Java EE 8
