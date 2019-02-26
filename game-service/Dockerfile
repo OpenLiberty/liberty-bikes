@@ -1,4 +1,4 @@
-FROM openliberty/open-liberty:microProfile1
+FROM open-liberty:microProfile1
 ADD build/libs/game-service.war /config/dropins
 COPY src/main/liberty/config /config/
 RUN printf 'httpPort=8080\n\

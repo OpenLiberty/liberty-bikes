@@ -3,12 +3,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.4.+'
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6.3'
     }
 }
 
 plugins {
-    id 'com.avast.gradle.docker-compose' version "0.8.0"
+    id 'com.avast.gradle.docker-compose' version "0.9.0"
 }
 
 task clean(type: Delete) {
@@ -57,7 +57,7 @@ subprojects {
             mavenCentral()
         }
         dependencies {
-            classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.4.+'
+            classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6.3'
         }
     }
 

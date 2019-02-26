@@ -28,7 +28,7 @@ war {
 }
 
 node {
-	version = '10.12.0'
+	version = '10.15.1'
 	npmVersion = '6.4.1'
 	download = true
 	workDir = file("${rootDir}/frontend/prebuild/node")
