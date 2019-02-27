@@ -1,0 +1,20 @@
+sourceSets {
+    integrationTest {
+        compileClasspath += sourceSets.main.output + configurations.testCompile
+        runtimeClasspath += output + compileClasspath + configurations.testRuntime
+    }
+}
+
+task integrationTest(type: Test) {
+    group = 'verification'
+    description = 'Runs integration tests against Docker containers'
+
+    //dependsOn rootProject.composeBuild
+    mustRunAfter test
+
+    // Prevent Gradle from deciding not to run the tests as UP-TO-DATE
+    outputs.upToDateWhen { false } 
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+}

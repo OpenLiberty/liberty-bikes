@@ -1,4 +1,4 @@
-FROM openliberty/open-liberty:microProfile1
+FROM open-liberty:microProfile1
 ADD build/libs/auth-service.war /config/dropins
 COPY src/main/liberty/config /config/
 RUN printf 'frontend_url=http://lb-frontend:12000/login\n\

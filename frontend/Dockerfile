@@ -1,4 +1,4 @@
-FROM openliberty/open-liberty:microProfile1
+FROM open-liberty:microProfile1
 ADD build/libs/frontend.war /config/apps
 COPY src/main/liberty/config /config/
 RUN printf 'httpPort=12000\n\
