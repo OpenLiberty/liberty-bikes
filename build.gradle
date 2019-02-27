@@ -40,15 +40,21 @@ task dockerStop {
     dependsOn 'composeDown'
 }
 
-composeUp {
+composeBuild {
     subprojects.each {
         dependsOn("${it.name}:war")
     }
 }
 
+composeUp {
+    dependsOn 'composeBuild'
+}
+
 subprojects {
     apply plugin: 'liberty'
     apply plugin: 'war'
+
+    apply from: "$rootDir/integration-test.gradle"
 
     sourceCompatibility = 1.8
 
@@ -71,6 +77,7 @@ subprojects {
         testCompile group: 'junit', name: 'junit', version: '4.+'
         testCompile group: 'org.eclipse', name: 'yasson', version: '1.0.1'
         testCompile group: 'org.glassfish', name: 'javax.json', version: '1.1.+'
+        testCompile group: 'org.testcontainers', name: 'testcontainers', version: '1.10.6'
         libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '[18.0.0.3,)'
     }
     

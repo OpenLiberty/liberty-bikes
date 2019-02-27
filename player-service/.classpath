@@ -9,5 +9,11 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" output="bin/integrationTest" path="src/integrationTest/java">
+		<attributes>
+			<attribute name="gradle_scope" value="integrationTest"/>
+			<attribute name="gradle_used_by_scope" value="integrationTest"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="build/classes/java/main"/>
 </classpath>
