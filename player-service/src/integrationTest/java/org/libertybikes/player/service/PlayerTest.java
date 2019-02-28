@@ -1,6 +1,7 @@
 package org.libertybikes.player.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -9,20 +10,46 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonReader;
 
+import org.apache.log4j.BasicConfigurator;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.testcontainers.containers.GenericContainer;
+import org.junit.rules.TestName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+
+import io.openliberty.testcontainers.LibertyContainer;
 
 public class PlayerTest {
-    @Rule
-    public GenericContainer playerContainer = new GenericContainer<>("libertybikes-player").withExposedPorts(8081);
+
+    static Logger LOGGER = LoggerFactory.getLogger(PlayerTest.class);
+
+    static {
+        BasicConfigurator.configure();
+    }
+
+    @ClassRule
+    public static LibertyContainer playerContainer = new LibertyContainer("libertybikes-player")
+                    .withExposedPorts(8081)
+                    .waitForMPHealth();
 
     private String address;
     private Integer port;
 
+    @Rule
+    public TestName testName = new TestName();
+
+    @BeforeClass
+    public static void setupClass() {
+        playerContainer.followOutput(new Slf4jLogConsumer(LOGGER));
+    }
+
     @Before
     public void setUp() {
+        System.out.println("BEGIN TEST: " + testName.getMethodName());
         address = playerContainer.getContainerIpAddress();
         port = playerContainer.getFirstMappedPort();
     }
@@ -34,28 +61,17 @@ public class PlayerTest {
         conn.setRequestMethod("GET");
         conn.connect();
 
-        int maximumTries = 15;
-        // The port connects before the app is ready, and returns a 404
-        // so wait for a while until it changes, or give up
-        for (int i = 0; i < maximumTries; i++) {
-            System.out.println("(Attempt " + (i + 1) + "/" + maximumTries + ") Got response " + conn.getResponseCode() + " connecting to: " + conn);
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                break;
-            }
-            conn.disconnect();
-
-            Thread.sleep(1 * 1000);
-
-            conn = (HttpURLConnection) playerURL.openConnection();
-            conn.setRequestMethod("GET");
-            conn.connect();
+        System.out.println("Got response " + conn.getResponseCode() + " connecting to: " + conn);
+        if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+            fail("Got HTTP response: " + conn.getResponseCode());
         }
-
         System.out.println("Got final response code: " + conn.getResponseCode());
 
         JsonReader jsonReader = Json.createReader(conn.getInputStream());
         JsonArray result = jsonReader.readArray();
         assertEquals(result.size(), 5);
+
+        conn.disconnect();
     }
 
     @Test
@@ -66,27 +82,16 @@ public class PlayerTest {
         conn.setRequestMethod("GET");
         conn.connect();
 
-        int maximumTries = 15;
-        // The port connects before the app is ready, and returns a 404
-        // so wait for a while until it changes, or give up
-        for (int i = 0; i < maximumTries; i++) {
-            System.out.println("(Attempt " + (i + 1) + "/" + maximumTries + ") Got response " + conn.getResponseCode() + " connecting to: " + conn);
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                break;
-            }
-            conn.disconnect();
-
-            Thread.sleep(1 * 1000);
-
-            conn = (HttpURLConnection) playerURL.openConnection();
-            conn.setRequestMethod("GET");
-            conn.connect();
+        System.out.println("Got response " + conn.getResponseCode() + " connecting to: " + conn);
+        if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+            fail("Got HTTP response: " + conn.getResponseCode());
         }
-
         System.out.println("Got final response code: " + conn.getResponseCode());
 
         JsonReader jsonReader = Json.createReader(conn.getInputStream());
         JsonArray result = jsonReader.readArray();
         assertEquals(result.size(), LIMIT);
+
+        conn.disconnect();
     }
 }

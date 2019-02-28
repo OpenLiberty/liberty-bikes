@@ -1,10 +1,12 @@
 version: '3'
 services:
-  frontend:
-    build: frontend
-    image: libertybikes-frontend
-    ports:
-      - "12000:12000"
+# TOOD: comment out frontend from docker build for now, because it takes a long time to 
+# rebuild the docker image, since we pack a bunch of NPM dependencies in this layer
+#  frontend:
+#    build: frontend
+#    image: libertybikes-frontend
+#    ports:
+#      - "12000:12000"
   auth:
     build: auth-service
     image: libertybikes-auth
