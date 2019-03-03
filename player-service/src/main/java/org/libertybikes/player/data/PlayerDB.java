@@ -1,8 +1,8 @@
 package org.libertybikes.player.data;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,7 +13,7 @@ import org.libertybikes.player.service.Player;
 public class PlayerDB {
 
     // TODO back this by a DB instead of in-mem
-    private final Map<String, Player> allPlayers = new HashMap<>();
+    private final Map<String, Player> allPlayers = new ConcurrentHashMap<>();
 
     /**
      * Inserts a new player into the database.

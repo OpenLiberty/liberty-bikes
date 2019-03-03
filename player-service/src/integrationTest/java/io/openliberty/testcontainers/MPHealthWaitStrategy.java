@@ -21,6 +21,7 @@ public class MPHealthWaitStrategy extends HttpWaitStrategy {
     public void waitUntilReady(WaitStrategyTarget waitStrategyTarget) {
         super.waitUntilReady(waitStrategyTarget);
         // TODO: heuristic to work around MP Health endpoint being available slightly before the app is
+        // Starting with MP Health 2.0, health endpoints won't reply "UP" until the apps are available
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
