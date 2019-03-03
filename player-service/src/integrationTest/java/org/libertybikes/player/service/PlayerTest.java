@@ -1,14 +1,8 @@
 package org.libertybikes.player.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonReader;
+import java.util.Collection;
 
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Before;
@@ -36,62 +30,50 @@ public class PlayerTest {
                     .withExposedPorts(8081)
                     .waitForMPHealth();
 
-    private String address;
-    private Integer port;
-
     @Rule
     public TestName testName = new TestName();
+
+    private static PlayerService playerSvc;
+    private static RankingService rankingService;
 
     @BeforeClass
     public static void setupClass() {
         playerContainer.followOutput(new Slf4jLogConsumer(LOGGER));
+        playerSvc = playerContainer.createRestClient(PlayerService.class);
+        rankingService = playerContainer.createRestClient(RankingService.class);
     }
 
     @Before
     public void setUp() {
         System.out.println("BEGIN TEST: " + testName.getMethodName());
-        address = playerContainer.getContainerIpAddress();
-        port = playerContainer.getFirstMappedPort();
+    }
+
+    @Test
+    public void testCreatePlayer() throws Exception {
+        String createdID = playerSvc.createPlayer("Andy", null);
+        assertEquals("BASIC:Andy", createdID);
+    }
+
+    @Test
+    public void testGetPlayer() throws Exception {
+        playerSvc.createPlayer("Andy", null);
+        String bobID = playerSvc.createPlayer("Bob", null);
+        playerSvc.createPlayer("Chuck", null);
+
+        Player bob = playerSvc.getPlayerById(bobID);
+        assertEquals("BASIC:Bob", bob.id);
+        assertEquals("Bob", bob.name);
     }
 
     @Test
     public void testRankDefaultAmount() throws Exception {
-        URL playerURL = new URL("http", address, port, "/rank");
-        HttpURLConnection conn = (HttpURLConnection) playerURL.openConnection();
-        conn.setRequestMethod("GET");
-        conn.connect();
-
-        System.out.println("Got response " + conn.getResponseCode() + " connecting to: " + conn);
-        if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-            fail("Got HTTP response: " + conn.getResponseCode());
-        }
-        System.out.println("Got final response code: " + conn.getResponseCode());
-
-        JsonReader jsonReader = Json.createReader(conn.getInputStream());
-        JsonArray result = jsonReader.readArray();
-        assertEquals(result.size(), 5);
-
-        conn.disconnect();
+        Collection<Player> top5Players = rankingService.topNPlayers(5);
+        assertEquals(5, top5Players.size());
     }
 
     @Test
     public void testRankCustomAmount() throws Exception {
-        final int LIMIT = 10;
-        URL playerURL = new URL("http", address, port, "/rank?limit=" + LIMIT);
-        HttpURLConnection conn = (HttpURLConnection) playerURL.openConnection();
-        conn.setRequestMethod("GET");
-        conn.connect();
-
-        System.out.println("Got response " + conn.getResponseCode() + " connecting to: " + conn);
-        if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-            fail("Got HTTP response: " + conn.getResponseCode());
-        }
-        System.out.println("Got final response code: " + conn.getResponseCode());
-
-        JsonReader jsonReader = Json.createReader(conn.getInputStream());
-        JsonArray result = jsonReader.readArray();
-        assertEquals(result.size(), LIMIT);
-
-        conn.disconnect();
+        Collection<Player> top10Players = rankingService.topNPlayers(10);
+        assertEquals(10, top10Players.size());
     }
 }

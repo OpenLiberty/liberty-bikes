@@ -1,8 +1,9 @@
-/**
- *
- */
 package io.openliberty.testcontainers;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
@@ -10,6 +11,8 @@ import org.testcontainers.containers.wait.strategy.Wait;
  * @author aguibert
  */
 public class LibertyContainer extends GenericContainer<LibertyContainer> {
+
+    private String baseURL;
 
     public LibertyContainer(final String dockerImageName) {
         super(dockerImageName);
@@ -19,6 +22,21 @@ public class LibertyContainer extends GenericContainer<LibertyContainer> {
     public LibertyContainer waitForMPHealth() {
         waitingFor(new MPHealthWaitStrategy());
         return self();
+    }
+
+    public <T> T createRestClient(Class<T> clazz) {
+        List<Class<?>> providers = new ArrayList<>();
+        providers.add(JsonBProvider.class);
+        return JAXRSClientFactory.create(getBaseURL(), clazz, providers);
+    }
+
+    public String getBaseURL() throws IllegalStateException {
+        if (baseURL != null)
+            return baseURL;
+        if (!this.isRunning())
+            throw new IllegalStateException("Container must be running to determine hostname and port");
+        baseURL = "http://" + this.getContainerIpAddress() + ':' + this.getFirstMappedPort();
+        return baseURL;
     }
 
 }
