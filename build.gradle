@@ -3,12 +3,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.4.+'
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6.3'
     }
 }
 
 plugins {
-    id 'com.avast.gradle.docker-compose' version "0.8.0"
+    id 'com.avast.gradle.docker-compose' version "0.9.1"
 }
 
 task clean(type: Delete) {
@@ -57,7 +57,7 @@ subprojects {
             mavenCentral()
         }
         dependencies {
-            classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.4.+'
+            classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6.3'
         }
     }
 
@@ -71,7 +71,7 @@ subprojects {
         testCompile group: 'junit', name: 'junit', version: '4.+'
         testCompile group: 'org.eclipse', name: 'yasson', version: '1.0.1'
         testCompile group: 'org.glassfish', name: 'javax.json', version: '1.1.+'
-        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '[18.0.0.3,)'
+        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '[19.0.0.3,)'
     }
     
     eclipse {
