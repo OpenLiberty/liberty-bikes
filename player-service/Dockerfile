@@ -1,6 +1,6 @@
-FROM openliberty/open-liberty:microProfile1
-ADD build/libs/player-service.war /config/dropins
-COPY src/main/liberty/config /config/
+FROM open-liberty:microProfile1
+ADD --chown=1001:0 build/libs/player-service.war /config/dropins
+COPY --chown=1001:0 src/main/liberty/config /config/
 RUN printf 'httpPort=8081\n\
 httpsPort=8444' > /config/bootstrap.properties
 
