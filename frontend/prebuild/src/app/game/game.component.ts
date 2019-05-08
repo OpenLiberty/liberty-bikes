@@ -198,13 +198,13 @@ export class GameComponent implements OnInit, OnDestroy {
     window.onkeydown = (e: KeyboardEvent): any => {
       const key = e.keyCode ? e.keyCode : e.which;
 
-      if (key === 38) {
+      if (key === 38 || key === 87) {
         this.moveUp();
-      } else if (key === 40) {
+      } else if (key === 40 || key === 83) {
         this.moveDown();
-      } else if (key === 37) {
+      } else if (key === 37 || key === 65) {
         this.moveLeft();
-      } else if (key === 39) {
+      } else if (key === 39 || key === 68) {
         this.moveRight();
       }
     };
