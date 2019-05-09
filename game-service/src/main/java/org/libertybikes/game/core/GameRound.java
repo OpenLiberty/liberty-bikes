@@ -129,11 +129,8 @@ public class GameRound implements Runnable {
     private void beginLobbyCountdown(Session s, boolean isPhone) {
         if (!lobbyCountdownStarted.get()) {
             lobbyCountdownStarted.set(true);
-            ManagedScheduledExecutorService exec = executor();
-            if (exec != null) {
-                lobbyCountdown = new LobbyCountdown();
-                exec.submit(lobbyCountdown);
-            }
+            lobbyCountdown = new LobbyCountdown();
+            executor().submit(lobbyCountdown);
         }
         if (!isPhone)
             sendToClient(s, new OutboundMessage.AwaitPlayersCountdown(lobbyCountdown.roundStartCountdown));
@@ -216,14 +213,12 @@ public class GameRound implements Runnable {
         // Send a heartbeat to connected clients every 100 seconds in an attempt to keep them connected.
         // It appears that when running in IBM Cloud, sockets time out after 120 seconds
         if (!heartbeatStarted.getAndSet(true)) {
-            ManagedScheduledExecutorService exec = executor();
-            if (exec != null) {
-                log("Initiating heartbeat to clients");
-                exec.schedule(() -> {
-                    log("Sending heartbeat to " + clients.size() + " clients");
-                    sendToClients(clients.keySet(), new OutboundMessage.Heartbeat());
-                }, new HeartbeatTrigger());
-            }
+            log("Initiating heartbeat to clients");
+            executor().schedule(() -> {
+                log("Sending heartbeat to " + clients.size() + " clients");
+                sendToClients(clients.keySet(), new OutboundMessage.Heartbeat());
+            }, new HeartbeatTrigger());
+
         }
     }
 
@@ -482,21 +477,9 @@ public class GameRound implements Runnable {
 
         // Issue a countdown to all of the clients
         gameState = State.STARTING;
-
         sendToClients(clients.keySet(), new OutboundMessage.StartingCountdown(STARTING_COUNTDOWN));
-        delay(TimeUnit.SECONDS.toMillis(STARTING_COUNTDOWN));
 
-        paused.set(false);
-        for (Player p : getPlayers())
-            if (STATUS.Connected == p.getStatus())
-                p.setStatus(STATUS.Alive);
-        broadcastPlayerList();
-        if (!gameRunning.get()) {
-            ManagedScheduledExecutorService exec = executor();
-            if (exec != null)
-                exec.submit(this);
-        }
-        gameState = State.RUNNING;
+        executor().submit(new Starter());
     }
 
     private void endGame() {
@@ -505,14 +488,12 @@ public class GameRound implements Runnable {
         broadcastPlayerList();
 
         ManagedScheduledExecutorService exec = executor();
-        if (exec != null) {
-            exec.submit(() -> {
-                updatePlayerStats();
-            });
-            exec.submit(() -> {
-                lifecycleCallbacks.forEach(c -> c.gameEnding());
-            });
-        }
+        exec.submit(() -> {
+            updatePlayerStats();
+        });
+        exec.submit(() -> {
+            lifecycleCallbacks.forEach(c -> c.gameEnding());
+        });
 
         // Tell each client that the game is done and close the websockets
         for (Session s : clients.keySet())
@@ -544,6 +525,28 @@ public class GameRound implements Runnable {
         public void gameEnding();
     }
 
+    private class Starter implements Runnable {
+
+        @Override
+        public void run() {
+
+            for (int i = 0; i < (STARTING_COUNTDOWN * 4); i++) {
+                delay(250);
+                broadcastPlayerList();
+            }
+
+            paused.set(false);
+            for (Player p : getPlayers())
+                if (STATUS.Connected == p.getStatus())
+                    p.setStatus(STATUS.Alive);
+            broadcastPlayerList();
+            if (!gameRunning.get()) {
+                executor().submit(GameRound.this);
+            }
+            gameState = State.RUNNING;
+        }
+    }
+
     private class LobbyCountdown implements Runnable {
 
         public int roundStartCountdown = MAX_TIME_BETWEEN_ROUNDS;
@@ -556,7 +559,10 @@ public class GameRound implements Runnable {
         @Override
         public void run() {
             while (isOpen() || gameState == State.FULL) {
-                delay(1000);
+                for (int i = 0; i < 4; i++) {
+                    delay(250);
+                    broadcastPlayerList();
+                }
                 roundStartCountdown--;
                 if (roundStartCountdown < 1) {
                     if (clients.size() == 0) {
