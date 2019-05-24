@@ -28,8 +28,8 @@ war {
 }
 
 node {
-	version = '10.12.0'
-	npmVersion = '6.4.1'
+	version = '10.15.3'
+	npmVersion = '6.9.0'
 	download = true
 	workDir = file("${rootDir}/frontend/prebuild/node")
 	nodeModulesDir = file("${rootDir}/frontend/prebuild")
