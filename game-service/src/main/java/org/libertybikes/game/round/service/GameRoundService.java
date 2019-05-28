@@ -48,14 +48,17 @@ public class GameRoundService {
 
     @POST
     public GameRound createRoundById(@QueryParam("gameId") String gameId) {
+        if (allRounds.containsKey(gameId)) {
+            System.out.println("Round " + gameId + " already exists, returning it");
+            return allRounds.get(gameId);
+        }
         GameRound newRound = new GameRound(gameId);
-        GameRound existingRound = allRounds.putIfAbsent(gameId, newRound);
-        GameRound round = existingRound == null ? newRound : existingRound;
-        System.out.println("Created round id=" + round.id);
+        allRounds.put(gameId, newRound);
+        System.out.println("Created round id=" + newRound.id);
         if (allRounds.size() > 5)
             System.out.println("WARNING: Found " + allRounds.size() + " active games in GameRoundService. " +
                                "They are probably not being cleaned up properly: " + allRounds.keySet());
-        return round;
+        return newRound;
     }
 
     @GET

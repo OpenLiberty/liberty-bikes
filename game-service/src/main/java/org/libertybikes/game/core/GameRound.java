@@ -32,6 +32,11 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.websocket.Session;
 
+import org.eclipse.microprofile.metrics.Metadata;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.MetricType;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.Timer.Context;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.Player.STATUS;
 import org.libertybikes.restclient.PlayerService;
@@ -87,6 +92,57 @@ public class GameRound implements Runnable {
 
     String keyStoreAlias;
 
+    // MpMetric Metadatas
+    private Metadata currentRoundsCounter = new Metadata("current_num_of_rounds", // name
+                    "Current Number of Rounds", // display name
+                    "Number of rounds currently running", // description
+                    MetricType.COUNTER, // type
+                    MetricUnits.NONE); // units
+
+    private Metadata totalRoundsCounter = new Metadata("total_num_of_rounds", // name
+                    "Total Number of Rounds", // display name
+                    "Number of rounds that have been created", // description
+                    MetricType.COUNTER, // type
+                    MetricUnits.NONE); // units
+
+    private Metadata currentPlayersCounter = new Metadata("current_num_of_players", // name
+                    "Current Number of Players", // display name
+                    "Number of players that are currently playing in a round", // description
+                    MetricType.COUNTER, // type
+                    MetricUnits.NONE); // units
+
+    private Metadata totalPlayersCounter = new Metadata("total_num_of_players", // name
+                    "Total Number of Players That Have Played", // display name
+                    "Number of players that have played in a round, requeuing and replaying increases the count", // description
+                    MetricType.COUNTER, // type
+                    MetricUnits.NONE); // units
+
+    private Metadata totalMobilePlayersCounter = new Metadata("total_num_of_mobile_players", // name
+                    "Total Number of Mobile Players That Have Played", // display name
+                    "Number of mobile players that have played in a round, requeuing and replaying increases the count", // description
+                    MetricType.COUNTER, // type
+                    MetricUnits.NONE); // units
+
+    Metadata gameRoundTimerMetadata = new Metadata("game_round_timer", // name
+                    "Game Round Timer", // display name
+                    "The Time Game Rounds Last", // description
+                    MetricType.TIMER, // type
+                    MetricUnits.SECONDS); // units
+
+    private static MetricRegistry registry;
+    private Context timerContext;
+
+    @JsonbTransient
+    private static MetricRegistry getRegistry() {
+        try {
+            return registry == null ? registry = CDI.current().select(MetricRegistry.class).get() : registry;
+        } catch (IllegalStateException ise) {
+            System.out.println("WARNING: Unable to locate CDIProvider");
+            ise.printStackTrace();
+        }
+        return null;
+    }
+
     // Get a string of 4 random uppercase letters (A-Z)
     private static String getRandomId() {
         char[] chars = new char[4];
@@ -120,6 +176,13 @@ public class GameRound implements Runnable {
             log("Unable to perform JNDI lookup to determine time between rounds, using default value");
         }
         MAX_TIME_BETWEEN_ROUNDS = (maxTimeBetweenRounds < 5 || maxTimeBetweenRounds > 60) ? MAX_TIME_BETWEEN_ROUNDS_DEFAULT : maxTimeBetweenRounds;
+
+        // Increment round counter metrics
+        MetricRegistry registry = getRegistry();
+        if (registry != null) {
+            registry.counter(totalRoundsCounter).inc();
+            registry.counter(currentRoundsCounter).inc();
+        }
     }
 
     public GameBoard getBoard() {
@@ -172,6 +235,14 @@ public class GameRound implements Runnable {
             isPhone = c.isPhone = hasGameBoard ? false : true;
             clients.put(s, c);
             log("Player " + playerId + " has joined.");
+
+            // Increment player counter metrics
+            getRegistry().counter(currentPlayersCounter).inc();
+            getRegistry().counter(totalPlayersCounter).inc();
+            if (isPhone) {
+                getRegistry().counter(totalMobilePlayersCounter).inc();
+            }
+
         } else {
             log("Player " + playerId + " already exists.");
         }
@@ -228,7 +299,7 @@ public class GameRound implements Runnable {
         return c != null && c.player.isPresent();
     }
 
-    private void removePlayer(Player p) {
+    private void removePlayer(Player p, boolean isMobile) {
         p.disconnect();
         log(p.name + " disconnected.");
 
@@ -239,18 +310,29 @@ public class GameRound implements Runnable {
 
         if (isOpen()) {
             board.removePlayer(p);
+
+            // Decrement player counters because they didn't play
+            getRegistry().counter(totalPlayersCounter).dec();
+            if (isMobile) {
+                getRegistry().counter(totalMobilePlayersCounter).dec();
+            }
+
         } else if (gameState == State.RUNNING) {
             checkForWinner();
         }
 
         if (gameState != State.FINISHED)
             broadcastPlayerList();
+
+        // Decrement current players counter
+        getRegistry().counter(currentPlayersCounter).dec();
     }
 
     public int removeClient(Session client) {
         Client c = clients.remove(client);
-        if (c != null && c.player.isPresent())
-            removePlayer(c.player.get());
+        if (c != null && c.player.isPresent()) {
+            removePlayer(c.player.get(), c.isPhone);
+        }
         return clients.size();
     }
 
@@ -263,6 +345,7 @@ public class GameRound implements Runnable {
     public void run() {
         gameRunning.set(true);
         log(">>> Starting round");
+
         ticksFromGameEnd = 0;
         int numGames = runningGames.incrementAndGet();
         if (numGames > 3)
@@ -484,7 +567,13 @@ public class GameRound implements Runnable {
 
     private void endGame() {
         runningGames.decrementAndGet();
+
         log("<<< Finished round");
+
+        // Decrement current rounds counter and close round timer
+        getRegistry().counter(currentRoundsCounter).dec();
+        timerContext.close();
+
         broadcastPlayerList();
 
         ManagedScheduledExecutorService exec = executor();
@@ -544,6 +633,10 @@ public class GameRound implements Runnable {
                 executor().submit(GameRound.this);
             }
             gameState = State.RUNNING;
+
+            // Start round timer metric
+            timerContext = getRegistry().timer(gameRoundTimerMetadata).time();
+
         }
     }
 

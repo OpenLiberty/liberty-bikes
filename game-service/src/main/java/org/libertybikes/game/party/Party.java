@@ -2,12 +2,20 @@ package org.libertybikes.game.party;
 
 import java.util.Random;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 
+import org.eclipse.microprofile.metrics.Counter;
+import org.eclipse.microprofile.metrics.Metadata;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.MetricType;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.libertybikes.game.core.GameRound;
 import org.libertybikes.game.core.GameRound.LifecycleCallback;
 import org.libertybikes.game.round.service.GameRoundService;
@@ -27,7 +35,34 @@ public class Party {
     private final PartyQueue queue = new PartyQueue(this);
     private volatile GameRound currentRound;
 
+    Metadata currentPartiesCounterMetadata = new Metadata("current_number_of_parties", // name
+                    "Current Number of Parties", // display name
+                    "Number of parties currently running", // description
+                    MetricType.COUNTER, // type
+                    MetricUnits.NONE); // units
+
     @Inject
+    private MetricRegistry registry;
+
+    private Counter currentPartiesCounter;
+
+    @PostConstruct
+    public void postConstruct() {
+        currentPartiesCounter = registry.counter(currentPartiesCounterMetadata);
+        currentPartiesCounter.inc();
+    }
+
+    @PreDestroy
+    public void preDestroy() {
+        currentPartiesCounter.dec();
+    }
+
+    @Inject
+    @Counted(unit = MetricUnits.NONE,
+             name = "number_of_parties",
+             monotonic = true,
+             description = "Total Number of Parties",
+             absolute = true)
     public Party() {
         this(getRandomPartyID());
     }

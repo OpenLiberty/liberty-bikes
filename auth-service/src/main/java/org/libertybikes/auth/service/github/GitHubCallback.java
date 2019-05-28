@@ -18,6 +18,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.libertybikes.auth.service.ConfigBean;
 import org.libertybikes.auth.service.JwtAuth;
 import org.libertybikes.auth.service.github.GitHubOAuthAPI.GithubTokenResponse;
@@ -50,6 +52,12 @@ public class GitHubCallback extends JwtAuth {
     }
 
     @GET
+    @Counted(unit = MetricUnits.NONE,
+             name = "num_github_logins",
+             monotonic = true,
+             displayName = "Number of Github Logins",
+             description = "Metrics to show how many times a user has logged in through Github Auth.",
+             absolute = true)
     public Response getGitHubCallbackURL(@Context HttpServletRequest request) throws URISyntaxException {
         try {
             String githubCode = request.getParameter("code");

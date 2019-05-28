@@ -18,6 +18,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.libertybikes.auth.service.ConfigBean;
 import org.libertybikes.auth.service.JwtAuth;
 
@@ -85,6 +87,12 @@ public class GoogleCallback extends JwtAuth {
     }
 
     @GET
+    @Counted(unit = MetricUnits.NONE,
+             name = "num_google_logins",
+             monotonic = true,
+             displayName = "Number of Google Logins",
+             description = "Metrics to show how many times a user has logged in through Google Auth.",
+             absolute = true)
     public Response getGoogleAuthURL(@Context HttpServletRequest request) throws IOException, URISyntaxException {
         // google calls us back at this app when a user has finished authing with them.
         // when it calls us back here, it passes an oauth_verifier token that we
