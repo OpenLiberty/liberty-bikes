@@ -39,9 +39,9 @@ public class PlayerService {
     @Inject
     private MetricRegistry registry;
 
-    private Metadata numLoginsCounter = new Metadata("num_player_logins", // name
+    private static final Metadata numLoginsCounter = new Metadata("num_player_logins", // name
                     "Number of Total Logins", // display name
-                    "Metrics to show how many times a user has logged in.", // description
+                    "How many times a user has logged in.", // description
                     MetricType.COUNTER, // type
                     MetricUnits.NONE); // units
 

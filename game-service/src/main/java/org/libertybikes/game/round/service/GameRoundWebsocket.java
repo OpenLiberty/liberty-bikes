@@ -18,10 +18,6 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.MetricType;
-import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.Timer.Context;
 import org.eclipse.microprofile.metrics.annotation.Metered;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -30,6 +26,7 @@ import org.libertybikes.game.core.GameRound.State;
 import org.libertybikes.game.core.InboundMessage;
 import org.libertybikes.game.core.InboundMessage.GameEvent;
 import org.libertybikes.game.core.OutboundMessage;
+import org.libertybikes.game.metric.GameMetrics;
 import org.libertybikes.restclient.PlayerService;
 
 @Dependent
@@ -45,27 +42,20 @@ public class GameRoundWebsocket {
 
     private final static Jsonb jsonb = JsonbBuilder.create();
 
-    @Inject
-    private MetricRegistry registry;
-
     private Context timerContext;
-
-    Metadata openWebsocketTimerMetadata = new Metadata("open_game_websocket_timer", // name
-                    "Open Game Round Websocket Timer", // display name
-                    "The Time Game Round Websockets Are Open", // description
-                    MetricType.TIMER, // type
-                    MetricUnits.SECONDS); // units
 
     @OnOpen
     public void onOpen(@PathParam("roundId") String roundId, Session session) {
         log(roundId, "Opened a session");
-        timerContext = registry.timer(openWebsocketTimerMetadata).time();
+        timerContext = GameMetrics.timerStart(GameMetrics.openWebsocketTimerMetadata);
     }
 
     @OnClose
     public void onClose(@PathParam("roundId") String roundId, Session session) {
         log(roundId, "Closed a session");
-        timerContext.close();
+
+        if (timerContext != null)
+            timerContext.close();
 
         try {
             GameRound round = gameSvc.getRound(roundId);

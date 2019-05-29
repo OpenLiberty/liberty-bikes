@@ -15,8 +15,6 @@
     </featureManager>
     
     <mpMetrics authentication="false"/>
-    
-    <logging traceSpecification="com.ibm.ws.microprofile.metrics*=all"/>
 
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
     

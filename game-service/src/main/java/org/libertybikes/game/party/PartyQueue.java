@@ -3,36 +3,20 @@ package org.libertybikes.game.party;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import javax.enterprise.inject.spi.CDI;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.sse.OutboundSseEvent;
 import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 
-import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.MetricType;
-import org.eclipse.microprofile.metrics.MetricUnits;
 import org.libertybikes.game.core.GameRound;
 import org.libertybikes.game.core.OutboundMessage;
 import org.libertybikes.game.core.Player;
+import org.libertybikes.game.metric.GameMetrics;
 
 public class PartyQueue {
 
     private final ConcurrentLinkedDeque<QueuedClient> waitingPlayers = new ConcurrentLinkedDeque<>();
     private final Party party;
-
-    private Metadata currentPlayersCounter = new Metadata("current_num_of_players_in_queue", // name
-                    "Current Number of Players Waiting In A Queue", // display name
-                    "Number of players that are currently waiting in a queue", // description
-                    MetricType.COUNTER, // type
-                    MetricUnits.NONE); // units
-
-    private MetricRegistry registry;
-
-    private MetricRegistry getRegistry() {
-        return registry == null ? registry = CDI.current().select(MetricRegistry.class).get() : registry;
-    }
 
     public PartyQueue(Party p) {
         this.party = p;
@@ -43,12 +27,13 @@ public class PartyQueue {
         // If this client was already in the queue, remove them and add them at the end
         if (waitingPlayers.removeFirstOccurrence(client)) {
             party.log("Removed client " + playerId + " from queue before adding at end");
-            getRegistry().counter(currentPlayersCounter).dec();
+            GameMetrics.counterDec(GameMetrics.currentQueuedPlayersCounter);
         }
         party.log("Adding client " + playerId + " into the queue in position " + client.queuePosition());
         waitingPlayers.add(client);
 
-        getRegistry().counter(currentPlayersCounter).inc();
+        GameMetrics.counterInc(GameMetrics.currentQueuedPlayersCounter);
+
         if (party.getCurrentRound().isOpen())
             promoteClients();
         else
@@ -62,7 +47,7 @@ public class PartyQueue {
             QueuedClient first = waitingPlayers.pollFirst();
             if (first != null) {
                 first.promoteToGame(newRound.id);
-                getRegistry().counter(currentPlayersCounter).dec();
+                GameMetrics.counterDec(GameMetrics.currentQueuedPlayersCounter);
             }
         }
         for (QueuedClient client : waitingPlayers)
@@ -74,7 +59,7 @@ public class PartyQueue {
         QueuedClient client = null;
         while ((client = waitingPlayers.pollFirst()) != null) {
             client.close();
-            getRegistry().counter(currentPlayersCounter).dec();
+            GameMetrics.counterDec(GameMetrics.currentQueuedPlayersCounter);
         }
     }
 

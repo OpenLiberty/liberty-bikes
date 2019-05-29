@@ -91,7 +91,7 @@ public class GoogleCallback extends JwtAuth {
              name = "num_google_logins",
              monotonic = true,
              displayName = "Number of Google Logins",
-             description = "Metrics to show how many times a user has logged in through Google Auth.",
+             description = "How many times a user has logged in through Google Auth.",
              absolute = true)
     public Response getGoogleAuthURL(@Context HttpServletRequest request) throws IOException, URISyntaxException {
         // google calls us back at this app when a user has finished authing with them.

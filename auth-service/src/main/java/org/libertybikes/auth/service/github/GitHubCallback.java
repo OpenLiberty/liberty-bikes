@@ -56,7 +56,7 @@ public class GitHubCallback extends JwtAuth {
              name = "num_github_logins",
              monotonic = true,
              displayName = "Number of Github Logins",
-             description = "Metrics to show how many times a user has logged in through Github Auth.",
+             description = "How many times a user has logged in through Github Auth.",
              absolute = true)
     public Response getGitHubCallbackURL(@Context HttpServletRequest request) throws URISyntaxException {
         try {

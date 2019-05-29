@@ -37,7 +37,7 @@ public class TwitterCallback extends JwtAuth {
              name = "num_twitter_logins",
              monotonic = true,
              displayName = "Number of Twitter Logins",
-             description = "Metrics to show how many times a user has logged in through Twitter Auth.",
+             description = "How many times a user has logged in through Twitter Auth.",
              absolute = true)
     public Response getTwitterCallbackURL(@Context HttpServletRequest request) throws URISyntaxException {
         try {
