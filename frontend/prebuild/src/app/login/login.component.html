@@ -55,7 +55,7 @@
                 <input type="text" id="username" name="username" [(ngModel)]="username" />
               </div>
               <div class="form-item">
-                <button type="submit" id="signin" (click)="loginAsGuest(username)">Sign In As Guest</button>
+                <button type="submit" id="signin">Sign In As Guest</button>
               </div>
               <div class="form-item">
                 <button type="button" (click)="cancelLogin()">Cancel</button>
@@ -89,7 +89,7 @@
                   autocapitalize="off" spellcheck="false">
               </div>
               <div *ngIf="!isSingleParty" class="form-item">
-                <button type="submit" (click)="joinParty()">Join Party</button>
+                <button type="submit">Join Party</button>
               </div>
             </div>
             <div *ngIf="isFullDevice" class="form-group">

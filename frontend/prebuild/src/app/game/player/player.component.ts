@@ -34,6 +34,10 @@ export class PlayerComponent implements OnInit {
   }
 
   get statusImage() {
+    if (!this.player || !this.player.status) {
+      return '';
+    }
+
     let status = this.player.status.toLowerCase();
     if (status === 'none') {
       return '';
