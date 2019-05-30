@@ -1,4 +1,4 @@
-FROM open-liberty:microProfile1
+FROM open-liberty:microProfile2-java11
 ADD --chown=1001:0 build/libs/player-service.war /config/dropins
 COPY --chown=1001:0 src/main/liberty/config /config/
 RUN printf 'httpPort=8081\n\

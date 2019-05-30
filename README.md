@@ -58,12 +58,13 @@ export singleParty=true
   - JNDI (auth-service, game-service, player-service)
   - [JSON-B](#json-b) (game-service, player-service)
   - WebSocket 1.1 (game-service)
-- MicroProfile 1.3
+- MicroProfile 2.2 
   - Config (auth-service, game-service, player-service)
   - JWT (auth-service, game-service, player-service)
   - [Rest Client](#microprofile-rest-client) (game-service)
   - [OpenAPI](#microprofile-openapi) (auth-service, game-service, player-service)
-- Angular 6 (frontend)
+  - Metrics (auth-service, game-service, player-service)
+- Angular 7 (frontend)
 - Gradle build
   - [Liberty Gradle Plugin](#liberty-gradle-plugin)
 - [IBM Cloud Continuous Delivery Pipeline](#continuous-delivery)
@@ -207,7 +208,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.3'
+    classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6.5'
   }
 }
 ```
@@ -216,7 +217,7 @@ To control the Liberty distribution, we simply specify a dependency:
 
 ```groovy
 dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-webProfile7', version: '+'
+    libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '[19.0.0.5,)'
 }
 ```
 
@@ -225,20 +226,9 @@ Or, if we want to use a Beta image instead of an official GA'd image, we specify
 ```groovy
 liberty {
   install {
-    // use 1 liberty install for the whole repo
-    baseDir = rootProject.buildDir
     runtimeUrl = "https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2018.5.0.0.zip"
   }
 }
-```
-
-And lastly, we added some convenience Gradle tasks to make our life a bit easier (shorter names for less typing, always run unit tests before starting the server, and always stop the server before trying to start it!).
-
-```groovy
-libertyStart.dependsOn 'libertyStop', 'test'
-
-task start { dependsOn 'libertyStart' }
-task stop  { dependsOn 'libertyStop'  }
 ```
 
 ## Continuous Delivery
