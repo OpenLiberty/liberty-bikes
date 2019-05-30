@@ -19,3 +19,6 @@ liberty {
 		              '-DsingleParty=' + System.getProperty('singleParty', 'false')]
 	}
 }
+
+// The installLiberty task doesn't work when run in parallel with other installLiberty tasks
+installLiberty.mustRunAfter ':frontend:installLiberty'

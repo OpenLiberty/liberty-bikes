@@ -14,8 +14,12 @@ liberty {
                       '-Dorg.libertybikes.auth.service.github.GitHubUserAPI/mp-rest/url=https://api.github.com']
 	}
 }
+
 dependencies {
     compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
     compile group: 'com.google.api-client', name: 'google-api-client', version: '1.23.0'
     compile group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.+'
 }
+
+// The installLiberty task doesn't work when run in parallel with other installLiberty tasks
+installLiberty.mustRunAfter ':frontend:installLiberty'

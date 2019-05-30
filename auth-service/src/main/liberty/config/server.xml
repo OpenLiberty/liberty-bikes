@@ -7,9 +7,9 @@
         <feature>jndi-1.0</feature>
         <feature>jsonb-1.0</feature>
         <feature>mpConfig-1.3</feature>
-        <feature>mpJwt-1.0</feature>
-        <feature>mpRestClient-1.0</feature>
-        <feature>mpOpenAPI-1.0</feature>
+        <feature>mpJwt-1.1</feature>
+        <feature>mpRestClient-1.2</feature>
+        <feature>mpOpenAPI-1.1</feature>
         <feature>mpMetrics-1.1</feature>
     </featureManager>
     

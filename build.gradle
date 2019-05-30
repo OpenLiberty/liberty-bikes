@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6.3'
+        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6.5'
     }
 }
 
@@ -57,7 +57,7 @@ subprojects {
             mavenCentral()
         }
         dependencies {
-            classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6.3'
+            classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.6.5'
         }
     }
 
@@ -66,12 +66,12 @@ subprojects {
     }
 
     dependencies {
-        providedCompile group: 'org.eclipse.microprofile', name: 'microprofile', version: '1.3'
+        providedCompile group: 'org.eclipse.microprofile', name: 'microprofile', version: '2.2'
         providedCompile group: 'javax', name: 'javaee-api', version: '8.0'
-        testCompile group: 'junit', name: 'junit', version: '4.+'
-        testCompile group: 'org.eclipse', name: 'yasson', version: '1.0.1'
-        testCompile group: 'org.glassfish', name: 'javax.json', version: '1.1.+'
-        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '[19.0.0.3,)'
+        testCompile group: 'junit', name: 'junit', version: '4.12'
+        testCompile group: 'org.eclipse', name: 'yasson', version: '1.0.3'
+        testCompile group: 'org.glassfish', name: 'jakarta.json', version: '1.1.5'
+        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '[19.0.0.5,)'
     }
     
     eclipse {
@@ -107,6 +107,7 @@ subprojects {
     }
     
     task open {
+        shouldRunAfter 'libertyStart'
         doLast {
             java.awt.Desktop.desktop.browse "${appUrl}".toURI()
         }
