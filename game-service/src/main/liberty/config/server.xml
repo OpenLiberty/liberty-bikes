@@ -11,7 +11,10 @@
         <feature>mpRestClient-1.1</feature>
         <feature>mpOpenAPI-1.0</feature>
         <feature>websocket-1.1</feature>
+        <feature>mpMetrics-1.1</feature>
     </featureManager>
+    
+    <mpMetrics authentication="false"/>
 
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
     

@@ -32,8 +32,10 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.websocket.Session;
 
+import org.eclipse.microprofile.metrics.Timer.Context;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.Player.STATUS;
+import org.libertybikes.game.metric.GameMetrics;
 import org.libertybikes.restclient.PlayerService;
 
 import io.jsonwebtoken.Claims;
@@ -87,6 +89,8 @@ public class GameRound implements Runnable {
 
     String keyStoreAlias;
 
+    private Context timerContext;
+
     // Get a string of 4 random uppercase letters (A-Z)
     private static String getRandomId() {
         char[] chars = new char[4];
@@ -120,6 +124,10 @@ public class GameRound implements Runnable {
             log("Unable to perform JNDI lookup to determine time between rounds, using default value");
         }
         MAX_TIME_BETWEEN_ROUNDS = (maxTimeBetweenRounds < 5 || maxTimeBetweenRounds > 60) ? MAX_TIME_BETWEEN_ROUNDS_DEFAULT : maxTimeBetweenRounds;
+
+        // Increment round counter metrics
+        GameMetrics.counterInc(GameMetrics.totalRoundsCounter);
+        GameMetrics.counterInc(GameMetrics.currentRoundsCounter);
     }
 
     public GameBoard getBoard() {
@@ -172,6 +180,14 @@ public class GameRound implements Runnable {
             isPhone = c.isPhone = hasGameBoard ? false : true;
             clients.put(s, c);
             log("Player " + playerId + " has joined.");
+
+            // Increment player counter metrics
+            GameMetrics.counterInc(GameMetrics.currentPlayersCounter);
+            GameMetrics.counterInc(GameMetrics.totalPlayersCounter);
+            if (isPhone) {
+                GameMetrics.counterInc(GameMetrics.totalMobilePlayersCounter);
+            }
+
         } else {
             log("Player " + playerId + " already exists.");
         }
@@ -228,7 +244,7 @@ public class GameRound implements Runnable {
         return c != null && c.player.isPresent();
     }
 
-    private void removePlayer(Player p) {
+    private void removePlayer(Player p, boolean isMobile) {
         p.disconnect();
         log(p.name + " disconnected.");
 
@@ -239,18 +255,29 @@ public class GameRound implements Runnable {
 
         if (isOpen()) {
             board.removePlayer(p);
+
+            // Decrement player counters because they didn't play
+            GameMetrics.counterDec(GameMetrics.totalPlayersCounter);
+            if (isMobile) {
+                GameMetrics.counterDec(GameMetrics.totalMobilePlayersCounter);
+            }
+
         } else if (gameState == State.RUNNING) {
             checkForWinner();
         }
 
         if (gameState != State.FINISHED)
             broadcastPlayerList();
+
+        // Decrement current players counter
+        GameMetrics.counterDec(GameMetrics.currentPlayersCounter);
     }
 
     public int removeClient(Session client) {
         Client c = clients.remove(client);
-        if (c != null && c.player.isPresent())
-            removePlayer(c.player.get());
+        if (c != null && c.player.isPresent()) {
+            removePlayer(c.player.get(), c.isPhone);
+        }
         return clients.size();
     }
 
@@ -263,6 +290,7 @@ public class GameRound implements Runnable {
     public void run() {
         gameRunning.set(true);
         log(">>> Starting round");
+
         ticksFromGameEnd = 0;
         int numGames = runningGames.incrementAndGet();
         if (numGames > 3)
@@ -484,7 +512,14 @@ public class GameRound implements Runnable {
 
     private void endGame() {
         runningGames.decrementAndGet();
+
         log("<<< Finished round");
+
+        // Decrement current rounds counter and close round timer
+        GameMetrics.counterDec(GameMetrics.currentRoundsCounter);
+        if (timerContext != null)
+            timerContext.close();
+
         broadcastPlayerList();
 
         ManagedScheduledExecutorService exec = executor();
@@ -544,6 +579,9 @@ public class GameRound implements Runnable {
                 executor().submit(GameRound.this);
             }
             gameState = State.RUNNING;
+
+            // Start round timer metric
+            timerContext = GameMetrics.timerStart(GameMetrics.gameRoundTimerMetadata);
         }
     }
 

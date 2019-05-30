@@ -11,6 +11,7 @@ import javax.ws.rs.sse.SseEventSink;
 import org.libertybikes.game.core.GameRound;
 import org.libertybikes.game.core.OutboundMessage;
 import org.libertybikes.game.core.Player;
+import org.libertybikes.game.metric.GameMetrics;
 
 public class PartyQueue {
 
@@ -26,9 +27,13 @@ public class PartyQueue {
         // If this client was already in the queue, remove them and add them at the end
         if (waitingPlayers.removeFirstOccurrence(client)) {
             party.log("Removed client " + playerId + " from queue before adding at end");
+            GameMetrics.counterDec(GameMetrics.currentQueuedPlayersCounter);
         }
         party.log("Adding client " + playerId + " into the queue in position " + client.queuePosition());
         waitingPlayers.add(client);
+
+        GameMetrics.counterInc(GameMetrics.currentQueuedPlayersCounter);
+
         if (party.getCurrentRound().isOpen())
             promoteClients();
         else
@@ -42,6 +47,7 @@ public class PartyQueue {
             QueuedClient first = waitingPlayers.pollFirst();
             if (first != null) {
                 first.promoteToGame(newRound.id);
+                GameMetrics.counterDec(GameMetrics.currentQueuedPlayersCounter);
             }
         }
         for (QueuedClient client : waitingPlayers)
@@ -51,8 +57,10 @@ public class PartyQueue {
     public void close() {
         party.log("Closing party queue");
         QueuedClient client = null;
-        while ((client = waitingPlayers.pollFirst()) != null)
+        while ((client = waitingPlayers.pollFirst()) != null) {
             client.close();
+            GameMetrics.counterDec(GameMetrics.currentQueuedPlayersCounter);
+        }
     }
 
     private class QueuedClient {

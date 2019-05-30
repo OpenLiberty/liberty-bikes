@@ -48,9 +48,7 @@ public class GameRoundService {
 
     @POST
     public GameRound createRoundById(@QueryParam("gameId") String gameId) {
-        GameRound newRound = new GameRound(gameId);
-        GameRound existingRound = allRounds.putIfAbsent(gameId, newRound);
-        GameRound round = existingRound == null ? newRound : existingRound;
+        GameRound round = allRounds.computeIfAbsent(gameId, k -> new GameRound(gameId));
         System.out.println("Created round id=" + round.id);
         if (allRounds.size() > 5)
             System.out.println("WARNING: Found " + allRounds.size() + " active games in GameRoundService. " +

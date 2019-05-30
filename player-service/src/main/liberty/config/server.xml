@@ -9,7 +9,10 @@
         <feature>mpConfig-1.3</feature>
         <feature>mpJwt-1.0</feature>
         <feature>mpOpenAPI-1.0</feature>
+        <feature>mpMetrics-1.1</feature>
     </featureManager>
+
+	<mpMetrics authentication="false"/>
 
     <applicationManager autoExpand="true"/>
     

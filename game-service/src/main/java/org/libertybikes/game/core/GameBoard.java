@@ -186,7 +186,7 @@ public class GameBoard {
 
     public void broadcastToAI() {
         for (Player p : players) {
-            if (p.isAlive()) {
+            if (p.isAlive() && !p.isRealPlayer()) {
                 short[][] boardCopy = board.clone();
                 p.processAIMove(boardCopy);
             }
