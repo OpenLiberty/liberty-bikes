@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 services:
   frontend:
     build: frontend
@@ -31,7 +31,7 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ./monitoring/prometheius.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus:/etc/prometheus
   grafana:
     image: grafana/grafana:5.2.4
     ports:
@@ -39,6 +39,6 @@ services:
     environment:
       - GF_INSTALL_PLUGINS=flant-statusmap-panel
     volumes:
-      - ./monitoring/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-      - ./monitoring/dashboardList.yml:/etc/grafana/provisioning/dashboards/gdashboardList.yml
-      - ./monitoring/grafanaDashboardConfig.json:/var/lib/grafana/dashboards/grafanaDashboardConfig.json
+      - ./monitoring/datasource:/etc/grafana/provisioning/datasources
+      - ./monitoring/dashboardList:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafanaDashboardConfig:/var/lib/grafana/dashboards
