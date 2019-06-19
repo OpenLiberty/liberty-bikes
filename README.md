@@ -63,8 +63,10 @@ export singleParty=true
   - JWT (auth-service, game-service, player-service)
   - [Rest Client](#microprofile-rest-client) (game-service)
   - [OpenAPI](#microprofile-openapi) (auth-service, game-service, player-service)
-  - Metrics (auth-service, game-service, player-service)
+  - Metrics (auth-service, game-service, player-service, frontend)
 - Angular 7 (frontend)
+- Prometheus for metric collection
+- Grafana for metric visualization
 - Gradle build
   - [Liberty Gradle Plugin](#liberty-gradle-plugin)
 - [IBM Cloud Continuous Delivery Pipeline](#continuous-delivery)
@@ -230,6 +232,46 @@ liberty {
   }
 }
 ```
+
+## Monitoring
+
+If you run Liberty Bikes in a container environment using `./graldew dockerStart`, a Prometheus and Grafana instance will be started and preconfigured for monitoring the 4 Liberty Bikes microservices.
+
+If you are running locally, you can open a browser to http://localhost:3000 and login with the username/password of `admin/admin` (respectively). The dashboard looks something like this:
+
+![Image of Grafana dashboard](https://user-images.githubusercontent.com/5427967/59791807-807ef900-9298-11e9-96fc-6071c85cf865.png)
+
+The above shapshot shows basic data such as:
+- Service Health: Green/Red boxes for up/down respectively
+- System info: CPU load and memory usage
+- Current stats:
+  - Number of players in queue
+  - Number of players playing a game
+  - Total actions/sec of players
+- Overall stats:
+  - Total number of logins
+  - Total number of games played
+
+Any application-specific stats can be collected using MicroProfile Metrics. For example, to collect number of player logins, we added the following code to our `createPlayer` method:
+```java
+    @Inject
+    private MetricRegistry registry;
+
+     private static final Metadata numLoginsCounter = new Metadata("num_player_logins", // name
+                    "Number of Total Logins", // display name
+                    "How many times a user has logged in.", // description
+                    MetricType.COUNTER, // type
+                    MetricUnits.NONE); // units
+
+    @POST
+    @Produces(MediaType.TEXT_HTML)
+    public String createPlayer(@QueryParam("name") String name, @QueryParam("id") String id) {
+      // ...
+      registry.counter(numLoginsCounter).inc();
+      // ...
+    }
+```
+
 
 ## Continuous Delivery
 
