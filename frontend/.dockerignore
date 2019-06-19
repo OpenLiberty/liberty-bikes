@@ -1,0 +1,3 @@
+prebuild/
+src/
+!src/main/liberty/config/

@@ -3,6 +3,7 @@ package org.libertybikes.player.service;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.annotation.JsonbCreator;
+import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
 
 public class Player {
@@ -32,7 +33,8 @@ public class Player {
     }
 
     @JsonbCreator
-    public Player(String name, String id) {
+    public Player(@JsonbProperty("name") String name,
+                  @JsonbProperty("id") String id) {
         this.id = (id == null || id.equals("null")) ? DOMAIN.BASIC + name : id;
         this.name = name;
     }
