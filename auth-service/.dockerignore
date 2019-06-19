@@ -1,0 +1,4 @@
+build/
+!build/libs/
+src/
+!src/main/liberty/config/

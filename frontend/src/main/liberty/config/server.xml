@@ -1,7 +1,10 @@
 <server>
     <featureManager>
         <feature>servlet-4.0</feature>
+        <feature>mpMetrics-1.1</feature>
     </featureManager>
+    
+    <mpMetrics authentication="false"/>
 
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
                   

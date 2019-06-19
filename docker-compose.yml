@@ -26,3 +26,19 @@ services:
     image: libertybikes-player
     ports:
       - "8081:8081"
+  prometheus:
+    image: prom/prometheus:v2.4.0
+    ports:
+      - 9090:9090
+    volumes:
+      - ./monitoring/prometheius.yml:/etc/prometheus/prometheus.yml
+  grafana:
+    image: grafana/grafana:5.2.4
+    ports:
+      - 3000:3000
+    environment:
+      - GF_INSTALL_PLUGINS=flant-statusmap-panel
+    volumes:
+      - ./monitoring/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./monitoring/dashboardList.yml:/etc/grafana/provisioning/dashboards/gdashboardList.yml
+      - ./monitoring/grafanaDashboardConfig.json:/var/lib/grafana/dashboards/grafanaDashboardConfig.json

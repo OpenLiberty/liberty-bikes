@@ -1,0 +1,39 @@
+global:
+  scrape_interval:     15s
+
+  external_labels:
+    monitor: 'game-service-monitor'
+
+scrape_configs:
+- job_name: 'game-service'
+  scrape_interval: 5s
+  metrics_path: '/metrics/'
+  static_configs:
+  - targets: ['game:8080']
+  scheme: http
+  tls_config:
+    insecure_skip_verify: true
+- job_name: 'player-service'
+  scrape_interval: 5s
+  metrics_path: '/metrics/'
+  static_configs:
+  - targets: ['player:8081']
+  scheme: http
+  tls_config:
+    insecure_skip_verify: true
+- job_name: 'auth-service'
+  scrape_interval: 5s
+  metrics_path: '/metrics/'
+  static_configs:
+  - targets: ['auth:8082']
+  scheme: http
+  tls_config:
+    insecure_skip_verify: true
+- job_name: 'frontend'
+  scrape_interval: 5s
+  metrics_path: '/metrics/'
+  static_configs:
+  - targets: ['frontend:12000']
+  scheme: http
+  tls_config:
+    insecure_skip_verify: true
