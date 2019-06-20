@@ -235,7 +235,7 @@ liberty {
 
 ## Monitoring
 
-If you run Liberty Bikes in a container environment using `./graldew dockerStart`, a Prometheus and Grafana instance will be started and preconfigured for monitoring the 4 Liberty Bikes microservices.
+If you run Liberty Bikes in a container environment using `./gradlew dockerStart`, a Prometheus and Grafana instance will be started and preconfigured for monitoring the 4 Liberty Bikes microservices.
 
 If you are running locally, you can open a browser to http://localhost:3000 and login with the username/password of `admin/admin` (respectively). The dashboard looks something like this:
 
