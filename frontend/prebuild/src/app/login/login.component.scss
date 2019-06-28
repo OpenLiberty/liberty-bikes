@@ -3,17 +3,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
 }
 
 #login-container {
+  transform: translateZ(0); // Hack to force Safari to render some effects properly
+
+  flex-grow: 1;
+
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
 
+  justify-self: center;
+
   padding: 10px;
-  height: inherit;
+  height: 100%;
   top: 0;
 }
 
@@ -32,7 +38,6 @@
   flex: 1;
   width: 100%;
   display: flex;
-  height: auto;
   flex-direction: column;
   align-items: center;
 }
@@ -42,8 +47,15 @@
   padding-bottom: 10px;
 }
 
-#login-icon {
+#icon {
   padding-bottom: 40px;
+  filter: none;
+  transition: all 0.3s ease-in-out;
+  transform: translateZ(0); // Hack to force Safari to render some effects properly
+}
+
+#icon:hover {
+  filter: drop-shadow(0 0 4px #fff);
 }
 
 #player-card {
@@ -141,11 +153,46 @@ h2 {
   width: 100%;
 }
 
+#footer {
+  position: relative;
+
+  width: 100%;
+  height: 150px;
+  margin: 0;
+
+  background: radial-gradient(ellipse at top, #000a, #0003);
+  border-top: 1px solid #ABD155AA;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#logo {
+  position: absolute;
+  top: -40px;
+}
+
+#logo img {
+  height: 80px;
+
+}
+
+.gallery {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.gallery img {
+  width: 50px;
+  margin: 0 20px;
+}
+
 @media screen and (min-width: 550px) {
   #login-container {
     width: 500px;
-    // border-radius: 4px;
-    // border: 1px solid #fff;
     display: flex;
     flex-direction: column;
   }
@@ -163,19 +210,13 @@ h2 {
     display: inline-block;
     min-height: 50px;
   }
-
-  :host::after {
-    content: "";
-    display: inline-block;
-    min-height: 50px;
-  }
 }
 
 @media screen and (max-width: 549px) {
   #login-container {
     width: 100%;
     min-height: 100%;
-    position: absolute;
+
     background: none;
     top: 0px;
   }
