@@ -1,0 +1,20 @@
+
+ext {
+   httpPort = 8083
+   httpsPort = 8275
+   appUrl = "http://${hostname}:${httpPort}/ai"
+}
+
+liberty {
+    server {
+        name = "ai-service"
+        dropins = [war]
+        configDirectory = file('src/main/liberty/config')
+        // TODO: make configurable
+        jvmOptions = ['-Dorg.libertybikes.ai.restclient.GameServiceClient/mp-rest/url=http://localhost:8080']
+        bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
+    }
+}
+
+// The installLiberty task doesn't work when run in parallel with other installLiberty tasks
+installLiberty.mustRunAfter ':frontend:installLiberty'
