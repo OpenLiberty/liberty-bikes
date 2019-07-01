@@ -1,3 +1,4 @@
+// Global styles for component
 :host {
   min-height: 100%;
   display: flex;
@@ -9,6 +10,127 @@
 a:hover {
   text-decoration: none;
 }
+
+button {
+  width: 100%;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  background-color: rgba(0, 0, 20, 0.2);
+
+  text-transform: lowercase;
+  font-variant: small-caps;
+
+  border-color: #bbb;
+}
+
+h2 {
+  color: #fff;
+}
+
+.glow {
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    filter: drop-shadow(0 0 4px #fff);
+  }
+}
+
+.form-group {
+  width: 100%;
+  margin-bottom: 30px;
+
+  display: flex;
+  flex-flow: column;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.form-item {
+  width: 100%;
+  margin-bottom: 10px;
+
+  & label {
+    display: initial;
+    width: 100%;
+    margin-bottom: -4px;
+    padding-bottom: 0px;
+    font-size: 0.8em;
+    font-variant: small-caps;
+    text-transform: lowercase;
+    color: #bbb;
+  }
+
+  & input {
+    width: 100%;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border: none;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid #bbb;
+    border-radius: 0px;
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+      text-shadow: 0 0 5px #fff;
+    }
+
+    &:focus {
+      border-color: #fff;
+      outline: none;
+    }
+  }
+}
+
+.section-header {
+  width: 100%;
+  margin-bottom: 15px;
+
+  font-size: 1.4em;
+  font-variant: small-caps;
+  font-weight: 300;
+  text-transform: lowercase;
+  text-align: center;
+
+  color: white;
+}
+
+.caption {
+  color: #ccc;
+  font-style: italic;
+  font-size: .7em;
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+.slider {
+  width: 100%;
+}
+
+.gallery {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.gallery-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gallery-icon {
+  width: 50px;
+  margin: 0 20px;
+}
+
+.gallery-label {
+  margin-top: 15px;
+  color: #ccc;
+  font-size: 0.8em;
+}
+
+// Main content elements
 
 #login-container {
   transform: translateZ(0); // Hack to force Safari to render some effects properly
@@ -56,108 +178,15 @@ a:hover {
   transform: translateZ(0); // Hack to force Safari to render some effects properly
 }
 
-.glow {
-  transition: all 0.3s ease-in-out;
-
-  &:hover {
-    filter: drop-shadow(0 0 4px #fff);
-  }
-}
-
 #player-card {
   height: 60px;
-}
-
-.form-group {
-  width: 100%;
-  margin-bottom: 30px;
-
-  display: flex;
-  flex-flow: column;
-  padding-left: 10px;
-  padding-right: 10px;
-}
-
-.form-item {
-  width: 100%;
-  margin-bottom: 10px;
-}
-
-.form-item label {
-  display: initial;
-  width: 100%;
-  margin-bottom: -4px;
-  padding-bottom: 0px;
-  font-size: 0.8em;
-  font-variant: small-caps;
-  text-transform: lowercase;
-  color: #bbb;
-}
-
-.form-item input {
-  width: 100%;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  border: none;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid #bbb;
-  border-radius: 0px;
-  transition: all 0.3s ease-in-out;
-}
-
-.form-item input:hover {
-  text-shadow: 0 0 5px #fff;
-}
-.form-item input:focus {
-  border-color: #fff;
-  outline: none;
 }
 
 #partyid {
   text-transform: uppercase;
 }
 
-button {
-  width: 100%;
-  padding-top: 6px;
-  padding-bottom: 6px;
-  background-color: rgba(0, 0, 20, 0.2);
-
-  text-transform: lowercase;
-  font-variant: small-caps;
-
-  border-color: #bbb;
-}
-
-h2 {
-  color: #fff;
-}
-
-.section-header {
-  width: 100%;
-  margin-bottom: 15px;
-
-  font-size: 1.4em;
-  font-variant: small-caps;
-  font-weight: 300;
-  text-transform: lowercase;
-  text-align: center;
-
-  color: white;
-}
-
-.caption {
-  color: #ccc;
-  font-style: italic;
-  font-size: .7em;
-  text-align: center;
-  padding-bottom: 10px;
-}
-
-.slider {
-  width: 100%;
-}
+// Footer section elements
 
 #footer {
   position: relative;
@@ -173,44 +202,22 @@ h2 {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
+  &.gallery {
+    margin-top: 15px;
+  }
 }
 
 #logo {
   position: absolute;
   top: -40px;
+
+  & img {
+    height: 80px;
+  }
 }
 
-#logo img {
-  height: 80px;
-
-}
-
-.gallery {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-#footer .gallery {
-  margin-top: 15px;
-}
-
-.gallery-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.gallery-icon {
-  width: 50px;
-  margin: 0 20px;
-}
-
-.gallery-label {
-  margin-top: 15px;
-  color: #ccc;
-  font-size: 0.8em;
-}
+// Format-specific overrides
 
 @media screen and (min-width: 550px) {
   #login-container {
