@@ -195,8 +195,8 @@ h2 {
   height: 150px;
   margin: 0;
 
-  background: radial-gradient(ellipse at top, #000a, #0003);
-  border-top: 1px solid #ABD155AA;
+  background: radial-gradient(ellipse at top, rgba(0,0,0,0.666), rgba(0,0,0,0.2));
+  border-top: 1px solid rgba(171,209,85,0.666);
 
   display: flex;
   flex-direction: column;
@@ -252,5 +252,11 @@ h2 {
 
   :host {
     min-height: 100%;
+  }
+}
+
+@media screen and (max-width: 350px) {
+  #login-title h1 {
+    font-size: 2em;
   }
 }
