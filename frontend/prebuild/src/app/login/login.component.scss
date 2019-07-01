@@ -6,6 +6,10 @@
   justify-content: space-around;
 }
 
+a:hover {
+  text-decoration: none;
+}
+
 #login-container {
   transform: translateZ(0); // Hack to force Safari to render some effects properly
 
@@ -49,13 +53,15 @@
 
 #icon {
   padding-bottom: 40px;
-  filter: none;
-  transition: all 0.3s ease-in-out;
   transform: translateZ(0); // Hack to force Safari to render some effects properly
 }
 
-#icon:hover {
-  filter: drop-shadow(0 0 4px #fff);
+.glow {
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    filter: drop-shadow(0 0 4px #fff);
+  }
 }
 
 #player-card {
@@ -185,9 +191,25 @@ h2 {
   align-items: center;
 }
 
-.gallery img {
+#footer .gallery {
+  margin-top: 15px;
+}
+
+.gallery-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gallery-icon {
   width: 50px;
   margin: 0 20px;
+}
+
+.gallery-label {
+  margin-top: 15px;
+  color: #ccc;
+  font-size: 0.8em;
 }
 
 @media screen and (min-width: 550px) {
