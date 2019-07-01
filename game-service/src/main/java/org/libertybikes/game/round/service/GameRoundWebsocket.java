@@ -86,17 +86,34 @@ public class GameRoundWebsocket {
                 session.close();
                 return;
             }
-            // log(roundId, "[onMessage] msg=" + message);
+            //log(roundId, "[onMessage] msg=" + message);
 
             if (GameEvent.GAME_START == msg.event) {
                 round.startGame();
             } else if (msg.direction != null) {
                 round.updatePlayerDirection(session, msg);
             } else if (msg.playerJoinedId != null) {
-                org.libertybikes.restclient.Player playerResponse = getPlayer(msg.playerJoinedId);
-                if (!round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard))
-                    sendToClient(session, new OutboundMessage.ErrorEvent("Unable to add player " + playerResponse.name
-                                                                         + " to game. This is probably because someone else with the same name is already in the game."));
+                /*
+                 * If an external service joins through just opening a websocket and sending a message
+                 * We will get an exception trying to find the player in the playerservice DB
+                 * TODO: we need to handle this better for our externalAI, either here or have the
+                 * external service call playerservice first and create the player
+                 * msg.playerJoinedId.startsWith("BOT:") is currently a hack and a player joining
+                 * vs externalAI should not be different.
+                 */
+                if (!msg.playerJoinedId.startsWith("BOT:")) {
+                    // Call playerserver for player in DB
+                    org.libertybikes.restclient.Player playerResponse = getPlayer(msg.playerJoinedId);
+                    if (!round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard))
+                        sendToClient(session, new OutboundMessage.ErrorEvent("Unable to add player " + playerResponse.name
+                                                                             + " to game. This is probably because someone else with the same name is already in the game."));
+                } else {
+                    String botName = msg.playerJoinedId.substring(4);
+                    if (!round.addPlayer(session, msg.playerJoinedId, botName, true))
+                        sendToClient(session, new OutboundMessage.ErrorEvent("Unable to add player " + msg.playerJoinedId
+                                                                             + " to game. This is probably because someone else with the same name is already in the game."));
+                }
+
             } else if (Boolean.TRUE == msg.isSpectator) {
                 round.addSpectator(session);
             } else {
