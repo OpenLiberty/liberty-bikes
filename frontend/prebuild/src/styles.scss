@@ -33,15 +33,17 @@ button {
   background-color: rgba(0, 0, 0, 0.2);
   border: 1px solid #ccc;
   color: #fff;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.15s ease-in-out;
 }
 
 button:disabled {
   opacity: 0.5;
 }
 
-button:hover:enabled {
+button:hover:enabled, button:focus:enabled {
   text-shadow: 0 0 5px #fff;
+  background-color: rgba(50, 50, 50, 0.2);
+  border-color: #fff;
 }
 
 /* Navigation link styles */

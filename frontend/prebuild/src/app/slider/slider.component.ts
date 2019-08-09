@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, Input } from '@angular/core';
-import { trigger, state, style, transition, animate, query, group } from '@angular/animations';
+import { trigger, state, style, transition, animate, query, group, animateChild } from '@angular/animations';
 
 @Component({
   selector: 'app-slider',
@@ -13,12 +13,17 @@ import { trigger, state, style, transition, animate, query, group } from '@angul
       state('right', style({ transform: 'translateX(-50%)' })),
       state('queue', style({ transform: 'translateX(-75%)'})),
       transition('void => *', animate(0)),
-      transition('* => *', animate(300))
+      transition('* => *', [
+        group([
+          query('@fade', animateChild()),
+          animate('300ms ease-out')
+        ])
+      ])
     ]),
     trigger('fade', [
-      state('active', style({ opacity: 1 })),
-      state('inactive', style({ opacity: 0 })),
-      transition('* => *', animate(300))
+      state('active', style({ visibility: 'visible', opacity: 1 })),
+      state('inactive', style({ visibility: 'hidden', opacity: 0 })),
+      transition('* => *', animate('200ms'))
     ])
   ]
 })

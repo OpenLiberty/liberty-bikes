@@ -30,7 +30,7 @@ h2 {
 .glow {
   transition: all 0.3s ease-in-out;
 
-  &:hover {
+  &:hover, &:focus {
     filter: drop-shadow(0 0 4px #fff);
   }
 }
@@ -69,10 +69,11 @@ h2 {
     background: rgba(0, 0, 0, 0.2);
     border-bottom: 1px solid #bbb;
     border-radius: 0px;
-    transition: all 0.3s ease-in-out;
+    transition: all 0.15s ease-in-out;
 
-    &:hover {
+    &:hover, &:focus {
       text-shadow: 0 0 5px #fff;
+      background-color: rgba(75, 75, 75, 0.2);
     }
 
     &:focus {
