@@ -90,7 +90,7 @@ public class GameBoard {
 }
 ```
 
-By default, JSON-B will expose any `public` members as wel as public `getXXX()`, this includes other objects such as the `Set<Player> players` field.  The resulting class gets serialized into something like this:
+By default, JSON-B will expose any `public` members as well as public `getXXX()`, this includes other objects such as the `Set<Player> players` field.  The resulting class gets serialized into something like this:
 
 ```json
 {
