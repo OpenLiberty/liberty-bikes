@@ -40,7 +40,7 @@ public class PartyService {
     private final Map<String, Party> allParties = new ConcurrentHashMap<>();
 
     @Inject
-    @ConfigProperty(name = "singleParty", defaultValue = "false")
+    @ConfigProperty(name = "singleParty", defaultValue = "true")
     private boolean isSingleParty;
 
     @Resource
