@@ -270,7 +270,7 @@ Any application-specific stats can be collected using MicroProfile Metrics. For 
 
 ## Continuous Delivery
 
-Early on we set up a build pipeline on IBM Cloud that we pointed at this GitHub repository.  Every time a new commit is merged into the `master` branch, the pipeline kicks off a new build and redeploys all of the services.  The average time from pressing merge on a PR to having the changes live on libertbikes.mybluemix.net is around 20 minutes.
+Early on we set up a build pipeline on IBM Cloud that we pointed at this GitHub repository.  Every time a new commit is merged into the `master` branch, the pipeline kicks off a new build and redeploys all of the services.  The average time from pressing merge on a PR to having the changes live on libertybikes.mybluemix.net is around 20 minutes.
 
 The pipeline UI looks like this in our dashboard:
 
