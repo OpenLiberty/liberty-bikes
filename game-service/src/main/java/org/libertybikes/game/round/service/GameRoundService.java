@@ -40,7 +40,7 @@ public class GameRoundService {
         GameRound p = new GameRound();
         allRounds.put(p.id, p);
         System.out.println("Created round id=" + p.id);
-        if (allRounds.size() > 5)
+        if (allRounds.size() > 35)
             System.out.println("WARNING: Found " + allRounds.size() + " active games in GameRoundService. " +
                                "They are probably not being cleaned up properly: " + allRounds.keySet());
         return p.id;
@@ -50,7 +50,7 @@ public class GameRoundService {
     public GameRound createRoundById(@QueryParam("gameId") String gameId) {
         GameRound round = allRounds.computeIfAbsent(gameId, k -> new GameRound(gameId));
         System.out.println("Created round id=" + round.id);
-        if (allRounds.size() > 5)
+        if (allRounds.size() > 35)
             System.out.println("WARNING: Found " + allRounds.size() + " active games in GameRoundService. " +
                                "They are probably not being cleaned up properly: " + allRounds.keySet());
         return round;
@@ -101,12 +101,12 @@ public class GameRoundService {
         String roundId = round.id;
         if (round.isOpen())
             round.gameState = State.FINISHED;
-        System.out.println("Scheduling round id=" + roundId + " for deletion in 5 minutes");
+        System.out.println("Scheduling round id=" + roundId + " for deletion in 15 minutes");
         // Do not immediately delete rounds in order to give players/spectators time to move along to the next game
         exec.schedule(() -> {
             allRounds.remove(roundId);
             System.out.println("Deleted round id=" + roundId);
-        }, 5, TimeUnit.MINUTES);
+        }, 15, TimeUnit.MINUTES);
     }
 
 }

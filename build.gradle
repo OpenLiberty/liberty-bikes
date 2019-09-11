@@ -71,7 +71,7 @@ subprojects {
         testCompile group: 'junit', name: 'junit', version: '4.12'
         testCompile group: 'org.eclipse', name: 'yasson', version: '1.0.3'
         testCompile group: 'org.glassfish', name: 'jakarta.json', version: '1.1.5'
-        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '[19.0.0.5,)'
+        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '[19.0.0.8,)'
     }
     
     eclipse {
