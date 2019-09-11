@@ -31,9 +31,16 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   pane: PaneType = sessionStorage.getItem('username') === null ? 'left' : 'right';
   username: string;
-  party: string;
   queuePosition: number;
   player = new Player();
+
+  private partyCode = '';
+  get party(): string {
+    return this.partyCode.toLocaleUpperCase().trim();
+  }
+  set party(newParty: string) {
+    this.partyCode = newParty;
+  }
 
   isFullDevice: boolean = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   isQuickPlayAllowed: boolean = this.isFullDevice;
