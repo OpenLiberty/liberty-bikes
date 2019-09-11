@@ -16,6 +16,12 @@ Builds all microservice applications and deploys them to locally running liberty
 
 Any code changes that are made in an eclipse environment with auto-build enabled will automatically publish content to the loose application, meaning no server restarts should be required between code changes.
 
+To start the monitoring services, you must have Docker installed. They can be started with:
+
+```
+./startMonitoring.sh
+```
+
 To stop all liberty servers, issue the command:
 
 ```
