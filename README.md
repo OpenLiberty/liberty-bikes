@@ -6,7 +6,7 @@ Publicly hosted on IBM Cloud here: [http://libertybikes.mybluemix.net/](http://l
 
 Bluemix toolchain automatically deploys the current `liberty-bikes/liberty-bikes:master` branch
 
-mama mia
+mama mia, it's a spicy meatball
 
 ## Run it locally
 
