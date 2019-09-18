@@ -23,7 +23,7 @@ import { SliderComponent } from './slider/slider.component';
     BrowserAnimationsModule,
     FormsModule,
     AppRoutingModule,
-    NgbModule.forRoot(),
+    NgbModule,
     HttpClientModule
   ],
   declarations: [
