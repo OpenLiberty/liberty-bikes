@@ -1,18 +1,22 @@
-apply plugin: 'com.moowork.node'
+// apply plugin: 'com.moowork.node'
 
-buildscript {
-	ext {
-		gradleNodeVersion = '1.2.0'
-	}
+// buildscript {
+// 	ext {
+// 		gradleNodeVersion = '1.2.0'
+// 	}
 
-	repositories {
-		mavenCentral()
-		maven { url 'https://plugins.gradle.org/m2' }
-	}
+// 	repositories {
+// 		mavenCentral()
+// 		maven { url 'https://plugins.gradle.org/m2' }
+// 	}
 
-	dependencies {
-		classpath "com.moowork.gradle:gradle-node-plugin:$gradleNodeVersion"
-	}
+// 	dependencies {
+// 		classpath "com.moowork.gradle:gradle-node-plugin:$gradleNodeVersion"
+// 	}
+// }
+
+plugins {
+	id 'com.moowork.node' version '1.3.1'
 }
 
 ext {
@@ -28,7 +32,7 @@ war {
 }
 
 node {
-	version = '10.15.3'
+	version = '10.16.3'
 	npmVersion = '6.9.0'
 	download = true
 	workDir = file("${rootDir}/frontend/prebuild/node")
