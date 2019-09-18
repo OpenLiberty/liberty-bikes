@@ -15,17 +15,28 @@ export class PlayerListComponent implements OnInit {
     playersService.messages.subscribe((msg) => {
       const json = msg as any;
       if (json.playerlist) {
-        const newPlayers = new Array();
         // console.log(`Got playerlist ${JSON.stringify(json.playerlist)}`);
-        for (let player of json.playerlist) {
-          const newPlayer = new Player();
-          newPlayer.name = player.name;
-          newPlayer.status = player.status;
-          newPlayer.color = player.color;
-          newPlayers.push(newPlayer);
-        }
-        this.ngZone.run(() => {
-          this.players = newPlayers;
+        json.playerlist.forEach((player, i) => {
+          if (this.players.length > i) {
+            // Player already exists, compare
+            if (this.players[i].name !== player.name) {
+              this.players[i].name = player.name;
+            }
+
+            if (this.players[i].status !== player.status) {
+              this.players[i].status = player.status;
+            }
+
+            if (this.players[i].color !== player.color) {
+              this.players[i].color = player.color;
+            }
+          } else {
+            const newPlayer = new Player();
+            newPlayer.name = player.name;
+            newPlayer.status = player.status;
+            newPlayer.color = player.color;
+            this.players.push(newPlayer);
+          }
         });
       }
     }, (err) => {
