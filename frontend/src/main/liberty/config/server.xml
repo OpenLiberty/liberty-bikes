@@ -1,7 +1,7 @@
 <server>
     <featureManager>
         <feature>servlet-4.0</feature>
-        <feature>mpMetrics-1.1</feature>
+        <feature>mpMetrics-2.0</feature>
     </featureManager>
     
     <mpMetrics authentication="false"/>
@@ -10,6 +10,5 @@
                   
     <applicationManager autoExpand="true"/>
 
-    <webApplication location="${application.name}" contextRoot="/" >
-    </webApplication>
+    <webApplication location="${application.name}" contextRoot="/"/>
 </server>

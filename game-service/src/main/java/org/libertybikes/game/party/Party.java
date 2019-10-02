@@ -10,7 +10,6 @@ import javax.json.bind.annotation.JsonbTransient;
 import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 
-import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.libertybikes.game.core.GameRound;
 import org.libertybikes.game.core.GameRound.LifecycleCallback;
@@ -43,11 +42,7 @@ public class Party {
     }
 
     @Inject
-    @Counted(unit = MetricUnits.NONE,
-             name = "number_of_parties",
-             monotonic = true,
-             description = "Total Number of Parties",
-             absolute = true)
+    @Counted(name = "number_of_parties", description = "Total Number of Parties", absolute = true)
     public Party() {
         this(getRandomPartyID());
     }
