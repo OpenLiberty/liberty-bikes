@@ -96,14 +96,12 @@ public class GameMetrics {
     public static void counterInc(Metadata metricMetadata) {
         if (registry != null || (getRegistry() != null)) {
             registry.concurrentGauge(metricMetadata).inc();
-            //registry.counter(metricMetadata).inc();
         }
     }
 
     public static void counterDec(Metadata metricMetadata) {
         if (registry != null || (getRegistry() != null)) {
             registry.concurrentGauge(metricMetadata).dec();
-            //registry.counter(metricMetadata).dec();
         }
     }
 
