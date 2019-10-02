@@ -12,7 +12,7 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-@RegisterRestClient
+@RegisterRestClient(baseUri = "http://localhost:8081/")
 @Path("/")
 public interface PlayerService {
 

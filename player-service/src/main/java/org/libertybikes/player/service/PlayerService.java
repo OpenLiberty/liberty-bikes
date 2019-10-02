@@ -15,9 +15,9 @@ import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.metrics.Metadata;
+import org.eclipse.microprofile.metrics.MetadataBuilder;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.MetricType;
-import org.eclipse.microprofile.metrics.MetricUnits;
 import org.libertybikes.player.data.PlayerDB;
 
 @Path("/player")
@@ -39,11 +39,12 @@ public class PlayerService {
     @Inject
     private MetricRegistry registry;
 
-    private static final Metadata numLoginsCounter = new Metadata("num_player_logins", // name
-                    "Number of Total Logins", // display name
-                    "How many times a user has logged in.", // description
-                    MetricType.COUNTER, // type
-                    MetricUnits.NONE); // units
+    private static final Metadata numLoginsCounter = new MetadataBuilder()
+                    .withName("num_player_logins")
+                    .withDisplayName("Number of Total Logins")
+                    .withDescription("How many times a user has logged in.")
+                    .withType(MetricType.COUNTER)
+                    .build();
 
     @POST
     @Produces(MediaType.TEXT_HTML)
