@@ -10,8 +10,6 @@ liberty {
 		dropins = [war]
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
 		configDirectory = file('src/main/liberty/config')
-        jvmOptions = ['-Dorg.libertybikes.auth.service.github.GitHubOAuthAPI/mp-rest/url=https://github.com',
-                      '-Dorg.libertybikes.auth.service.github.GitHubUserAPI/mp-rest/url=https://api.github.com']
 	}
 }
 

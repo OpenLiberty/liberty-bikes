@@ -9,7 +9,7 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-@RegisterRestClient
+@RegisterRestClient(baseUri = "https://github.com")
 @Path("/login/oauth")
 public interface GitHubOAuthAPI {
 
