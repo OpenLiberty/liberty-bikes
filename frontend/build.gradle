@@ -58,6 +58,11 @@ task npmUpdate {
 task buildStandaloneClient(type: NpmTask, dependsOn: npmInstall) {
     group 'build client'
     description = 'Compile client side folder for development'
+    inputs.files(fileTree("${rootDir}/frontend/prebuild/").matching {
+        exclude "**/dist"
+    }).withPropertyName("sourceFiles")
+    outputs.dir("${rootDir}/frontend/prebuild/dist").withPropertyName("outputDir")
+
     if("prod".equals(System.getProperty("env_mode"))) {
         println "### prod environment ###"
         file("${rootDir}/frontend/prebuild/src/environments/environment.prod.ts").eachLine { String line ->
