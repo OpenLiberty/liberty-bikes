@@ -26,6 +26,16 @@ services:
     image: libertybikes-player
     ports:
       - "8081:8081"
+    environment:
+      - DB_HOST=postgres
+  postgres:
+    image: postgres:11-alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=playerdb
+      - POSTGRES_USER=lb_user
+      - POSTGRES_PASSWORD=lb_password
   prometheus:
     image: prom/prometheus:v2.4.0
     ports:

@@ -35,6 +35,11 @@ public class RankingService {
 
     @PostConstruct
     public void initPlayers() {
+        if (db.exists(Player.createDefaultId("SamplePlayer-0"))) {
+            System.out.println("Sample players already exist in database.");
+            return;
+        }
+
         Random r = new Random();
         for (int i = 0; i < 10; i++) {
             String id = playerSvc.createPlayer("SamplePlayer-" + i, null);
@@ -53,13 +58,6 @@ public class RankingService {
         if (numPlayers > 100)
             numPlayers = 100;
         return db.topPlayers(numPlayers);
-    }
-
-    @GET
-    @Path("/{playerId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public long getRank(@PathParam("playerId") String id) {
-        return db.getRank(id);
     }
 
     @POST

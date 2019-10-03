@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.libertybikes.player.data.PlayerDB;
+import org.libertybikes.player.data.InMemPlayerDB;
 
 public class PlayerServiceTest {
 
@@ -14,7 +14,7 @@ public class PlayerServiceTest {
     @Before
     public void beforeEach() {
         svc = new PlayerService();
-        svc.db = new PlayerDB();
+        svc.db = new InMemPlayerDB();
     }
 
     @Test
