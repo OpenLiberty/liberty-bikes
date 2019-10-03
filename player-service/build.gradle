@@ -13,9 +13,28 @@ liberty {
 	}
 }
 
+configurations {
+    postgresql
+}
+
 dependencies {
     compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+    postgresql group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
 }
+
+task addPostgresqlToServer(type: Copy) {
+  shouldRunAfter libertyCreate
+  from configurations.postgresql
+  into "${rootProject.buildDir}/wlp/usr/servers/${liberty.server.name}/postgresql"
+}
+
+task addPostgresqlToBuild(type: Copy) {
+  from configurations.postgresql
+  into "${buildDir}/libs"
+}
+
+assemble.dependsOn 'addPostgresqlToBuild'
+installApps.dependsOn 'addPostgresqlToServer'
 
 // The installLiberty task doesn't work when run in parallel with other installLiberty tasks
 installLiberty.mustRunAfter ':frontend:installLiberty'

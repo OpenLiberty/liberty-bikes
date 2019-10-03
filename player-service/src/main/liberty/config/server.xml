@@ -4,15 +4,39 @@
         <feature>cdi-2.0</feature>
         <feature>concurrent-1.0</feature>
         <feature>jaxrs-2.1</feature>
+        <feature>jdbc-4.2</feature>
         <feature>jndi-1.0</feature>
         <feature>jsonb-1.0</feature>
         <feature>mpConfig-1.3</feature>
         <feature>mpJwt-1.1</feature>
         <feature>mpOpenAPI-1.1</feature>
         <feature>mpMetrics-2.0</feature>
+        <feature>restConnector-2.0</feature>
     </featureManager>
 
 	<mpMetrics authentication="false"/>
+	<quickStartSecurity userName="admin" userPassword="admin"/>
+	
+	<!-- Auth filter so MP JWT is only used for the app and not built-in server API -->
+	<authFilter id="appFilter">
+	  <requestUrl urlPattern="/ibm/api" matchType="notContain"/>
+    </authFilter>
+	
+	<variable name="DB_HOST" defaultValue="localhost"/>
+	<variable name="DB_PORT" defaultValue="5432"/>
+	<variable name="DB_NAME" defaultValue="playerdb"/>
+	<variable name="DB_USER" defaultValue="lb_user"/>
+	<variable name="DB_PASS" defaultValue="lb_password"/>
+	
+	<library id="postgresql">
+        <fileset dir="postgresql"/>
+    </library>
+
+    <dataSource id="DefaultDataSource">
+        <jdbcDriver libraryRef="postgresql"/>
+        <properties.postgresql serverName="${DB_HOST}" portNumber="${DB_PORT}" databaseName="${DB_NAME}"
+                               user="${DB_USER}" password="${DB_PASS}"/>
+    </dataSource>
 
     <applicationManager autoExpand="true"/>
     
@@ -27,12 +51,14 @@
          
     <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}resources/security/validationKeystore.jks"/>
            
-        <mpJwt id="myMpJwt" 
+    <mpJwt id="myMpJwt" 
            keyName="rebike" 
            issuer="https://libertybikes.mybluemix.net" 
-           audiences="client"/>
+           audiences="client"
+           authFilterRef="appFilter"/>
     
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="${httpPort}" httpsPort="${httpsPort}" />
                   
     <applicationManager autoExpand="true"/>
+
 </server>

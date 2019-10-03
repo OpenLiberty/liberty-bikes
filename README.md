@@ -14,7 +14,13 @@ Builds all microservice applications and deploys them to locally running liberty
 ./gradlew start frontend:open
 ```
 
-Any code changes that are made in an eclipse environment with auto-build enabled will automatically publish content to the loose application, meaning no server restarts should be required between code changes.
+Any code changes that are made in an IDE with auto-build enabled will automatically publish content to the loose application, meaning no server restarts should be required between code changes.
+
+By default, the player-service stores player registration and stats in-memory. To use a real database, you can start a PostgreSQL docker container with this script:
+
+```
+./startDB.sh
+```
 
 To start the monitoring services, you must have Docker installed. They can be started with:
 

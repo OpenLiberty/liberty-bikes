@@ -1,4 +1,4 @@
-FROM open-liberty:microProfile3-java11
+FROM open-liberty:19.0.0.9-microProfile3-java11
 ADD --chown=1001:0 build/libs/auth-service.war /config/dropins
 COPY --chown=1001:0 src/main/liberty/config /config/
 RUN printf 'frontend_url=http://lb-frontend:12000/login\n\
