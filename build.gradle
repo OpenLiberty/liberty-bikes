@@ -98,6 +98,7 @@ subprojects {
     libertyDebug.dependsOn 'libertyStop'    
     libertyStart.dependsOn 'libertyStop', 'test'
     libertyRun.dependsOn   'libertyStop'
+    composeUp.dependsOn ':player-service:addPostgresqlToBuild'
     
     task debug { dependsOn 'libertyDebug' }
     task start { dependsOn 'libertyStart' }
