@@ -9,9 +9,10 @@ import { trigger, state, style, transition, animate, query, group, animateChild 
   animations: [
     trigger('slide', [
       state('left', style({ transform: 'translateX(0)' })),
-      state('center', style({ transform: 'translateX(-25%)' })),
-      state('right', style({ transform: 'translateX(-50%)' })),
-      state('queue', style({ transform: 'translateX(-75%)'})),
+      state('center', style({ transform: 'translateX(-20%)' })),
+      state('right', style({ transform: 'translateX(-40%)' })),
+      state('queue', style({ transform: 'translateX(-60%)'})),
+      state('ai', style({ transform: 'translateX(-80%)'})),
       transition('void => *', animate(0)),
       transition('* => *', [
         group([
@@ -35,4 +36,4 @@ export class SliderComponent {
   }
 }
 
-export type PaneType = 'left' | 'center' | 'right' | 'queue';
+export type PaneType = 'left' | 'center' | 'right' | 'queue' | 'ai';
