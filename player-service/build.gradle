@@ -23,7 +23,7 @@ dependencies {
 }
 
 task addPostgresqlToServer(type: Copy) {
-  shouldRunAfter libertyCreate
+  mustRunAfter libertyCreate
   from configurations.postgresql
   into "${rootProject.buildDir}/wlp/usr/servers/${liberty.server.name}/postgresql"
 }
