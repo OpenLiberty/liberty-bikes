@@ -18,6 +18,9 @@
               <button type="button" (click)="showGuestLogin()" [disabled]="isPerformingSsoRedirect">Play as Guest</button>
             </div>
             <div class="form-item">
+              <button type="button" (click)="showBotLogin()" [disabled]="isPerformingSsoRedirect">Register Bot</button>
+            </div>
+            <div class="form-item">
               <button type="button" (click)="loginGoogle()" [disabled]="isPerformingSsoRedirect || !isGoogleConfigured">Sign in with Google</button>
             </div>
             <div class="form-item">
@@ -111,6 +114,23 @@
               <h2>You are number {{queuePosition}} in queue</h2>
               <hr/>
               <button type="button" (click)="cancelQueue()">Leave Queue</button>
+            </div>
+          </div>
+        </div>
+        
+       <div aiPane>
+          <div class="form-group">
+            <div class="form-item">
+              <div class="form-item">
+                <label>bot name</label>
+                <input type="text" id="ainame" name="ainame" [(ngModel)]="ainame" />
+              </div>
+              <div class="form-item">
+                <button type="submit" id="registerBot" (click)="registerBot(ainame)">Register Bot</button>
+              </div>
+               <div class="form-item">
+                <button type="submit" (click)="cancelLogin()">Back</button>
+              </div>
             </div>
           </div>
         </div>

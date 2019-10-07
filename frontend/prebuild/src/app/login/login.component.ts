@@ -390,4 +390,42 @@ export class LoginComponent implements OnInit, OnDestroy {
     sessionStorage.removeItem('userId');
     this.pane = 'left';
   }
+  
+  makeid() {
+   var result           = '';
+   var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+   var charactersLength = characters.length;
+   for ( var i = 1; i <= 16; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      if (i % 4 == 0 && i != 16) {
+          result += "-";
+      }
+   }
+   return result;
+  }
+  
+  showBotLogin() {
+     this.pane='ai';
+  }
+  
+
+  async registerBot(name: string) {
+    console.log(`Bot name input: "${name}"`);
+
+    // ensure username is valid before creating
+    let usernameError = this.validateUsername(name);
+    if (usernameError !== null) {
+      alert(usernameError);
+      return false;
+    }
+    name = name.trim();
+
+    let userid = this.makeid();
+    console.log("id: " + userid);
+    // register a new user
+    let key: any = await this.http.post(`${environment.API_URL_PLAYERS}?name=${name}&id=${userid}`, '', {
+      responseType: 'text'
+    }).toPromise();
+    alert(`Key for ${name}: ${key}`);
+  }
 }
