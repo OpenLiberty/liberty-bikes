@@ -42,7 +42,7 @@ task dockerStop {
 
 composeUp {
     subprojects.each {
-        dependsOn("${it.name}:war")
+        dependsOn("${it.name}:assemble")
     }
 }
 
