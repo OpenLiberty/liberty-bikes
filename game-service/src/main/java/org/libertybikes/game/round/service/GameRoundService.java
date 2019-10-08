@@ -18,7 +18,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.libertybikes.game.core.GameRound;
-import org.libertybikes.game.core.GameRound.State;
 
 @Path("/round")
 @ApplicationScoped
@@ -91,7 +90,7 @@ public class GameRoundService {
         if (isPlayer && nextRound.isStarted())
             return requeue(nextRound.id, isPlayer);
         // If next round is already done, requeue ahead to next game
-        else if (nextRound.gameState == GameRound.State.FINISHED)
+        else if (nextRound.getGameState() == GameRound.State.FINISHED)
             return requeue(nextRound.id, isPlayer);
         else
             return nextRound.id;
@@ -100,7 +99,7 @@ public class GameRoundService {
     public void deleteRound(GameRound round) {
         String roundId = round.id;
         if (round.isOpen())
-            round.gameState = State.FINISHED;
+            round.endGame();
         System.out.println("Scheduling round id=" + roundId + " for deletion in 15 minutes");
         // Do not immediately delete rounds in order to give players/spectators time to move along to the next game
         exec.schedule(() -> {

@@ -4,8 +4,6 @@
 package org.libertybikes.game.round.service;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.context.Dependent;
@@ -78,7 +76,7 @@ public class GameRoundWebsocket {
         try {
             final InboundMessage msg = jsonb.fromJson(message, InboundMessage.class);
             final GameRound round = gameSvc.getRound(roundId);
-            if (round == null || round.gameState == State.FINISHED) {
+            if (round == null || round.getGameState() == State.FINISHED) {
                 log(roundId, "[onMessage] Received message for round that did not exist or has completed.  Closing this websocket connection.");
                 if (round == null)
                     sendToClient(session, new OutboundMessage.ErrorEvent("Round " + roundId + " did not exist."));
@@ -101,7 +99,6 @@ public class GameRoundWebsocket {
                 if (!round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard == null ? true : msg.hasGameBoard))
                     sendToClient(session, new OutboundMessage.ErrorEvent("Unable to add player " + playerResponse.name
                                                                          + " to game. This is probably because someone else with the same name is already in the game."));
-
 
             } else if (Boolean.TRUE == msg.isSpectator) {
                 round.addSpectator(session);
