@@ -64,12 +64,14 @@ public class GameRound implements Runnable {
     // Properties exposed in JSON representation of object
     public final String id;
     public final String nextRoundId;
-    public volatile State gameState = State.OPEN;
+    private volatile State gameState = State.OPEN;
     private final GameBoard board = new GameBoard();
 
     private final AtomicBoolean gameRunning = new AtomicBoolean();
+    private final AtomicBoolean didRun = new AtomicBoolean();
     private final AtomicBoolean paused = new AtomicBoolean();
     private final AtomicBoolean heartbeatStarted = new AtomicBoolean();
+    private final AtomicBoolean gameClosed = new AtomicBoolean();
     private final Map<Session, Client> clients = new HashMap<>();
     private final Deque<Player> playerRanks = new ArrayDeque<>();
     private final Set<LifecycleCallback> lifecycleCallbacks = new HashSet<>();
@@ -273,6 +275,12 @@ public class GameRound implements Runnable {
         GameMetrics.counterDec(GameMetrics.currentPlayersCounter);
     }
 
+    /**
+     * Removes a client from the game round
+     *
+     * @param client The client to remove
+     * @return The number of remaining clients in the game round
+     */
     public int removeClient(Session client) {
         Client c = clients.remove(client);
         if (c != null && c.player.isPresent()) {
@@ -289,6 +297,7 @@ public class GameRound implements Runnable {
     @Override
     public void run() {
         gameRunning.set(true);
+        didRun.set(true);
         log(">>> Starting round");
 
         ticksFromGameEnd = 0;
@@ -495,6 +504,10 @@ public class GameRound implements Runnable {
         return gameState == State.OPEN;
     }
 
+    public State getGameState() {
+        return gameState;
+    }
+
     public void startGame() {
         if (isStarted())
             return;
@@ -510,9 +523,13 @@ public class GameRound implements Runnable {
         executor().submit(new Starter());
     }
 
-    private void endGame() {
-        runningGames.decrementAndGet();
+    public void endGame() {
+        if (gameClosed.getAndSet(true))
+            return;
 
+        gameState = State.FINISHED;
+        if (didRun.get())
+            runningGames.decrementAndGet();
         log("<<< Finished round");
 
         // Decrement current rounds counter and close round timer
@@ -604,9 +621,10 @@ public class GameRound implements Runnable {
                 roundStartCountdown--;
                 if (roundStartCountdown < 1) {
                     if (clients.size() == 0) {
+                        // Ensure that game state is closed off so that no other players
+                        // can quick join while a round is marked for deletion
                         log("No clients remaining.  Cancelling LobbyCountdown.");
-                        // Ensure that game state is closed off so that no other players can quick join while a round is marked for deletion
-                        gameState = State.FINISHED;
+                        endGame();
                     } else {
                         startGame();
                     }
@@ -623,9 +641,10 @@ public class GameRound implements Runnable {
         public Date getNextRunTime(LastExecution lastExecutionInfo, Date taskScheduledTime) {
             // If there are any clients still connected to this game, keep sending heartbeats
             if (clients.size() == 0) {
+                // Ensure that game state is closed off so that no other players
+                // can quick join while a round is marked for deletion
                 log("No clients remaining.  Cancelling heartbeat.");
-                // Ensure that game state is closed off so that no other players can quick join while a round is marked for deletion
-                gameState = State.FINISHED;
+                endGame();
                 return null;
             }
             return Date.from(Instant.now().plusSeconds(HEARTBEAT_INTERVAL_SEC));
