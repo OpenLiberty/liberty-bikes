@@ -57,6 +57,12 @@ export class GameComponent implements OnInit, OnDestroy {
       }
       case GameState.Playing: {
         this.gameButtonText = 'Start Game';
+
+        // Firefox on Windows: focus gets stuck on the button if clicked,
+        // and no keyboard events are sent to the game. Remove the
+        // focus when the game starts.
+        document.getElementById('gameButton').blur();
+
         this.gameButtonDisabled = true;
         break;
       }
