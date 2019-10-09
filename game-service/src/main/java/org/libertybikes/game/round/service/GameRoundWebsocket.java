@@ -84,11 +84,10 @@ public class GameRoundWebsocket {
             if (round == null || round.getGameState() == State.FINISHED) {
                 log(roundId, "[onMessage] Received message for round that did not exist or has completed.  Closing this websocket connection.");
                 if (round == null)
-                    sendToClient(session, new OutboundMessage.ErrorEvent("Round " + roundId + " did not exist."));
+                    closeWithError(session, roundId, "Round " + roundId + " did not exist.");
                 // don't boot out players that may keep sending messages a few seconds after the game is done
                 else if (!round.isPlayer(session))
-                    sendToClient(session, new OutboundMessage.ErrorEvent("Round " + roundId + " has already completed."));
-                session.close();
+                    closeWithError(session, roundId, "Round " + roundId + " has already completed.");
                 return;
             }
             //log(roundId, "[onMessage] msg=" + message);
@@ -96,23 +95,22 @@ public class GameRoundWebsocket {
             if (GameEvent.GAME_START == msg.event) {
                 round.startGame();
             } else if (msg.direction != null) {
-                round.updatePlayerDirection(session, msg);
+                boolean updated = round.updatePlayerDirection(session, msg);
+                if (!updated)
+                    closeWithError(session, roundId, "Unable to update direction because client was not joined to round");
             } else if (msg.playerJoinedId != null && !msg.playerJoinedId.isEmpty()) {
-
                 // Call playerserver for player in DB
                 org.libertybikes.restclient.Player playerResponse = getPlayer(msg.playerJoinedId);
                 if (playerResponse == null)
-                    closeWithError(session, "Unable to add player " + msg.playerJoinedId +
-                                            " to game. This is probably because the player has not been registered with the game service yet.");
+                    closeWithError(session, roundId, "Unable to add player " + msg.playerJoinedId +
+                                                     " to game. This is probably because the player has not been registered yet");
                 else if (!round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard == null ? true : msg.hasGameBoard))
-                    closeWithError(session, "Unable to add player " + playerResponse.name
-                                            + " to game. This is probably because someone else with the same name is already in the game.");
+                    closeWithError(session, roundId, "Unable to add player " + playerResponse.name
+                                                     + " to game. This is probably because someone else with the same name is already in the game.");
             } else if (Boolean.TRUE == msg.isSpectator) {
                 round.addSpectator(session);
             } else {
-                String invalidMsg = jsonb.toJson(msg);
-                log(roundId, "ERR: Unrecognized message: " + invalidMsg);
-                session.close(new CloseReason(CloseCodes.UNEXPECTED_CONDITION, "Unrecognized message: " + invalidMsg));
+                closeWithError(session, roundId, jsonb.toJson(msg));
             }
         } catch (Exception e) {
             log(roundId, "ERR: " + e.getMessage());
@@ -120,8 +118,12 @@ public class GameRoundWebsocket {
         }
     }
 
-    private void closeWithError(Session session, String msg) throws IOException {
+    private void closeWithError(Session session, String roundId, String msg) throws IOException {
+        log(roundId, msg);
         sendToClient(session, new OutboundMessage.ErrorEvent(msg));
+        // close reason phrase cannot exceed 123 UTF-8 encoded bytes
+        if (msg.length() > 123)
+            msg = msg.substring(0, 122);
         session.close(new CloseReason(CloseCodes.UNEXPECTED_CONDITION, msg));
     }
 

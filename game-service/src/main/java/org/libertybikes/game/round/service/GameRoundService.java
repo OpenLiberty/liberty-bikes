@@ -9,7 +9,9 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
 import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotAcceptableException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -17,11 +19,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.libertybikes.game.core.GameRound;
 
 @Path("/round")
 @ApplicationScoped
 public class GameRoundService {
+
+    @Inject
+    @ConfigProperty(name = "singleParty", defaultValue = "true")
+    private boolean isSingleParty;
 
     @Resource
     ManagedScheduledExecutorService exec;
@@ -58,6 +65,9 @@ public class GameRoundService {
     @GET
     @Path("/available")
     public String getAvailableRound() {
+        if (isSingleParty)
+            throw new NotAcceptableException("Cannot call this endpoint when game service is in single party mode");
+
         Optional<GameRound> availableRound = allRounds.values()
                         .stream()
                         .filter(r -> r.isOpen())
