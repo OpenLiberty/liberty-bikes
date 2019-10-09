@@ -146,10 +146,12 @@ public class GameRound implements Runnable {
             sendToClient(s, new OutboundMessage.AwaitPlayersCountdown(lobbyCountdown.roundStartCountdown));
     }
 
-    public void updatePlayerDirection(Session playerSession, InboundMessage msg) {
+    public boolean updatePlayerDirection(Session playerSession, InboundMessage msg) {
         Client c = clients.get(playerSession);
-        if (c != null)
-            c.player.ifPresent((p) -> p.setDirection(msg.direction));
+        if (c == null)
+            return false;
+        c.player.ifPresent((p) -> p.setDirection(msg.direction));
+        return true;
     }
 
     public boolean addPlayer(Session s, String playerId, String playerName, Boolean hasGameBoard) {
