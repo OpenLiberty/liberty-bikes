@@ -10,6 +10,8 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.websocket.CloseReason;
+import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
@@ -47,6 +49,9 @@ public class GameRoundWebsocket {
     @OnOpen
     public void onOpen(@PathParam("roundId") String roundId, Session session) {
         log(roundId, "Opened a session");
+        session.setMaxTextMessageBufferSize(1000);
+        session.setMaxBinaryMessageBufferSize(1000);
+        session.setMaxIdleTimeout(90 * 1000);
         timerContext = GameMetrics.timerStart(GameMetrics.openWebsocketTimerMetadata);
     }
 
@@ -92,23 +97,32 @@ public class GameRoundWebsocket {
                 round.startGame();
             } else if (msg.direction != null) {
                 round.updatePlayerDirection(session, msg);
-            } else if (msg.playerJoinedId != null) {
+            } else if (msg.playerJoinedId != null && !msg.playerJoinedId.isEmpty()) {
 
                 // Call playerserver for player in DB
                 org.libertybikes.restclient.Player playerResponse = getPlayer(msg.playerJoinedId);
-                if (!round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard == null ? true : msg.hasGameBoard))
-                    sendToClient(session, new OutboundMessage.ErrorEvent("Unable to add player " + playerResponse.name
-                                                                         + " to game. This is probably because someone else with the same name is already in the game."));
-
+                if (playerResponse == null)
+                    closeWithError(session, "Unable to add player " + msg.playerJoinedId +
+                                            " to game. This is probably because the player has not been registered with the game service yet.");
+                else if (!round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard == null ? true : msg.hasGameBoard))
+                    closeWithError(session, "Unable to add player " + playerResponse.name
+                                            + " to game. This is probably because someone else with the same name is already in the game.");
             } else if (Boolean.TRUE == msg.isSpectator) {
                 round.addSpectator(session);
             } else {
-                log(roundId, "ERR: Unrecognized message: " + jsonb.toJson(msg));
+                String invalidMsg = jsonb.toJson(msg);
+                log(roundId, "ERR: Unrecognized message: " + invalidMsg);
+                session.close(new CloseReason(CloseCodes.UNEXPECTED_CONDITION, "Unrecognized message: " + invalidMsg));
             }
         } catch (Exception e) {
             log(roundId, "ERR: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void closeWithError(Session session, String msg) throws IOException {
+        sendToClient(session, new OutboundMessage.ErrorEvent(msg));
+        session.close(new CloseReason(CloseCodes.UNEXPECTED_CONDITION, msg));
     }
 
     public static void sendToClient(Session client, Object message) {

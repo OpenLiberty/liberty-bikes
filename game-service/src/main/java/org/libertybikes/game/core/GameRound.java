@@ -148,7 +148,8 @@ public class GameRound implements Runnable {
 
     public void updatePlayerDirection(Session playerSession, InboundMessage msg) {
         Client c = clients.get(playerSession);
-        c.player.ifPresent((p) -> p.setDirection(msg.direction));
+        if (c != null)
+            c.player.ifPresent((p) -> p.setDirection(msg.direction));
     }
 
     public boolean addPlayer(Session s, String playerId, String playerName, Boolean hasGameBoard) {
@@ -170,9 +171,13 @@ public class GameRound implements Runnable {
                 return false;
             }
 
-        if (getPlayers().size() + 1 >= Player.MAX_PLAYERS) {
+        int numPlayers = getPlayers().size() + 1;
+        if (numPlayers == Player.MAX_PLAYERS) {
             gameState = State.FULL;
             lobbyCountdown.gameFull();
+        } else if (numPlayers > Player.MAX_PLAYERS) {
+            log("Cannot add player " + playerId + " to game because the current round is full.");
+            return false;
         }
 
         Player p = board.addPlayer(playerId, playerName);
