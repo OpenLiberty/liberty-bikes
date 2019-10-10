@@ -105,6 +105,12 @@ h2 {
   padding-bottom: 10px;
 }
 
+.explanation {
+  color: #fff;
+  font-size: 1em;
+  text-align: center;
+}
+
 .slider {
   width: 100%;
 }
@@ -217,6 +223,18 @@ h2 {
   & img {
     height: 80px;
   }
+}
+
+#botKey {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 10px 0;
+}
+
+#botKey h3 {
+  padding: 10px 0;
 }
 
 // Format-specific overrides

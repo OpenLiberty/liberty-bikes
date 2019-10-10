@@ -69,6 +69,28 @@
           </form>
         </div>
 
+        <div aiPane>
+          <div class="form-group">
+            <div class="form-item">
+              <div class="form-item" *ngIf="!hasBotKey" [@sso]="hasBotKey">
+                <label>bot name</label>
+                <input type="text" id="ainame" name="ainame" [(ngModel)]="nextAiName" />
+              </div>
+              <div class="form-item" *ngIf="!hasBotKey" [@sso]="hasBotKey">
+                <button type="submit" id="registerBot" (click)="registerBot(nextAiName)">Register Bot</button>
+              </div>
+              <div class="form-item" id="botKey" *ngIf="hasBotKey" [@sso]="hasBotKey">
+                <div class="explanation">{{aiName}}'s secret key is:</div>
+                <h3>{{this.botKey}}</h3>
+                <div class="explanation">This key will disappear when you leave this page. Don't share this key with anyone else!</div>
+              </div>
+              <div class="form-item">
+                <button type="button" (click)="doneRegisteringBots()">Done</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div rightPane>
           <form (submit)="joinParty()">
             <div class="form-group">
@@ -117,23 +139,8 @@
             </div>
           </div>
         </div>
-        
-       <div aiPane>
-          <div class="form-group">
-            <div class="form-item">
-              <div class="form-item">
-                <label>bot name</label>
-                <input type="text" id="ainame" name="ainame" [(ngModel)]="ainame" />
-              </div>
-              <div class="form-item">
-                <button type="submit" id="registerBot" (click)="registerBot(ainame)">Register Bot</button>
-              </div>
-               <div class="form-item">
-                <button type="submit" (click)="cancelLogin()">Back</button>
-              </div>
-            </div>
-          </div>
-        </div>
+
+
       </app-slider>
     </div>
   </div>
