@@ -76,7 +76,6 @@ public class GameRound implements Runnable {
     private final Deque<Player> playerRanks = new ArrayDeque<>();
     private final Set<LifecycleCallback> lifecycleCallbacks = new HashSet<>();
     private final int GAME_TICK_SPEED, MAX_TIME_BETWEEN_ROUNDS;
-    private volatile boolean broadcastPlayerList = true;
     private LobbyCountdown lobbyCountdown;
     private AtomicBoolean lobbyCountdownStarted = new AtomicBoolean();
 
@@ -152,7 +151,6 @@ public class GameRound implements Runnable {
         if (c == null)
             return false;
         c.player.ifPresent((p) -> p.setDirection(msg.direction));
-        broadcastPlayerList = true;
         return true;
     }
 
@@ -225,7 +223,6 @@ public class GameRound implements Runnable {
 
     public void addSpectator(Session s) {
         log("A spectator has joined.");
-        broadcastPlayerList = true;
         clients.put(s, new Client(s));
         sendToClient(s, new OutboundMessage.PlayerList(getPlayers()));
         sendToClient(s, board);
@@ -478,7 +475,6 @@ public class GameRound implements Runnable {
 
     private void broadcastPlayerList() {
         sendToClients(getNonMobileSessions(), new OutboundMessage.PlayerList(getPlayers()));
-        broadcastPlayerList = false;
     }
 
     private void checkForWinner() {
@@ -595,8 +591,7 @@ public class GameRound implements Runnable {
 
             for (int i = 0; i < (STARTING_COUNTDOWN * 4); i++) {
                 delay(250);
-                if (broadcastPlayerList)
-                    broadcastPlayerList();
+                broadcastPlayerList();
             }
 
             paused.set(false);
@@ -628,8 +623,7 @@ public class GameRound implements Runnable {
             while (isOpen() || gameState == State.FULL) {
                 for (int i = 0; i < 4; i++) {
                     delay(250);
-                    if (broadcastPlayerList)
-                        broadcastPlayerList();
+                    broadcastPlayerList();
                 }
                 roundStartCountdown--;
                 if (roundStartCountdown < 1) {
