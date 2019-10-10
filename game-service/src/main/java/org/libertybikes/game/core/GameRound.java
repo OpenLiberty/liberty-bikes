@@ -589,8 +589,8 @@ public class GameRound implements Runnable {
         @Override
         public void run() {
 
-            for (int i = 0; i < (STARTING_COUNTDOWN * 4); i++) {
-                delay(250);
+            for (int i = 0; i < (STARTING_COUNTDOWN * 2); i++) {
+                delay(500);
                 broadcastPlayerList();
             }
 
@@ -621,8 +621,8 @@ public class GameRound implements Runnable {
         @Override
         public void run() {
             while (isOpen() || gameState == State.FULL) {
-                for (int i = 0; i < 4; i++) {
-                    delay(250);
+                for (int i = 0; i < 2; i++) {
+                    delay(500);
                     broadcastPlayerList();
                 }
                 roundStartCountdown--;
