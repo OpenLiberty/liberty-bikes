@@ -5,6 +5,8 @@ package org.libertybikes.game.round.service;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -130,9 +132,10 @@ public class GameRoundWebsocket {
     public static void sendToClient(Session client, Object message) {
         if (client != null) {
             String msg = message instanceof String ? (String) message : jsonb.toJson(message);
+            Future<Void> f = client.getAsyncRemote().sendText(msg);
             try {
-                client.getBasicRemote().sendText(msg);
-            } catch (IOException e) {
+                f.get(50, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
