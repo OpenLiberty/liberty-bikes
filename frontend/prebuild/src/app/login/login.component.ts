@@ -33,6 +33,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   username: string;
   queuePosition: number;
   player = new Player();
+  nextAiName: string;
+  aiName: string;
+  hasBotKey = false;
+  botKey: string;
 
   private partyCode = '';
   get party(): string {
@@ -390,24 +394,32 @@ export class LoginComponent implements OnInit, OnDestroy {
     sessionStorage.removeItem('userId');
     this.pane = 'left';
   }
-  
-  makeid() {
-   var result           = '';
-   var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-   var charactersLength = characters.length;
-   for ( var i = 1; i <= 16; i++ ) {
+
+  makeId() {
+   let result           = '';
+   let characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+   let charactersLength = characters.length;
+   for (let i = 1; i <= 16; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      if (i % 4 == 0 && i != 16) {
-          result += "-";
+      if (i % 4 === 0 && i !== 16) {
+          result += '-';
       }
    }
    return result;
   }
-  
+
   showBotLogin() {
-     this.pane='ai';
+     this.pane = 'ai';
   }
-  
+
+  async doneRegisteringBots() {
+    this.pane = 'left';
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    this.hasBotKey = false;
+    this.botKey = null;
+    this.aiName = null;
+    this.nextAiName = null;
+  }
 
   async registerBot(name: string) {
     console.log(`Bot name input: "${name}"`);
@@ -420,12 +432,15 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
     name = name.trim();
 
-    let userid = this.makeid();
-    console.log("id: " + userid);
+    let userId = this.makeId();
+    console.log(`id: ${userId}`);
     // register a new user
-    let key: any = await this.http.post(`${environment.API_URL_PLAYERS}?name=${name}&id=${userid}`, '', {
+    let key: any = await this.http.post(`${environment.API_URL_PLAYERS}?name=${name}&id=${userId}`, '', {
       responseType: 'text'
     }).toPromise();
-    alert(`Key for ${name}: ${key}`);
+
+    this.hasBotKey = true;
+    this.botKey = userId;
+    this.aiName = name;
   }
 }
