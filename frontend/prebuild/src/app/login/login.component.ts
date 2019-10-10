@@ -432,8 +432,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
     name = name.trim();
 
-    let userId = this.makeId();
-    console.log(`id: ${userId}`);
+    let userId = `BOT:${this.makeId()}`;
     // register a new user
     let key: any = await this.http.post(`${environment.API_URL_PLAYERS}?name=${name}&id=${userId}`, '', {
       responseType: 'text'
