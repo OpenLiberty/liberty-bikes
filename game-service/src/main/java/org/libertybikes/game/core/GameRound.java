@@ -167,11 +167,20 @@ public class GameRound implements Runnable {
             return false;
         }
 
-        for (Client c : clients.values())
+        Client replaceClient = null;
+        for (Client c : clients.values()) {
             if (c.player.isPresent() && playerId.equals(c.player.get().id)) {
-                log("Cannot add player " + playerId + " to game because a player with that ID is already in the game.");
-                return false;
+                // If we find a player trying to join a game with the same ID as a player who is already
+                // in the game, assume it was from an AI Bot player who's developer made a hot code update
+                // TODO: once private IDs are implemented, could filter this on playerId.startsWith("BOT:")
+                replaceClient = c;
+                break;
             }
+        }
+        if (replaceClient != null) {
+            log("Replacing client with id: " + playerId);
+            removeClient(replaceClient.session);
+        }
 
         int numPlayers = getPlayers().size() + 1;
         if (numPlayers == Player.MAX_PLAYERS) {

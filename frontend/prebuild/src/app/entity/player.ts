@@ -65,8 +65,10 @@ export class Player {
       this.explosionImage = Assets.PLAYER_DEAD_BITMAP.clone();
       this.explosionImage.scaleX = 1 / 5;
       this.explosionImage.scaleY = 1 / 5;
-      this.explosionImage.regX = this.explosionImage.getBounds().width / 2;
-      this.explosionImage.regY = this.explosionImage.getBounds().height / 2;
+      if (this.explosionImage.getBounds() !== null) {
+          this.explosionImage.regX = this.explosionImage.getBounds().width / 2;
+          this.explosionImage.regY = this.explosionImage.getBounds().height / 2;
+      }
       this.childrenLoaded = true;
     }
 
