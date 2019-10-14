@@ -22,11 +22,13 @@
 	  <requestUrl urlPattern="/ibm/api" matchType="notContain"/>
     </authFilter>
 	
+	<!-- uncomment these once liberty-gradle-plugin v2.7 is released
 	<variable name="DB_HOST" defaultValue="localhost"/>
 	<variable name="DB_PORT" defaultValue="5432"/>
 	<variable name="DB_NAME" defaultValue="playerdb"/>
 	<variable name="DB_USER" defaultValue="lb_user"/>
 	<variable name="DB_PASS" defaultValue="lb_password"/>
+	 -->
 	
 	<library id="postgresql">
         <fileset dir="postgresql"/>
@@ -34,8 +36,8 @@
 
     <dataSource id="DefaultDataSource">
         <jdbcDriver libraryRef="postgresql"/>
-        <properties.postgresql serverName="${DB_HOST}" portNumber="${DB_PORT}" databaseName="${DB_NAME}"
-                               user="${DB_USER}" password="${DB_PASS}"/>
+        <properties.postgresql serverName="localhost" portNumber="5432" databaseName="playerdb"
+                               user="lb_user" password="lb_password"/>
     </dataSource>
 
     <applicationManager autoExpand="true"/>
