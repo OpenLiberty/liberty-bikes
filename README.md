@@ -8,15 +8,34 @@ Publicly hosted on IBM Cloud here: [http://libertybikes.mybluemix.net/](http://l
 
 Bluemix toolchain automatically deploys the current `liberty-bikes/liberty-bikes:master` branch
 
-## Run it locally
+## How to setup locally
 
-Builds all microservice applications and deploys them to locally running liberty servers, then opens the UI.
+### Prereqs:
+
+- [Java 8 or newer](https://adoptopenjdk.net/index.html?variant=openjdk8&jvmVariant=openj9). Java must also be on the `$PATH`. If you can run `java -version` from a terminal window, then Java is on your `$PATH`.
+- Have [Git installed](https://git-scm.com/downloads)
+- [*Optional*] Have [Docker installed](https://hub.docker.com/?overlay=onboarding) if you want to use the real database or Grafana dashboard.
+
+### Clone and run
+
+First, clone this github repo with the following commands:
+
+```
+git clone git@github.com:OpenLiberty/liberty-bikes.git
+cd liberty-bikes
+```
+
+If you have a Github account, press the "Fork" button in the top right corner of this web page to fork the repository.
+
+Next, build and deploy all microservice applications on locally running liberty servers, then open the game in a web browser. If you are on Windows, you may need to manually open the game in a web browser at http://localhost:12000
 
 ```
 ./gradlew start frontend:open
 ```
 
 Any code changes that are made in an IDE with auto-build enabled will automatically publish content to the loose application, meaning no server restarts should be required between code changes.
+
+### Optional Docker steps
 
 By default, the player-service stores player registration and stats in-memory. To use a real database, you can start a PostgreSQL docker container with this script:
 
@@ -30,6 +49,8 @@ To start the monitoring services, you must have Docker installed. They can be st
 ./startMonitoring.sh
 ```
 
+### How to shut everything down cleanly
+
 To stop all liberty servers, issue the command:
 
 ```
@@ -40,7 +61,7 @@ To stop all liberty servers, issue the command:
 
 (Requires docker and docker-compose to be installed. The Docker daemon must be running.)
 
-Builds all microservice applications and the images to run them in, then starts containers from those images.
+Normally you get better performance running services outside of containers (aka bare metal), but if you want to build and run all of the containers locally, run the command: 
 
 ```
 ./gradlew dockerStart
@@ -256,6 +277,7 @@ The above shapshot shows basic data such as:
   - Total number of games played
 
 Any application-specific stats can be collected using MicroProfile Metrics. For example, to collect number of player logins, we added the following code to our `createPlayer` method:
+
 ```java
     @Inject
     private MetricRegistry registry;
@@ -287,6 +309,7 @@ The pipeline UI looks like this in our dashboard:
 The pipeline consists of 2 stages: Build and Deploy.
 
 The build stage simply points at the GitHub repository URL, and has a little bit of shell scripting where we define how to build the repo:
+
 ```bash
 #!/bin/bash
 export JAVA_HOME=~/java8
@@ -294,6 +317,7 @@ export JAVA_HOME=~/java8
 ```
 
 For the deployment stage, each microservice gets its own step in the stage.  We could also split the microservices into separate stages (or even different pipelines) if we didn't always want to redeploy all microservices.  Like the build stage, the deploy stage has a little bit of shell scripting at each step:
+
 ```bash
 #!/bin/bash
 
