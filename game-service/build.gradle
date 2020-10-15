@@ -11,9 +11,8 @@ ext {
 liberty {
 	server {
 		name = 'game-service'
-		dropins = [war]
+		deploy.dropins = [war]
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
-		configDirectory = file('src/main/liberty/config')
 		jvmOptions = ['-DsingleParty=' + System.getProperty('singleParty', 'true')]
 	}
 }

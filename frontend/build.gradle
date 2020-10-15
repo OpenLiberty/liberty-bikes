@@ -15,7 +15,7 @@ war {
 }
 
 node {
-	version = '10.16.3'
+	version = '10.19.0'
 	npmVersion = '6.9.0'
 	download = true
 	workDir = file("${rootDir}/frontend/prebuild/node")
@@ -86,8 +86,7 @@ libertyStart.doLast {
 liberty {
 	server {
 		name = 'frontendServer'
-		apps = [war]
+		deploy.apps = [war]
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort, 'application.name': applicationName]
-		configDirectory = file('src/main/liberty/config')
 	}
 }

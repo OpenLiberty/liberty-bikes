@@ -7,8 +7,7 @@ ext {
 liberty {
 	server {
 		name = 'player-service'
-		dropins = [war]
-		configDirectory = file('src/main/liberty/config')
+		deploy.dropins = [war]
 		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort]
 	}
 }
@@ -34,7 +33,7 @@ task addPostgresqlToBuild(type: Copy) {
 }
 
 assemble.dependsOn 'addPostgresqlToBuild'
-installApps.dependsOn 'addPostgresqlToServer'
+deploy.dependsOn 'addPostgresqlToServer'
 
 // The installLiberty task doesn't work when run in parallel with other installLiberty tasks
 installLiberty.mustRunAfter ':frontend:installLiberty'
