@@ -15,8 +15,8 @@ war {
 }
 
 node {
-	version = '14.16.0'
-	npmVersion = '7.7.6'
+	version = '14.17.5'
+	npmVersion = '7.21.0'
 	download = true
 	workDir = file("${rootDir}/frontend/prebuild/node")
 	nodeModulesDir = file("${rootDir}/frontend/prebuild")
