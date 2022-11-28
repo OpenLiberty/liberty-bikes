@@ -41,7 +41,12 @@
             "buildOptimizer": false,
             "sourceMap": true,
             "optimization": false,
-            "namedChunks": true
+            "namedChunks": true,
+            "allowedCommonJsDependencies": [
+              "createjs-module",
+              "rxjs/observable/timer",
+              "rxjs/add/operator/share"
+            ]
           },
           "configurations": {
             "production": {
@@ -113,7 +118,6 @@
       }
     }
   },
-  "defaultProject": "frontend",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",
@@ -123,5 +127,8 @@
     "@schematics/angular:directive": {
       "prefix": "app"
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

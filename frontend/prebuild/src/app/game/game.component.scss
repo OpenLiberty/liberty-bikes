@@ -172,7 +172,7 @@ $animationStyle:cubic-bezier(.23,.78,.69,.84);
 	position:fixed;
 	top:25%;
 	left:50%;
-	margin-left:-($loaderHeightWidth/2);
+	margin-left:-(calc($loaderHeightWidth/2));
 	height:$loaderHeightWidth;
 	width:$loaderHeightWidth;
 	background:transparent;
@@ -203,14 +203,14 @@ $animationStyle:cubic-bezier(.23,.78,.69,.84);
 		opacity: 0;
 
 		.spin-loader.shrink {
-			top: calc(25% + #{($loaderHeightWidth/2)});
+			top: calc(25% + #{(calc($loaderHeightWidth/2))});
 			margin-left:0;
 			width:$loaderMinHeightWidth;
 			height:$loaderMinHeightWidth;
 		}
 		.spin-loader.expand {
-			top: calc(25% - #{($loaderMaxHeightWidth/4)});
-			margin-left:-($loaderMaxHeightWidth/2);
+			top: calc(25% - #{(calc($loaderMaxHeightWidth/4))});
+			margin-left:-(calc($loaderMaxHeightWidth/2));
 			width:$loaderMaxHeightWidth;
 			height:$loaderMaxHeightWidth;
 		}
