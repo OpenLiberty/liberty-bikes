@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.2'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.5.1'
     }
 }
 
@@ -57,7 +57,7 @@ subprojects {
             mavenCentral()
         }
         dependencies {
-            classpath 'io.openliberty.tools:liberty-gradle-plugin:3.2'
+            classpath 'io.openliberty.tools:liberty-gradle-plugin:3.5.1'
         }
     }
 
@@ -70,7 +70,7 @@ subprojects {
         providedCompile group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '8.0.0'
         testImplementation group: 'junit', name: 'junit', version: '4.13.1'
         testImplementation group: 'org.eclipse', name: 'yasson', version: '1.0.8'
-        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '21.0.0.6'
+        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '22.0.0.9'
     }
     
     eclipse {
