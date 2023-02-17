@@ -1,5 +1,5 @@
 plugins {
-	id 'com.github.node-gradle.node' version '3.5.0'
+	id 'com.github.node-gradle.node' version '3.5.1'
 }
 
 ext {
@@ -15,8 +15,8 @@ war {
 }
 
 node {
-	version = '18.12.1'
-	npmVersion = '8.19.2'
+	version = '18.14.1'
+	npmVersion = '9.5.0'
 	download = true
 	workDir = file("${rootDir}/frontend/prebuild/node")
 	nodeModulesDir = file("${rootDir}/frontend/prebuild")
