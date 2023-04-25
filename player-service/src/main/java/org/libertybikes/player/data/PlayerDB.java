@@ -26,4 +26,6 @@ public interface PlayerDB {
 
     public boolean exists(String id);
 
+    //   public Player getBot(String key);
+
 }

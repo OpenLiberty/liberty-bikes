@@ -26,6 +26,8 @@ public class Player {
 
     public final String name;
 
+    public final String key;
+
     public final PlayerStats stats;
 
     public Player(String name) {
@@ -35,13 +37,18 @@ public class Player {
     @JsonbCreator
     public Player(@JsonbProperty("name") String name,
                   @JsonbProperty("id") String id) {
-        this(name, id, new PlayerStats());
+        this(name, id, null, new PlayerStats());
     }
 
-    public Player(String name, String id, PlayerStats stats) {
+    public Player(String name, String id, String key) {
+        this(name, id, key, new PlayerStats());
+    }
+
+    public Player(String name, String id, String key, PlayerStats stats) {
         this.id = (id == null || id.equals("null")) ? createDefaultId(name) : id;
         this.name = name;
         this.stats = stats;
+        this.key = key;
     }
 
     public static int compareByWins(Player a, Player b) {

@@ -22,6 +22,7 @@ public class PersistentPlayerDB implements PlayerDB {
 
     private static final String TABLE_NAME = "PLAYERS";
     private static final String COL_ID = "id";
+    private static final String COL_KEY = "key";
     private static final String COL_NAME = "name";
     private static final String COL_NUM_GAMES = "totalGames";
     private static final String COL_NUM_WINS = "totalWins";
@@ -39,6 +40,8 @@ public class PersistentPlayerDB implements PlayerDB {
                             .append(TABLE_NAME)
                             .append(" (")
                             .append(COL_ID)
+                            .append(" varchar(30) not null, ")
+                            .append(COL_KEY)
                             .append(" varchar(30) not null, ")
                             .append(COL_NAME)
                             .append(" varchar(20) not null, ")
@@ -109,15 +112,22 @@ public class PersistentPlayerDB implements PlayerDB {
 
     @Override
     public Player get(String id) {
+        Player p = null;
         try (Connection con = ds.getConnection()) {
             PreparedStatement ps = con.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + COL_ID + " = ?");
             ps.setString(1, id);
             ResultSet rs = ps.executeQuery();
-            return rs.next() ? inflate(rs) : null;
+            p = rs.next() ? inflate(rs) : null;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
+        if (p != null) {
+            if (p.key == null)
+                return p;
+            return null;
+        }
+        return getBot(id);
     }
 
     @Override
@@ -172,8 +182,20 @@ public class PersistentPlayerDB implements PlayerDB {
         stats.totalGames = rs.getInt(COL_NUM_GAMES);
         stats.numWins = rs.getInt(COL_NUM_WINS);
         stats.rating = rs.getInt(COL_RATING);
-        Player p = new Player(rs.getString(COL_NAME), rs.getString(COL_ID), stats);
+        Player p = new Player(rs.getString(COL_NAME), rs.getString(COL_ID), null, stats);
         return p;
+    }
+
+    public Player getBot(String key) {
+        try (Connection con = ds.getConnection()) {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + COL_KEY + " = ?");
+            ps.setString(1, key);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() ? inflate(rs) : null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

@@ -58,6 +58,17 @@ public class PlayerService {
         if (name.length() > 20)
             name = name.substring(0, 20);
 
+        String key = null;
+        if (id != null && id.startsWith("BOT:")) {
+            key = id.substring(4);
+            id = "BOT:" + key.substring(0, 4);
+            Player p = new Player(name, id, key);
+            if (db.create(p))
+                System.out.println("Created a new bot with id=" + p.id);
+            else
+                System.out.println("A player already existed with id=" + p.id);
+            return p.key;
+        }
         Player p = new Player(name, id);
         if (db.create(p))
             System.out.println("Created a new player with id=" + p.id);

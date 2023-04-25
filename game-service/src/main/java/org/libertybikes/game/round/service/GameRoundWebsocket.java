@@ -106,7 +106,7 @@ public class GameRoundWebsocket {
                 if (playerResponse == null)
                     closeWithError(session, roundId, "Unable to add player " + msg.playerJoinedId +
                                                      " to game. This is probably because the player has not been registered yet");
-                else if (!round.addPlayer(session, msg.playerJoinedId, playerResponse.name, msg.hasGameBoard == null ? true : msg.hasGameBoard))
+                else if (!round.addPlayer(session, playerResponse.id, playerResponse.name, msg.hasGameBoard == null ? true : msg.hasGameBoard))
                     closeWithError(session, roundId, "Unable to add player " + playerResponse.name
                                                      + " to game. This is probably because someone else with the same id is already in the game.");
             } else if (Boolean.TRUE == msg.isSpectator) {

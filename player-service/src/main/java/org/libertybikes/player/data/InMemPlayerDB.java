@@ -28,7 +28,13 @@ public class InMemPlayerDB implements PlayerDB {
 
     @Override
     public Player get(String id) {
-        return allPlayers.get(id);
+        Player p = allPlayers.get(id);
+        if (p != null) {
+            if (p.key == null)
+                return p;
+            return null;
+        }
+        return getBot(id);
     }
 
     @Override
@@ -48,6 +54,15 @@ public class InMemPlayerDB implements PlayerDB {
     @Override
     public boolean exists(String id) {
         return allPlayers.containsKey(id);
+    }
+
+    private Player getBot(String secret) {
+        for (Map.Entry<String, Player> entry : allPlayers.entrySet()) {
+            if (secret.equals(entry.getValue().key)) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 
 }
