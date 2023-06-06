@@ -50,7 +50,7 @@ subprojects {
     apply plugin: 'liberty'
     apply plugin: 'war'
 
-    sourceCompatibility = 1.8
+    sourceCompatibility = 11
 
     buildscript {
         repositories {
@@ -66,11 +66,11 @@ subprojects {
     }
 
     dependencies {
-        providedCompile group: 'org.eclipse.microprofile', name: 'microprofile', version: '3.0'
-        providedCompile group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '8.0.0'
+        providedCompile group: 'org.eclipse.microprofile', name: 'microprofile', version: '6.0'
+        providedCompile group: 'jakarta.platform', name: 'jakarta.jakartaee-api', version: '10.0.0'
         testImplementation group: 'junit', name: 'junit', version: '4.13.1'
         testImplementation group: 'org.eclipse', name: 'yasson', version: '1.0.8'
-        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '22.0.0.12'
+        libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '23.0.0.5'
     }
     
     eclipse {

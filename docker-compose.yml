@@ -1,26 +1,5 @@
 version: '2.1'
 services:
-  frontend:
-    build: frontend
-    image: libertybikes-frontend
-    ports:
-      - "12000:12000"
-  auth:
-    build: auth-service
-    image: libertybikes-auth
-    ports:
-      - "8082:8082"
-    environment:
-      - frontend_url=http://frontend:12000/login
-      - auth_url=https://auth:8482/auth-service
-  game:
-    build: game-service
-    image: libertybikes-game
-    ports:
-      - "8080:8080"
-    environment:
-      - org_libertybikes_restclient_PlayerService_mp_rest_url=http://player:8081
-      - singleParty
   player:
     build: player-service
     image: libertybikes-player
@@ -28,27 +7,3 @@ services:
       - "8081:8081"
     environment:
       - DB_HOST=postgres
-  postgres:
-    image: postgres:11-alpine
-    ports:
-      - 5432:5432
-    environment:
-      - POSTGRES_DB=playerdb
-      - POSTGRES_USER=lb_user
-      - POSTGRES_PASSWORD=lb_password
-  prometheus:
-    image: prom/prometheus:v2.4.0
-    ports:
-      - 9090:9090
-    volumes:
-      - ./monitoring/prometheus:/etc/prometheus
-  grafana:
-    image: grafana/grafana:5.2.4
-    ports:
-      - 3000:3000
-    environment:
-      - GF_INSTALL_PLUGINS=flant-statusmap-panel
-    volumes:
-      - ./monitoring/datasource:/etc/grafana/provisioning/datasources
-      - ./monitoring/dashboardList:/etc/grafana/provisioning/dashboards
-      - ./monitoring/grafanaDashboardConfig:/var/lib/grafana/dashboards
