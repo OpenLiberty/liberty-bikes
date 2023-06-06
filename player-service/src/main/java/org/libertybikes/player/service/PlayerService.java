@@ -14,10 +14,8 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetadataBuilder;
 import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.MetricType;
+import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.libertybikes.player.data.PlayerDB;
 
 @Path("/player")
@@ -39,15 +37,9 @@ public class PlayerService {
     @Inject
     private MetricRegistry registry;
 
-    private static final Metadata numLoginsCounter = new MetadataBuilder()
-                    .withName("num_player_logins")
-                    .withDisplayName("Number of Total Logins")
-                    .withDescription("How many times a user has logged in.")
-                    .withType(MetricType.COUNTER)
-                    .build();
-
     @POST
     @Produces(MediaType.TEXT_HTML)
+    @Counted(name = "num_player_logins", description = "Number of Total Logins", absolute = true)
     public String createPlayer(@QueryParam("name") String name, @QueryParam("id") String id) {
         // Validate player name
         if (name == null)
@@ -63,10 +55,6 @@ public class PlayerService {
             System.out.println("Created a new player with id=" + p.id);
         else
             System.out.println("A player already existed with id=" + p.id);
-
-        if (id != null && registry != null) {
-            registry.counter(numLoginsCounter).inc();
-        }
         return p.id;
     }
 

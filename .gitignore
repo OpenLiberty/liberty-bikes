@@ -3,6 +3,7 @@ build
 **/.project
 **/.gradle/
 **/.DS_Store
+.idea/
 .vscode
 /*/bin/
 /*/build/
