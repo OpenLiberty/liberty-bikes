@@ -17,6 +17,6 @@ include 'services:webservice'
 
 rootProject.name = 'liberty-bikes'
 //include 'auth-service'
-//include 'game-service'
+include 'game-service'
 include 'player-service'
-//include 'frontend'
+include 'frontend'

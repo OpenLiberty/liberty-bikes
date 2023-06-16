@@ -2,7 +2,7 @@ package org.libertybikes.game.core;
 
 import java.util.Optional;
 
-import javax.websocket.Session;
+import jakarta.websocket.Session;
 
 public class Client {
 

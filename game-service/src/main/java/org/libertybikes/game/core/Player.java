@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 
-import javax.json.bind.annotation.JsonbPropertyOrder;
-import javax.json.bind.annotation.JsonbTransient;
+import jakarta.json.bind.annotation.JsonbPropertyOrder;
+import jakarta.json.bind.annotation.JsonbTransient;
 
 import org.libertybikes.game.maps.GameMap;
 

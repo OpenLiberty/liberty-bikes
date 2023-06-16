@@ -22,20 +22,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import javax.enterprise.concurrent.LastExecution;
-import javax.enterprise.concurrent.ManagedScheduledExecutorService;
-import javax.enterprise.concurrent.Trigger;
-import javax.enterprise.inject.spi.CDI;
-import javax.json.bind.annotation.JsonbPropertyOrder;
-import javax.json.bind.annotation.JsonbTransient;
+import jakarta.enterprise.concurrent.LastExecution;
+import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
+import jakarta.enterprise.concurrent.Trigger;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.json.bind.annotation.JsonbPropertyOrder;
+import jakarta.json.bind.annotation.JsonbTransient;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.websocket.Session;
+import jakarta.websocket.Session;
 
 import org.eclipse.microprofile.metrics.Timer.Context;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.Player.STATUS;
-import org.libertybikes.game.metric.GameMetrics;
+//import org.libertybikes.game.metric.GameMetrics;
 import org.libertybikes.restclient.PlayerService;
 
 import io.jsonwebtoken.Claims;
@@ -128,8 +128,8 @@ public class GameRound implements Runnable {
         MAX_TIME_BETWEEN_ROUNDS = (maxTimeBetweenRounds < 5 || maxTimeBetweenRounds > 60) ? MAX_TIME_BETWEEN_ROUNDS_DEFAULT : maxTimeBetweenRounds;
 
         // Increment round counter metrics
-        GameMetrics.counterInc(GameMetrics.totalRoundsCounter);
-        GameMetrics.counterInc(GameMetrics.currentRoundsCounter);
+        //GameMetrics.counterInc(GameMetrics.totalRoundsCounter);
+        //GameMetrics.counterInc(GameMetrics.currentRoundsCounter);
     }
 
     public GameBoard getBoard() {
@@ -199,12 +199,12 @@ public class GameRound implements Runnable {
             clients.put(s, c);
             log("Player " + playerId + " has joined.");
 
-            // Increment player counter metrics
+            /* Increment player counter metrics
             GameMetrics.counterInc(GameMetrics.currentPlayersCounter);
             GameMetrics.counterInc(GameMetrics.totalPlayersCounter);
             if (isPhone) {
                 GameMetrics.counterInc(GameMetrics.totalMobilePlayersCounter);
-            }
+            }*/
 
         } else {
             log("Player " + playerId + " already exists.");
@@ -274,11 +274,11 @@ public class GameRound implements Runnable {
         if (isOpen()) {
             board.removePlayer(p);
 
-            // Decrement player counters because they didn't play
+            /* Decrement player counters because they didn't play
             GameMetrics.counterDec(GameMetrics.totalPlayersCounter);
             if (isMobile) {
                 GameMetrics.counterDec(GameMetrics.totalMobilePlayersCounter);
-            }
+            }*/
 
         } else if (gameState == State.RUNNING) {
             checkForWinner();
@@ -288,7 +288,7 @@ public class GameRound implements Runnable {
             broadcastPlayerList();
 
         // Decrement current players counter
-        GameMetrics.counterDec(GameMetrics.currentPlayersCounter);
+        //GameMetrics.counterDec(GameMetrics.currentPlayersCounter);
     }
 
     /**
@@ -549,7 +549,7 @@ public class GameRound implements Runnable {
         log("<<< Finished round");
 
         // Decrement current rounds counter and close round timer
-        GameMetrics.counterDec(GameMetrics.currentRoundsCounter);
+        //GameMetrics.counterDec(GameMetrics.currentRoundsCounter);
         if (timerContext != null)
             timerContext.close();
 
@@ -614,7 +614,7 @@ public class GameRound implements Runnable {
             gameState = State.RUNNING;
 
             // Start round timer metric
-            timerContext = GameMetrics.timerStart(GameMetrics.gameRoundTimerMetadata);
+            //timerContext = GameMetrics.timerStart(GameMetrics.gameRoundTimerMetadata);
         }
     }
 

@@ -3,25 +3,17 @@
  */
 package org.libertybikes.game.metric;
 
-import javax.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.CDI;
 
-import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetadataBuilder;
 import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.MetricType;
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.Timer.Context;
+import org.eclipse.microprofile.metrics.annotation.Counted;
 
 public class GameMetrics {
     // MpMetric Metadatas
-    public static final Metadata currentRoundsCounter = new MetadataBuilder()
-                    .withName("current_num_of_rounds")
-                    .withDisplayName("Current Number of Rounds")
-                    .withDescription("Number of rounds currently running")
-                    .withType(MetricType.CONCURRENT_GAUGE)
-                    .build();
 
-    public static final Metadata totalRoundsCounter = new MetadataBuilder()
+/*     public static final Metadata totalRoundsCounter = new MetadataBuilder()
                     .withName("total_num_of_rounds")
                     .withDisplayName("Total Number of Rounds")
                     .withDescription("Number of rounds that have been created")
@@ -78,7 +70,7 @@ public class GameMetrics {
                     .withType(MetricType.TIMER)
                     .withUnit(MetricUnits.SECONDS)
                     .build();
-
+ 
     private static MetricRegistry registry;
 
     private static MetricRegistry getRegistry() {
@@ -98,7 +90,7 @@ public class GameMetrics {
             registry.concurrentGauge(metricMetadata).inc();
         }
     }
-
+ 
     public static void counterDec(Metadata metricMetadata) {
         if (registry != null || (getRegistry() != null)) {
             registry.concurrentGauge(metricMetadata).dec();
@@ -110,5 +102,5 @@ public class GameMetrics {
             return registry.timer(metricMetadata).time();
         }
         return null;
-    }
+    } */
 }

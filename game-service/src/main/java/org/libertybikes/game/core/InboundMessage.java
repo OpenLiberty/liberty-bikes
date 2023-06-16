@@ -3,7 +3,7 @@
  */
 package org.libertybikes.game.core;
 
-import javax.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbProperty;
 
 public class InboundMessage {
 

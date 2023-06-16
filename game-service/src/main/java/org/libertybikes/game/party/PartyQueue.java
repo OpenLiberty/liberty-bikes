@@ -3,15 +3,15 @@ package org.libertybikes.game.party;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.sse.OutboundSseEvent;
-import javax.ws.rs.sse.Sse;
-import javax.ws.rs.sse.SseEventSink;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.sse.OutboundSseEvent;
+import jakarta.ws.rs.sse.Sse;
+import jakarta.ws.rs.sse.SseEventSink;
 
 import org.libertybikes.game.core.GameRound;
 import org.libertybikes.game.core.OutboundMessage;
 import org.libertybikes.game.core.Player;
-import org.libertybikes.game.metric.GameMetrics;
+//import org.libertybikes.game.metric.GameMetrics;
 
 public class PartyQueue {
 
@@ -27,12 +27,12 @@ public class PartyQueue {
         // If this client was already in the queue, remove them and add them at the end
         if (waitingPlayers.removeFirstOccurrence(client)) {
             party.log("Removed client " + playerId + " from queue before adding at end");
-            GameMetrics.counterDec(GameMetrics.currentQueuedPlayersCounter);
+            //GameMetrics.counterDec(GameMetrics.currentQueuedPlayersCounter);
         }
         party.log("Adding client " + playerId + " into the queue in position " + client.queuePosition());
         waitingPlayers.add(client);
 
-        GameMetrics.counterInc(GameMetrics.currentQueuedPlayersCounter);
+        //GameMetrics.counterInc(GameMetrics.currentQueuedPlayersCounter);
 
         if (party.getCurrentRound().isOpen())
             promoteClients();
@@ -47,7 +47,7 @@ public class PartyQueue {
             QueuedClient first = waitingPlayers.pollFirst();
             if (first != null) {
                 first.promoteToGame(newRound.id);
-                GameMetrics.counterDec(GameMetrics.currentQueuedPlayersCounter);
+                //GameMetrics.counterDec(GameMetrics.currentQueuedPlayersCounter);
             }
         }
         for (QueuedClient client : waitingPlayers)
@@ -59,7 +59,7 @@ public class PartyQueue {
         QueuedClient client = null;
         while ((client = waitingPlayers.pollFirst()) != null) {
             client.close();
-            GameMetrics.counterDec(GameMetrics.currentQueuedPlayersCounter);
+            //GameMetrics.counterDec(GameMetrics.currentQueuedPlayersCounter);
         }
     }
 

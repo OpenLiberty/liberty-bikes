@@ -2,7 +2,7 @@ package org.libertybikes.game.core;
 
 import java.util.Set;
 
-import javax.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbProperty;
 
 public class OutboundMessage {
 

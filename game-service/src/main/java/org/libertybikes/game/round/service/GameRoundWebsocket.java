@@ -8,29 +8,29 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.websocket.CloseReason;
-import javax.websocket.CloseReason.CloseCodes;
-import javax.websocket.OnClose;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.server.PathParam;
-import javax.websocket.server.ServerEndpoint;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.CloseReason.CloseCodes;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import jakarta.websocket.server.PathParam;
+import jakarta.websocket.server.ServerEndpoint;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.metrics.Timer.Context;
-import org.eclipse.microprofile.metrics.annotation.Metered;
+//import org.eclipse.microprofile.metrics.Timer.Context;
+//import org.eclipse.microprofile.metrics.annotation.Metered;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.GameRound;
 import org.libertybikes.game.core.GameRound.State;
 import org.libertybikes.game.core.InboundMessage;
 import org.libertybikes.game.core.InboundMessage.GameEvent;
 import org.libertybikes.game.core.OutboundMessage;
-import org.libertybikes.game.metric.GameMetrics;
+//import org.libertybikes.game.metric.GameMetrics;
 import org.libertybikes.restclient.PlayerService;
 
 @Dependent
@@ -46,7 +46,7 @@ public class GameRoundWebsocket {
 
     private final static Jsonb jsonb = JsonbBuilder.create();
 
-    private Context timerContext;
+    //private Context timerContext;
 
     @OnOpen
     public void onOpen(@PathParam("roundId") String roundId, Session session) {
@@ -54,16 +54,16 @@ public class GameRoundWebsocket {
         session.setMaxTextMessageBufferSize(1000);
         session.setMaxBinaryMessageBufferSize(1000);
         session.setMaxIdleTimeout(90 * 1000);
-        timerContext = GameMetrics.timerStart(GameMetrics.openWebsocketTimerMetadata);
+        //timerContext = GameMetrics.timerStart(GameMetrics.openWebsocketTimerMetadata);
     }
 
     @OnClose
     public void onClose(@PathParam("roundId") String roundId, Session session) {
         log(roundId, "Closed a session");
 
-        if (timerContext != null)
+        /*if (timerContext != null)
             timerContext.close();
-
+*/
         try {
             GameRound round = gameSvc.getRound(roundId);
             if (round != null)
@@ -75,10 +75,11 @@ public class GameRoundWebsocket {
     }
 
     @OnMessage
-    @Metered(name = "rate_of_websocket_calls",
+    /*@Metered(name = "rate_of_websocket_calls",
              displayName = "Rate of GameRound Websocket Calls",
              description = "Rate of incoming messages to the game round websocket",
              absolute = true)
+             */
     public void onMessage(@PathParam("roundId") final String roundId, String message, Session session) {
         try {
             final InboundMessage msg = jsonb.fromJson(message, InboundMessage.class);

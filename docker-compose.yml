@@ -1,5 +1,10 @@
 version: '2.1'
 services:
+  frontend:
+    build: frontend
+    image: libertybikes-frontend
+    ports:
+      - "12000:12000"
   player:
     build: player-service
     image: libertybikes-player
@@ -7,3 +12,11 @@ services:
       - "8081:8081"
     environment:
       - DB_HOST=postgres
+  game:
+    build: game-service
+    image: libertybikes-game
+    ports:
+     - "8080:8080"
+    environment:
+      - org_libertybikes_restclient_PlayerService_mp_rest_url=http://player:8081
+      - singleParty
