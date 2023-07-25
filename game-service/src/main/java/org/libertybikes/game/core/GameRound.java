@@ -35,7 +35,7 @@ import jakarta.websocket.Session;
 import org.eclipse.microprofile.metrics.Timer.Context;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.Player.STATUS;
-//import org.libertybikes.game.metric.GameMetrics;
+import org.libertybikes.game.metric.GameMetrics;
 import org.libertybikes.restclient.PlayerService;
 
 import io.jsonwebtoken.Claims;
@@ -199,6 +199,7 @@ public class GameRound implements Runnable {
             clients.put(s, c);
             log("Player " + playerId + " has joined.");
 
+            GameMetrics.incPlayerCount();
             /* Increment player counter metrics
             GameMetrics.counterInc(GameMetrics.currentPlayersCounter);
             GameMetrics.counterInc(GameMetrics.totalPlayersCounter);
