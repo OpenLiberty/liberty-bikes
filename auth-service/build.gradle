@@ -13,7 +13,9 @@ liberty {
 }
 
 dependencies {
-    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-gson', version: '0.11.5'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     implementation group: 'com.google.api-client', name: 'google-api-client', version: '1.30.4'
     implementation group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.7'
 }

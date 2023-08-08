@@ -7,6 +7,7 @@ docker run \
   --rm \
   -d \
   -p 5432:5432 \
+  --network host \
   -e POSTGRES_DB=playerdb \
   -e POSTGRES_USER=lb_user \
   -e POSTGRES_PASSWORD=lb_password \

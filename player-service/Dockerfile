@@ -30,7 +30,7 @@ USER 1001
 
 # Add app and config
 COPY --chown=1001:0 build/libs/player-service.war /config/dropins
-COPY --chown=1001:0 build/libs/postgresql-*.jar /config/postgresql
+COPY --chown=1001:0 build/libs/postgresql-42.6.0.jar /config/postgresql/postgresql-42.6.0.jar
 COPY --chown=1001:0 src/main/liberty/config/server.xml /config/
 COPY --chown=1001:0 src/main/liberty/config/bootstrap.properties /config/
 COPY --chown=1001:0 src/main/liberty/config/resources/security/validationKeystore.jks /config/resources/security/
