@@ -16,8 +16,8 @@ sed \
   $PROM_LOCAL_CONFIG/prometheus.yml
 
 echo "Starting prometheus"
-docker stop lb-prometheus 2> /dev/null
-docker run \
+podman stop lb-prometheus 2> /dev/null
+podman run \
   --name lb-prometheus \
   --rm \
   -d \
@@ -26,8 +26,8 @@ docker run \
   prom/prometheus:v2.4.0
   
 echo "Starting grafana"
-docker stop lb-grafana 2> /dev/null
-docker run \
+podman stop lb-grafana 2> /dev/null
+podman run \
   --name lb-grafana \
   --rm \
   -d \

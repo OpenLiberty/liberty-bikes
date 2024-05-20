@@ -1,8 +1,8 @@
 #!/bin/bash
 
 echo "Starting postgresql database"
-docker stop lb-postgresql 2> /dev/null
-docker run \
+podman stop lb-postgresql 2> /dev/null
+podman run \
   --name lb-postgresql \
   --rm \
   -d \

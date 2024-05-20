@@ -8,8 +8,8 @@ import java.security.KeyStore;
 import java.util.Calendar;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.inject.Inject;
+import jakarta.annotation.Resource;
+import jakarta.enterprise.inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
