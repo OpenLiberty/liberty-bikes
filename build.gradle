@@ -50,7 +50,7 @@ subprojects {
     apply plugin: 'liberty'
     apply plugin: 'war'
 
-    sourceCompatibility = 17
+    sourceCompatibility = 11
 
     buildscript {
         repositories {
