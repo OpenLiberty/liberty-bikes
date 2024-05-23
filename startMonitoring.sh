@@ -23,7 +23,7 @@ podman run \
   -d \
   -p 9090:9090 \
   -v $PROM_LOCAL_CONFIG:/etc/prometheus \
-  prom/prometheus:v2.4.0
+  prom/prometheus:v2.52.0
   
 echo "Starting grafana"
 podman stop lb-grafana 2> /dev/null
@@ -36,7 +36,7 @@ podman run \
   -v `pwd`/monitoring/datasource-local:/etc/grafana/provisioning/datasources \
   -v `pwd`/monitoring/dashboardList:/etc/grafana/provisioning/dashboards \
   -v `pwd`/monitoring/grafanaDashboardConfig:/var/lib/grafana/dashboards \
-  grafana/grafana:5.2.4
+  grafana/grafana:10.1.10
 
 echo "########################################################"  
 echo "Metrics dashboard available at http://localhost:3000"

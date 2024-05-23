@@ -33,7 +33,7 @@ public class GameMetrics {
     public static void decPlayerCount(){
         totalPlayers = totalPlayers -1 ;
     }
-    /*public static final Metadata totalRoundsCounter = new MetadataBuilder()
+    public static final Metadata totalRoundsCounter = new MetadataBuilder()
                     .withName("total_num_of_rounds")
                     .withDescription("Number of rounds that have been created")
                     .build();
@@ -91,20 +91,20 @@ public class GameMetrics {
 
     public static void counterInc(Metadata metricMetadata) {
         if (registry != null || (getRegistry() != null)) {
-            registry.concurrentGauge(metricMetadata).inc();
+            registry.counter(metricMetadata).inc();
         }
     }
  
-    public static void counterDec(Metadata metricMetadata) {
-        if (registry != null || (getRegistry() != null)) {
-            registry.concurrentGauge(metricMetadata).dec();
-        }
-    }
+    // public static void counterDec(Metadata metricMetadata) {
+    //     if (registry != null || (getRegistry() != null)) {
+    //         registry.counter(metricMetadata).dec();
+    //     }
+    // }
 
     public static Context timerStart(Metadata metricMetadata) {
         if (registry != null || (getRegistry() != null)) {
             return registry.timer(metricMetadata).time();
         }
         return null;
-    } */
+    }
 }
