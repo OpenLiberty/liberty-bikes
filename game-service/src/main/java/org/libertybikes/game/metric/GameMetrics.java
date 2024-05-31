@@ -33,11 +33,12 @@ public class GameMetrics {
     public static void decPlayerCount(){
         totalPlayers = totalPlayers -1 ;
     }
-    public static final Metadata totalRoundsCounter = new MetadataBuilder()
+    
+    /*public static final Metadata totalRoundsCounter = new MetadataBuilder()
                     .withName("total_num_of_rounds")
                     .withDescription("Number of rounds that have been created")
                     .build();
-
+*/
     public static final Metadata currentPlayersCounter = new MetadataBuilder()
                     .withName("current_num_of_players")
                     .withDescription("Number of players that are currently playing in a round")
@@ -47,7 +48,7 @@ public class GameMetrics {
                     .withName("total_num_of_players")
                     .withDescription("Number of players that have played in a round, requeuing and replaying increases the count")
                     .build();
-
+/*
     public static final Metadata totalMobilePlayersCounter = new MetadataBuilder()
                     .withName("total_num_of_mobile_players")
                     .withDescription("Number of mobile players that have played in a round, requeuing and replaying increases the count")
@@ -91,15 +92,15 @@ public class GameMetrics {
 
     public static void counterInc(Metadata metricMetadata) {
         if (registry != null || (getRegistry() != null)) {
-            registry.counter(metricMetadata).inc();
+            registry.getCounter(metricMetadata).inc();
         }
     }
- 
-    // public static void counterDec(Metadata metricMetadata) {
-    //     if (registry != null || (getRegistry() != null)) {
-    //         registry.counter(metricMetadata).dec();
-    //     }
-    // }
+ */
+    /*public static void counterDec(Metadata metricMetadata) {
+        if (registry != null || (getRegistry() != null)) {
+            registry.concurrentGauge(metricMetadata).dec();
+        }
+    }
 
     public static Context timerStart(Metadata metricMetadata) {
         if (registry != null || (getRegistry() != null)) {

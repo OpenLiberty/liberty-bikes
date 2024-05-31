@@ -200,12 +200,12 @@ public class GameRound implements Runnable {
             log("Player " + playerId + " has joined.");
 
             GameMetrics.incPlayerCount();
-            /* Increment player counter metrics
+             Increment player counter metrics
             GameMetrics.counterInc(GameMetrics.currentPlayersCounter);
             GameMetrics.counterInc(GameMetrics.totalPlayersCounter);
             if (isPhone) {
                 GameMetrics.counterInc(GameMetrics.totalMobilePlayersCounter);
-            }*/
+            }
 
         } else {
             log("Player " + playerId + " already exists.");
@@ -275,11 +275,11 @@ public class GameRound implements Runnable {
         if (isOpen()) {
             board.removePlayer(p);
 
-            /* Decrement player counters because they didn't play
+            //Decrement player counters because they didn't play
             GameMetrics.counterDec(GameMetrics.totalPlayersCounter);
             if (isMobile) {
                 GameMetrics.counterDec(GameMetrics.totalMobilePlayersCounter);
-            }*/
+            }
 
         } else if (gameState == State.RUNNING) {
             checkForWinner();
