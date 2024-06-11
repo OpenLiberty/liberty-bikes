@@ -4,41 +4,76 @@
 package org.libertybikes.game.metric;
 
 import jakarta.enterprise.inject.spi.CDI;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.metrics.MetricUnits;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.metrics.Timer.Context;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.metrics.Metadata;
 import org.eclipse.microprofile.metrics.MetadataBuilder;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.annotation.Gauge;
+import org.eclipse.microprofile.metrics.annotation.RegistryScope;
 
+@ApplicationScoped
 public class GameMetrics {
     // MpMetric Metadatas
 
     private static int totalPlayers = 0; 
+    private static int totalMobilePlayers = 0;
+
+    @Inject
+    private MetricRegistry registry;
 
     @Gauge(unit = MetricUnits.NONE,
             name = "playerNumberGauge",
             absolute = true,
             description = "Number of players in the game")
     public static int getPlayerCount() {
+        System.out.println("Total players (updated again and again) " + totalPlayers);
         return totalPlayers;
     }
 
+    @Gauge(unit = MetricUnits.NONE,
+            name = "mobilePlayerNumberGauge",
+            absolute = true,
+            description = "Number of mobile players in the game")
+    public static int getMobilePlayerCount() {
+        return totalMobilePlayers;
+    }
+    
+    @Counted(unit = MetricUnits.NONE,
+            name = "roundNumberCounter",
+            absolute = true,
+            description = "Number of total rounds played")
+    public static void totalRoundsCounter() {
+        return;
+    }
+
     public static void incPlayerCount(){
-        totalPlayers = totalPlayers + 1;
+        System.out.println("Increasing player count");
+        totalPlayers = getPlayerCount() + 1;
+        System.out.println("Increasing player count");
     }
 
     public static void decPlayerCount(){
-        totalPlayers = totalPlayers -1 ;
+        totalPlayers = getPlayerCount() -1 ;
+    }
+
+    public static void incMobilePlayerCount(){
+        totalMobilePlayers = totalMobilePlayers + 1;
+    }
+
+    public static void decMobilePlayerCount(){
+        totalMobilePlayers = totalMobilePlayers -1 ;
     }
     
-    /*public static final Metadata totalRoundsCounter = new MetadataBuilder()
+    public static final Metadata totalRoundsCounter = new MetadataBuilder()
                     .withName("total_num_of_rounds")
                     .withDescription("Number of rounds that have been created")
                     .build();
-*/
+
     public static final Metadata currentPlayersCounter = new MetadataBuilder()
                     .withName("current_num_of_players")
                     .withDescription("Number of players that are currently playing in a round")
@@ -48,12 +83,12 @@ public class GameMetrics {
                     .withName("total_num_of_players")
                     .withDescription("Number of players that have played in a round, requeuing and replaying increases the count")
                     .build();
-/*
+
     public static final Metadata totalMobilePlayersCounter = new MetadataBuilder()
                     .withName("total_num_of_mobile_players")
                     .withDescription("Number of mobile players that have played in a round, requeuing and replaying increases the count")
                     .build();
-
+    /*
     public static final Metadata gameRoundTimerMetadata = new MetadataBuilder()
                     .withName("game_round_timer")
                     .withDescription("The Time Game Rounds Last")
@@ -90,22 +125,10 @@ public class GameMetrics {
         return null;
     }
 
-    public static void counterInc(Metadata metricMetadata) {
-        if (registry != null || (getRegistry() != null)) {
-            registry.getCounter(metricMetadata).inc();
-        }
-    }
- */
-    /*public static void counterDec(Metadata metricMetadata) {
-        if (registry != null || (getRegistry() != null)) {
-            registry.concurrentGauge(metricMetadata).dec();
-        }
-    }
-
-    public static Context timerStart(Metadata metricMetadata) {
+    /*public static Context timerStart(Metadata metricMetadata) {
         if (registry != null || (getRegistry() != null)) {
             return registry.timer(metricMetadata).time();
         }
         return null;
-    }
+    }*/
 }
