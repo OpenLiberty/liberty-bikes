@@ -21,6 +21,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.libertybikes.game.core.GameRound;
+import org.libertybikes.game.metric.GameMetrics;
 
 @Path("/round")
 @ApplicationScoped
@@ -29,6 +30,9 @@ public class GameRoundService {
     @Inject
     @ConfigProperty(name = "singleParty", defaultValue = "true")
     private boolean isSingleParty;
+
+    @Inject
+    GameMetrics gameMetrics;
 
     @Resource
     ManagedScheduledExecutorService exec;
@@ -43,7 +47,7 @@ public class GameRoundService {
 
     @POST
     public String createRound() {
-        GameRound p = new GameRound();
+        GameRound p = new GameRound(gameMetrics);
         allRounds.put(p.id, p);
         System.out.println("Created round id=" + p.id);
         if (allRounds.size() > 35)
@@ -54,7 +58,7 @@ public class GameRoundService {
 
     @POST
     public GameRound createRoundById(@QueryParam("gameId") String gameId) {
-        GameRound round = allRounds.computeIfAbsent(gameId, k -> new GameRound(gameId));
+        GameRound round = allRounds.computeIfAbsent(gameId, k -> new GameRound(gameMetrics, gameId));
         System.out.println("Created round id=" + round.id);
         if (allRounds.size() > 35)
             System.out.println("WARNING: Found " + allRounds.size() + " active games in GameRoundService. " +

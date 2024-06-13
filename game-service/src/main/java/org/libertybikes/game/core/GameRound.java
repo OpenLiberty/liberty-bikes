@@ -94,8 +94,7 @@ public class GameRound implements Runnable {
 
     private Context timerContext;
 
-    @Inject
-    GameMetrics game;
+    GameMetrics gameMetrics;
 
     // Get a string of 4 random uppercase letters (A-Z)
     private static String getRandomId() {
@@ -105,12 +104,14 @@ public class GameRound implements Runnable {
         return new String(chars);
     }
 
-    public GameRound() {
-        this(getRandomId());
+    public GameRound(GameMetrics gameMetrics) {
+        this(gameMetrics, getRandomId());
     }
 
-    public GameRound(String id) {
+    public GameRound(GameMetrics gameMetrics, String id) {
         this.id = id;
+        this.gameMetrics = gameMetrics;
+
         nextRoundId = getRandomId();
 
         // Get game tick speed
@@ -203,7 +204,7 @@ public class GameRound implements Runnable {
             clients.put(s, c);
             log("Player " + playerId + " has joined.");
 
-            game.incPlayerCount();
+            gameMetrics.incPlayerCount();
             System.out.println("increase");
             //Increment player counter metrics
             /*
@@ -283,7 +284,7 @@ public class GameRound implements Runnable {
             board.removePlayer(p);
 
             //Decrement player counters because they didn't play
-            game.decPlayerCount();
+            gameMetrics.decPlayerCount();
             /*
              * if (isMobile) {
              * GameMetrics.counterDec(GameMetrics.totalMobilePlayersCounter);

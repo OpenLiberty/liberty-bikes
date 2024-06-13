@@ -35,7 +35,7 @@ public class GameMetrics {
         System.out.println("TESTING THE OBSERVER");
     }
 
-    @Counted(unit = MetricUnits.NONE,
+    @Gauge(unit = MetricUnits.NONE,
              name = "playerNumberGauge",
              absolute = true,
              description = "Number of players in the game")
