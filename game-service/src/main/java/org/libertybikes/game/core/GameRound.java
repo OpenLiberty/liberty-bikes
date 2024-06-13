@@ -26,6 +26,7 @@ import jakarta.enterprise.concurrent.LastExecution;
 import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
 import jakarta.enterprise.concurrent.Trigger;
 import jakarta.enterprise.inject.spi.CDI;
+import jakarta.inject.Inject;
 import jakarta.json.bind.annotation.JsonbPropertyOrder;
 import jakarta.json.bind.annotation.JsonbTransient;
 import javax.naming.InitialContext;
@@ -92,6 +93,9 @@ public class GameRound implements Runnable {
     String keyStoreAlias;
 
     private Context timerContext;
+
+    @Inject
+    GameMetrics game;
 
     // Get a string of 4 random uppercase letters (A-Z)
     private static String getRandomId() {
@@ -199,14 +203,16 @@ public class GameRound implements Runnable {
             clients.put(s, c);
             log("Player " + playerId + " has joined.");
 
-            GameMetrics.incPlayerCount();
+            game.incPlayerCount();
             System.out.println("increase");
             //Increment player counter metrics
-            /*GameMetrics.counterInc(GameMetrics.currentPlayersCounter);
-            GameMetrics.counterInc(GameMetrics.totalPlayersCounter);
-            if (isPhone) {
-                GameMetrics.counterInc(GameMetrics.totalMobilePlayersCounter);
-            }*/
+            /*
+             * GameMetrics.counterInc(GameMetrics.currentPlayersCounter);
+             * GameMetrics.counterInc(GameMetrics.totalPlayersCounter);
+             * if (isPhone) {
+             * GameMetrics.counterInc(GameMetrics.totalMobilePlayersCounter);
+             * }
+             */
 
         } else {
             log("Player " + playerId + " already exists.");
@@ -277,10 +283,12 @@ public class GameRound implements Runnable {
             board.removePlayer(p);
 
             //Decrement player counters because they didn't play
-            GameMetrics.decPlayerCount();
-            /*if (isMobile) {
-                GameMetrics.counterDec(GameMetrics.totalMobilePlayersCounter);
-            }*/
+            game.decPlayerCount();
+            /*
+             * if (isMobile) {
+             * GameMetrics.counterDec(GameMetrics.totalMobilePlayersCounter);
+             * }
+             */
 
         } else if (gameState == State.RUNNING) {
             checkForWinner();
