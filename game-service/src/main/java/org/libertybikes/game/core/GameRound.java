@@ -205,7 +205,9 @@ public class GameRound implements Runnable {
             clients.put(s, c);
             log("Player " + playerId + " has joined.");
 
+            // gameMetrics.incTotalPlayerCount();
             gameMetrics.incPlayerCount();
+            gameMetrics.incTotalPlayerCount();
             System.out.println("increase");
             if (isPhone) {
                 gameMetrics.incMobilePlayerCount();

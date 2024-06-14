@@ -64,21 +64,27 @@ public class GameMetrics {
         return totalCurrentMobilePlayers;
     }
 
-    @Counted(unit = MetricUnits.NONE,
-             name = "totalPlayerNumberGauge",
-             absolute = true,
-             description = "Number of players that have played in a round, requeuing and replaying increases the count")
+    @Gauge(unit = MetricUnits.NONE,
+           name = "totalPlayerNumberGauge",
+           absolute = true,
+           description = "Number of players that have played in a round, requeuing and replaying increases the count")
     public int getTotalPlayerCount() {
         System.out.println("Total players (updated again and again) " + totalPlayers);
         return totalPlayers;
     }
 
-    @Timed(unit = MetricUnits.SECONDS,
-           name = "timer",
-           absolute = true,
-           description = "The time an app has been running")
-    public void timer() {
-        return;
+    // @Timed(unit = MetricUnits.SECONDS,
+    //        name = "timer",
+    //        absolute = true,
+    //        description = "The time an app has been running")
+    // public void timer() {
+    //     return;
+    // }
+
+    public void incTotalPlayerCount() {
+        System.out.println("Increasing player count");
+        totalPlayers = getTotalPlayerCount() + 1;
+        System.out.println("Increasing player count");
     }
 
     public void incPlayerCount() {
