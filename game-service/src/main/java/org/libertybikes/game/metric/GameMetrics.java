@@ -30,6 +30,7 @@ public class GameMetrics {
     private int totalCurrentMobilePlayers = 0;
     private int totalPlayers = 0;
     private int currentRounds = 0;
+    private Context timerContext;
 
     @Counted(unit = MetricUnits.NONE,
              name = "roundNumberCounter",
@@ -77,8 +78,8 @@ public class GameMetrics {
     //        name = "timer",
     //        absolute = true,
     //        description = "The time an app has been running")
-    // public void timer() {
-    //     return;
+    // public Context startTimer() {
+    //     return timerContext;
     // }
 
     public void incTotalPlayerCount() {

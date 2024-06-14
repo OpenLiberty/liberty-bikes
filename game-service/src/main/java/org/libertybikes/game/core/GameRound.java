@@ -622,6 +622,8 @@ public class GameRound implements Runnable {
 
             // Start round timer metric
             // timerContext = gameMetrics.timer(GameMetrics.gameRoundTimerMetadata);
+            // timerContext = gameMetrics.startTimer();
+
         }
     }
 
