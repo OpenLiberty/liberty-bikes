@@ -133,8 +133,9 @@ public class GameRound implements Runnable {
         MAX_TIME_BETWEEN_ROUNDS = (maxTimeBetweenRounds < 5 || maxTimeBetweenRounds > 60) ? MAX_TIME_BETWEEN_ROUNDS_DEFAULT : maxTimeBetweenRounds;
 
         // Increment round counter metrics
-        //GameMetrics.counterInc(GameMetrics.totalRoundsCounter);
-        //GameMetrics.counterInc(GameMetrics.currentRoundsCounter);
+        gameMetrics.totalRoundsCounter();
+        gameMetrics.incRoundCounter();
+
     }
 
     public GameBoard getBoard() {
@@ -206,14 +207,9 @@ public class GameRound implements Runnable {
 
             gameMetrics.incPlayerCount();
             System.out.println("increase");
-            //Increment player counter metrics
-            /*
-             * GameMetrics.counterInc(GameMetrics.currentPlayersCounter);
-             * GameMetrics.counterInc(GameMetrics.totalPlayersCounter);
-             * if (isPhone) {
-             * GameMetrics.counterInc(GameMetrics.totalMobilePlayersCounter);
-             * }
-             */
+            if (isPhone) {
+                gameMetrics.incMobilePlayerCount();
+            }
 
         } else {
             log("Player " + playerId + " already exists.");
@@ -285,11 +281,10 @@ public class GameRound implements Runnable {
 
             //Decrement player counters because they didn't play
             gameMetrics.decPlayerCount();
-            /*
-             * if (isMobile) {
-             * GameMetrics.counterDec(GameMetrics.totalMobilePlayersCounter);
-             * }
-             */
+
+            if (isMobile) {
+                gameMetrics.decMobilePlayerCount();
+            }
 
         } else if (gameState == State.RUNNING) {
             checkForWinner();
@@ -298,8 +293,7 @@ public class GameRound implements Runnable {
         if (gameState != State.FINISHED)
             broadcastPlayerList();
 
-        // Decrement current players counter
-        //GameMetrics.counterDec(GameMetrics.currentPlayersCounter);
+        gameMetrics.decPlayerCount();
     }
 
     /**
@@ -560,7 +554,7 @@ public class GameRound implements Runnable {
         log("<<< Finished round");
 
         // Decrement current rounds counter and close round timer
-        //GameMetrics.counterDec(GameMetrics.currentRoundsCounter);
+        gameMetrics.decRoundCounter();
         if (timerContext != null)
             timerContext.close();
 
@@ -625,7 +619,7 @@ public class GameRound implements Runnable {
             gameState = State.RUNNING;
 
             // Start round timer metric
-            //timerContext = GameMetrics.timerStart(GameMetrics.gameRoundTimerMetadata);
+            // timerContext = gameMetrics.timer(GameMetrics.gameRoundTimerMetadata);
         }
     }
 
