@@ -31,6 +31,8 @@ public class GameMetrics {
     private int totalPlayers = 0;
     private int currentRounds = 0;
     private Context timerContext;
+    private int currentQueuedPlayers = 0;
+    private int currentPartiesCounter = 0;
 
     @Counted(unit = MetricUnits.NONE,
              name = "roundNumberCounter",
@@ -74,6 +76,22 @@ public class GameMetrics {
         return totalPlayers;
     }
 
+    @Gauge(unit = MetricUnits.NONE,
+           name = "currentQueuedPlayersCounter",
+           absolute = true,
+           description = "Number of players that are currently waiting in a queue")
+    public int getTotalPlayersQueued() {
+        return currentQueuedPlayers;
+    }
+
+    @Gauge(unit = MetricUnits.NONE,
+           name = "currentPartiesCounter",
+           absolute = true,
+           description = "Number of players that are currently waiting in a queue")
+    public int getCurrentPartiesCounter() {
+        return currentPartiesCounter;
+    }
+
     // @Timed(unit = MetricUnits.SECONDS,
     //        name = "timer",
     //        absolute = true,
@@ -99,19 +117,35 @@ public class GameMetrics {
     }
 
     public void incMobilePlayerCount() {
-        totalCurrentMobilePlayers = totalCurrentMobilePlayers + 1;
+        totalCurrentMobilePlayers = getMobilePlayerCount() + 1;
     }
 
     public void decMobilePlayerCount() {
-        totalCurrentMobilePlayers = totalCurrentMobilePlayers - 1;
+        totalCurrentMobilePlayers = getMobilePlayerCount() - 1;
     }
 
     public void incRoundCounter() {
-        currentRounds = currentRounds + 1;
+        currentRounds = getCurrentRoundsCounter() + 1;
     }
 
     public void decRoundCounter() {
-        currentRounds = currentRounds - 1;
+        currentRounds = getCurrentRoundsCounter() - 1;
+    }
+
+    public void incCurrentQueuedPlayersCounter() {
+        currentQueuedPlayers = getTotalPlayersQueued() + 1;
+    }
+
+    public void decCurrentQueuedPlayersCounter() {
+        currentQueuedPlayers = getTotalPlayersQueued() - 1;
+    }
+
+    public void incCurrentPartiesCounter() {
+        currentPartiesCounter = getCurrentPartiesCounter() + 1;
+    }
+
+    public void decCurrentPartiesCounter() {
+        currentPartiesCounter = getCurrentPartiesCounter() - 1;
     }
 
     // public static Context timerStart(Metadata metricMetadata) {
@@ -121,26 +155,21 @@ public class GameMetrics {
     //     return null;
     // }
 
-    public static final Metadata gameRoundTimerMetadata = new MetadataBuilder()
-                    .withName("game_round_timer")
-                    .withDescription("The Time Game Rounds Last")
-                    .withUnit(MetricUnits.SECONDS)
-                    .build();
+    // public static final Metadata gameRoundTimerMetadata = new MetadataBuilder()
+    //                 .withName("game_round_timer")
+    //                 .withDescription("The Time Game Rounds Last")
+    //                 .withUnit(MetricUnits.SECONDS)
+    //                 .build();
 
     public static final Metadata currentPartiesCounterMetadata = new MetadataBuilder()
                     .withName("current_number_of_parties")
                     .withDescription("Number of parties currently running")
                     .build();
 
-    public static final Metadata currentQueuedPlayersCounter = new MetadataBuilder()
-                    .withName("current_num_of_players_in_queue")
-                    .withDescription("Number of players that are currently waiting in a queue")
-                    .build();
-
-    public static final Metadata openWebsocketTimerMetadata = new MetadataBuilder()
-                    .withName("open_game_websocket_timer")
-                    .withDescription("The Time Game Round Websockets Are Open")
-                    .withUnit(MetricUnits.SECONDS)
-                    .build();
+    // public static final Metadata openWebsocketTimerMetadata = new MetadataBuilder()
+    //                 .withName("open_game_websocket_timer")
+    //                 .withDescription("The Time Game Round Websockets Are Open")
+    //                 .withUnit(MetricUnits.SECONDS)
+    //                 .build();
 
 }

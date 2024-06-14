@@ -57,13 +57,15 @@ public class GameRoundWebsocket {
         //timerContext = GameMetrics.timerStart(GameMetrics.openWebsocketTimerMetadata);
     }
 
+    //  BUG  : org.jboss.weld.contexts.ContextNotActiveException: WELD-001303: No active contexts for scope type jakarta.enterprise.context.ApplicationScoped
     @OnClose
     public void onClose(@PathParam("roundId") String roundId, Session session) {
         log(roundId, "Closed a session");
 
-        /*if (timerContext != null)
-            timerContext.close();
-*/
+        /*
+         * if (timerContext != null)
+         * timerContext.close();
+         */
         try {
             GameRound round = gameSvc.getRound(roundId);
             if (round != null)
@@ -75,11 +77,12 @@ public class GameRoundWebsocket {
     }
 
     @OnMessage
-    /*@Metered(name = "rate_of_websocket_calls",
-             displayName = "Rate of GameRound Websocket Calls",
-             description = "Rate of incoming messages to the game round websocket",
-             absolute = true)
-             */
+    /*
+     * @Metered(name = "rate_of_websocket_calls",
+     * displayName = "Rate of GameRound Websocket Calls",
+     * description = "Rate of incoming messages to the game round websocket",
+     * absolute = true)
+     */
     public void onMessage(@PathParam("roundId") final String roundId, String message, Session session) {
         try {
             final InboundMessage msg = jsonb.fromJson(message, InboundMessage.class);

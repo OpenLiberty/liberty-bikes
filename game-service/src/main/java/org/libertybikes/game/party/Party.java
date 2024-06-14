@@ -13,6 +13,7 @@ import jakarta.ws.rs.sse.SseEventSink;
 //import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.libertybikes.game.core.GameRound;
 import org.libertybikes.game.core.GameRound.LifecycleCallback;
+import org.libertybikes.game.metric.GameMetrics;
 //import org.libertybikes.game.metric.GameMetrics;
 import org.libertybikes.game.round.service.GameRoundService;
 
@@ -27,18 +28,21 @@ public class Party {
     @JsonbTransient
     GameRoundService roundService;
 
+    @Inject
+    GameMetrics gameMetrics;
+
     public final String id;
-    private final PartyQueue queue = new PartyQueue(this);
+    private final PartyQueue queue = new PartyQueue(this, gameMetrics);
     private volatile GameRound currentRound;
 
     @PostConstruct
     public void postConstruct() {
-        //GameMetrics.counterInc(GameMetrics.currentPartiesCounterMetadata);
+        gameMetrics.incCurrentPartiesCounter();
     }
 
     @PreDestroy
     public void preDestroy() {
-        //GameMetrics.counterDec(GameMetrics.currentPartiesCounterMetadata);
+        gameMetrics.decCurrentPartiesCounter();
     }
 
     @Inject

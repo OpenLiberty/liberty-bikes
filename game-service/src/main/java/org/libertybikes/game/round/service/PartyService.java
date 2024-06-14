@@ -15,6 +15,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -29,6 +30,7 @@ import jakarta.ws.rs.sse.Sse;
 import jakarta.ws.rs.sse.SseEventSink;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.libertybikes.game.metric.GameMetrics;
 import org.libertybikes.game.party.Party;
 
 @Path("/party")
@@ -43,6 +45,12 @@ public class PartyService {
     @ConfigProperty(name = "singleParty", defaultValue = "true")
     private boolean isSingleParty;
 
+    @Inject
+    GameMetrics gameMetrics;
+
+    @Inject
+    Instance<Party> partyInstance;
+
     @Resource
     private ManagedScheduledExecutorService exec;
 
@@ -51,7 +59,8 @@ public class PartyService {
         if (!isSingleParty)
             return;
 
-        Party p = CDI.current().select(Party.class).get();
+        // Party p = CDI.current().select(Party.class).get();
+        Party p = partyInstance.get();
         allParties.put(p.id, p);
         System.out.println("Created singleton party " + p.id);
     }
@@ -77,7 +86,7 @@ public class PartyService {
             return allParties.values().iterator().next();
         }
 
-        Party p = CDI.current().select(Party.class).get();
+        Party p = partyInstance.get();
         allParties.put(p.id, p);
         // Put a max lifetime of 12 hours on a party
         exec.schedule(() -> this.deleteParty(p.id), 12, TimeUnit.HOURS);
@@ -98,6 +107,7 @@ public class PartyService {
         Party deleted = allParties.remove(partyId);
         if (deleted != null) {
             deleted.close();
+            partyInstance.destroy(deleted);
             System.out.println("Deleted party " + partyId);
         }
     }
