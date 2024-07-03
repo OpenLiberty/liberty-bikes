@@ -9,23 +9,23 @@ scrape_configs:
   scrape_interval: 5s
   metrics_path: '/metrics/'
   static_configs:
-  - targets: ['game:8080']
-  scheme: http
+  - targets: ['game.1ibd03sq8zc5.eu-gb.codeengine.appdomain.cloud']
+  scheme: https
   tls_config:
     insecure_skip_verify: true
 - job_name: 'player-service'
   scrape_interval: 5s
   metrics_path: '/metrics/'
   static_configs:
-  - targets: ['player:8081']
-  scheme: http
+  - targets: ['player.1ibd03sq8zc5.eu-gb.codeengine.appdomain.cloud']
+  scheme: https
   tls_config:
     insecure_skip_verify: true
-- job_name: 'auth-service'
+- job_name: 'demo-failing-service'
   scrape_interval: 5s
   metrics_path: '/metrics/'
   static_configs:
-  - targets: ['auth:8082']
+  - targets: ['127.0.0.1:8082']
   scheme: http
   tls_config:
     insecure_skip_verify: true
@@ -33,7 +33,7 @@ scrape_configs:
   scrape_interval: 5s
   metrics_path: '/metrics/'
   static_configs:
-  - targets: ['frontend:12000']
-  scheme: http
+  - targets: ['frontend.1ibd03sq8zc5.eu-gb.codeengine.appdomain.cloud']
+  scheme: https
   tls_config:
     insecure_skip_verify: true

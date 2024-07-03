@@ -113,7 +113,9 @@ public class GameMetrics {
     }
 
     public void decPlayerCount() {
-        totalCurrentPlayers = getCurrentPlayerCount() - 1;
+        if (totalCurrentPlayers > 0) {
+            totalCurrentPlayers = getCurrentPlayerCount() - 1;
+        }
     }
 
     public void incMobilePlayerCount() {

@@ -51,10 +51,16 @@ public class GameRoundWebsocket {
     @OnOpen
     public void onOpen(@PathParam("roundId") String roundId, Session session) {
         log(roundId, "Opened a session");
-        session.setMaxTextMessageBufferSize(1000);
-        session.setMaxBinaryMessageBufferSize(1000);
-        session.setMaxIdleTimeout(90 * 1000);
-        //timerContext = GameMetrics.timerStart(GameMetrics.openWebsocketTimerMetadata);
+        try {
+            session.setMaxTextMessageBufferSize(1000);
+            System.out.println("setMaxTextMessageBufferSize");
+            session.setMaxBinaryMessageBufferSize(1000);
+            System.out.println("setMaxBinaryMessageBufferSize");
+            session.setMaxIdleTimeout(90 * 1000);
+            System.out.println("setMaxIdleTimeout");
+        } catch (Exception e) {
+            System.out.println("ON OPEN: " + e);
+        }
     }
 
     //  BUG  : org.jboss.weld.contexts.ContextNotActiveException: WELD-001303: No active contexts for scope type jakarta.enterprise.context.ApplicationScoped

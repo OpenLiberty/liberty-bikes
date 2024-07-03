@@ -79,7 +79,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "application_num_player_logins_total",
+          "expr": "totalPlayerNumberGauge",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -160,7 +160,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "application_current_num_of_players_current",
+          "expr": "playerNumberGauge",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -329,7 +329,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "application_current_num_of_players_in_queue_current",
+          "expr": "currentPartiesCounter",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -411,7 +411,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "application_total_num_of_rounds_current",
+          "expr": "currentRoundNumberCounter",
           "format": "time_series",
           "hide": false,
           "instant": true,
@@ -473,7 +473,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "base_cpu_systemLoadAverage",
+          "expr": "cpu_systemLoadAverage",
           "format": "time_series",
           "instant": false,
           "interval": "5s",
@@ -625,7 +625,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "base_memory_usedHeap_bytes",
+          "expr": "memory_usedHeap_bytes",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{job}}",

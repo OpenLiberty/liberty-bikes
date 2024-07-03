@@ -34,7 +34,7 @@ export class SocketService {
 
   constructor() {
     this.messageBuffer = [];
-   }
+  }
 
   get socketOpen(): boolean {
     return this.open;

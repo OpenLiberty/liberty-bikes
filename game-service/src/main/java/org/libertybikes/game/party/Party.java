@@ -32,11 +32,12 @@ public class Party {
     GameMetrics gameMetrics;
 
     public final String id;
-    private final PartyQueue queue = new PartyQueue(this, gameMetrics);
+    private PartyQueue queue = null;
     private volatile GameRound currentRound;
 
     @PostConstruct
     public void postConstruct() {
+        queue = new PartyQueue(this, gameMetrics);
         gameMetrics.incCurrentPartiesCounter();
     }
 
