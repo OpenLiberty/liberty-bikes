@@ -92,13 +92,13 @@ public class GameMetrics {
         return currentPartiesCounter;
     }
 
-    // @Timed(unit = MetricUnits.SECONDS,
-    //        name = "timer",
-    //        absolute = true,
-    //        description = "The time an app has been running")
-    // public Context startTimer() {
-    //     return timerContext;
-    // }
+    @Timed(unit = MetricUnits.SECONDS,
+           name = "timer",
+           absolute = true,
+           description = "The time an app has been running")
+    public Context startTimer() {
+        return timerContext;
+    }
 
     public void incTotalPlayerCount() {
         System.out.println("Increasing player count");
