@@ -22,17 +22,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import javax.enterprise.concurrent.LastExecution;
-import javax.enterprise.concurrent.ManagedScheduledExecutorService;
-import javax.enterprise.concurrent.Trigger;
-import javax.enterprise.inject.spi.CDI;
-import javax.json.bind.annotation.JsonbPropertyOrder;
-import javax.json.bind.annotation.JsonbTransient;
+import jakarta.enterprise.concurrent.ManagedScheduledExecutorService;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.json.bind.annotation.JsonbPropertyOrder;
+import jakarta.json.bind.annotation.JsonbTransient;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.websocket.Session;
+import jakarta.websocket.Session;
 
-import org.eclipse.microprofile.metrics.Timer.Context;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.libertybikes.game.core.Player.STATUS;
 import org.libertybikes.game.metric.GameMetrics;
@@ -72,7 +69,7 @@ public class GameRound implements Runnable {
     private final AtomicBoolean paused = new AtomicBoolean();
     private final AtomicBoolean heartbeatStarted = new AtomicBoolean();
     private final AtomicBoolean gameClosed = new AtomicBoolean();
-    private final Map<Session, Client> clients = new HashMap<>();
+    final Map<Session, Client> clients = new HashMap<>();
     private final Deque<Player> playerRanks = new ArrayDeque<>();
     private final Set<LifecycleCallback> lifecycleCallbacks = new HashSet<>();
     private final int GAME_TICK_SPEED, MAX_TIME_BETWEEN_ROUNDS;
@@ -90,8 +87,6 @@ public class GameRound implements Runnable {
     String keyStorePW;
 
     String keyStoreAlias;
-
-    private Context timerContext;
 
     // Get a string of 4 random uppercase letters (A-Z)
     private static String getRandomId() {
@@ -251,7 +246,7 @@ public class GameRound implements Runnable {
             executor().schedule(() -> {
                 log("Sending heartbeat to " + clients.size() + " clients");
                 sendToClients(clients.keySet(), new OutboundMessage.Heartbeat());
-            }, new HeartbeatTrigger());
+            }, new HeartbeatTrigger(this));
 
         }
     }
@@ -548,10 +543,8 @@ public class GameRound implements Runnable {
             runningGames.decrementAndGet();
         log("<<< Finished round");
 
-        // Decrement current rounds counter and close round timer
+        // Decrement current rounds counter
         GameMetrics.counterDec(GameMetrics.currentRoundsCounter);
-        if (timerContext != null)
-            timerContext.close();
 
         broadcastPlayerList();
 
@@ -585,7 +578,7 @@ public class GameRound implements Runnable {
         }
     }
 
-    private void log(String msg) {
+    void log(String msg) {
         System.out.println("[GameRound-" + id + "]  " + msg);
     }
 
@@ -612,9 +605,6 @@ public class GameRound implements Runnable {
                 executor().submit(GameRound.this);
             }
             gameState = State.RUNNING;
-
-            // Start round timer metric
-            timerContext = GameMetrics.timerStart(GameMetrics.gameRoundTimerMetadata);
         }
     }
 
@@ -649,27 +639,4 @@ public class GameRound implements Runnable {
         }
     }
 
-    private class HeartbeatTrigger implements Trigger {
-
-        private static final int HEARTBEAT_INTERVAL_SEC = 100;
-
-        @Override
-        public Date getNextRunTime(LastExecution lastExecutionInfo, Date taskScheduledTime) {
-            // If there are any clients still connected to this game, keep sending heartbeats
-            if (clients.size() == 0) {
-                // Ensure that game state is closed off so that no other players
-                // can quick join while a round is marked for deletion
-                log("No clients remaining.  Cancelling heartbeat.");
-                endGame();
-                return null;
-            }
-            return Date.from(Instant.now().plusSeconds(HEARTBEAT_INTERVAL_SEC));
-        }
-
-        @Override
-        public boolean skipRun(LastExecution lastExecutionInfo, Date scheduledRunTime) {
-            return clients.size() == 0;
-        }
-
-    }
 }

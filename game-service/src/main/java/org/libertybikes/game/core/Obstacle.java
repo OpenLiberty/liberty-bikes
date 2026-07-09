@@ -3,7 +3,7 @@
  */
 package org.libertybikes.game.core;
 
-import javax.json.bind.annotation.JsonbCreator;
+import jakarta.json.bind.annotation.JsonbCreator;
 
 public class Obstacle {
 
