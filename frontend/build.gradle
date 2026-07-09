@@ -5,12 +5,11 @@ plugins {
 ext {
 	httpPort = 12000
 	httpsPort = 12005
-	applicationName = "${war.archiveName}"
 	appUrl = "http://${hostname}:${httpPort}/"
 }
 
 war {
-	archiveName = "${baseName}.${extension}"
+	archiveVersion = ''
 	dependsOn 'copyFrontend'
 }
 
@@ -87,6 +86,6 @@ liberty {
 	server {
 		name = 'frontendServer'
 		deploy.apps = [war]
-		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort, 'application.name': applicationName]
+		bootstrapProperties = ['httpPort': httpPort, 'httpsPort': httpsPort, 'application.name': war.archiveFileName.get()]
 	}
 }

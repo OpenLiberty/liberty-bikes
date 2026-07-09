@@ -7,16 +7,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.libertybikes.auth.service.ConfigBean;
@@ -88,9 +88,7 @@ public class GoogleCallback extends JwtAuth {
 
     @GET
     @Counted(name = "num_google_logins",
-             displayName = "Number of Google Logins",
-             description = "How many times a user has logged in through Google Auth.",
-             absolute = true)
+             description = "How many times a user has logged in through Google Auth.")
     public Response getGoogleAuthURL(@Context HttpServletRequest request) throws IOException, URISyntaxException {
         // google calls us back at this app when a user has finished authing with them.
         // when it calls us back here, it passes an oauth_verifier token that we

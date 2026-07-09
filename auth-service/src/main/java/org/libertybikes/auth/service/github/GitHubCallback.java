@@ -7,16 +7,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.libertybikes.auth.service.ConfigBean;
@@ -52,9 +52,7 @@ public class GitHubCallback extends JwtAuth {
 
     @GET
     @Counted(name = "num_github_logins",
-             displayName = "Number of Github Logins",
-             description = "How many times a user has logged in through Github Auth.",
-             absolute = true)
+             description = "How many times a user has logged in through Github Auth.")
     public Response getGitHubCallbackURL(@Context HttpServletRequest request) throws URISyntaxException {
         try {
             String githubCode = request.getParameter("code");

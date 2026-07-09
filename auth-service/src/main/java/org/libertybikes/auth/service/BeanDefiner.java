@@ -1,6 +1,6 @@
 package org.libertybikes.auth.service;
 
-import javax.enterprise.inject.Stereotype;
+import jakarta.enterprise.inject.Stereotype;
 
 @Stereotype
 public @interface BeanDefiner {}

@@ -5,13 +5,13 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.libertybikes.auth.service.ConfigBean;
@@ -33,9 +33,7 @@ public class TwitterCallback extends JwtAuth {
 
     @GET
     @Counted(name = "num_twitter_logins",
-             displayName = "Number of Twitter Logins",
-             description = "How many times a user has logged in through Twitter Auth.",
-             absolute = true)
+             description = "How many times a user has logged in through Twitter Auth.")
     public Response getTwitterCallbackURL(@Context HttpServletRequest request) throws URISyntaxException {
         try {
             Twitter twitter = (Twitter) request.getSession().getAttribute("twitter");
